@@ -100,6 +100,8 @@ var readyLoaded = true;
 var playerOneLoaded = true;
 var bonusPointBallLoaded = true;
 var bonusPointBallHiddenLoaded = true;
+var hurtGhostFirstLoaded = false;
+var hurtGhostSecondLoaded = false;
 
 var pacmanLeftX = 0;
 var pacmanLeftY = 0;
@@ -112,10 +114,6 @@ var pacmanBottomY = 0;
 var pacmanX = 468;
 var pacmanY = 373;
 var pacmanAng = 0;
-var pacmanTop = 0;
-var pacmanBottom = 0;
-var pacmanLeft = 0;
-var pacmanRight = 0;
 var blinkyLeftX = 0;
 var blinkyLeftY = 0;
 var blinkyRightX = 0;
@@ -160,11 +158,11 @@ var clydeBottomY = 0;
 var clydeX = 524;
 var clydeY = 460;
 var clydeAng = 0;
-var pacmanSpeed = 13;
-var blinkySpeed = 13;
-var pinkySpeed = 13;
-var inkySpeed = 13;
-var clydeSpeed = 13;
+var pacmanSpeed = 4;
+var blinkySpeed = 4;
+var pinkySpeed = 4;
+var inkySpeed = 4;
+var clydeSpeed = 4;
 var readyX = 0;
 var readyY = 0;
 var readyAng = 0;
@@ -177,6 +175,8 @@ var bonusPointAng = 0;
 
 const WALL_W = 4;
 const WALL_H = 4;
+const CHARACTER_W = 12;
+const CHARACTER_H = 12;
 const WALL_COLS = 231;
 const WALL_ROWS = 242;
 const WALL_COUNT = WALL_COLS * WALL_ROWS;
@@ -197,6 +197,7 @@ var pinkyHeldLeft = false;
 var pinkyHeldRight = false;
 var pinkyHeldUp = true;
 var pinkyHeldDown = false;
+
 
 var direction = ['left', 'right', 'up', 'down'];
 var intro = new Howl({
@@ -569,14 +570,14 @@ function pacmanReset() {
                 wallGrid[arrayIndex] = 0;
                 pacmanX = col * WALL_W + WALL_W/2;
                 pacmanY = row * WALL_H + WALL_H/2;
-                pacmanTopX = col * WALL_W + WALL_W/2;
-                pacmanTopY = (row - 9) * WALL_H + WALL_H/2;
-                pacmanBottomX = col * WALL_W + WALL_W/2;
-                pacmanBottomY = (row + 9) * WALL_H + WALL_H/2;
-                pacmanLeftX = (col - 9) * WALL_W + WALL_W/2;
-                pacmanLeftY = row * WALL_H + WALL_H/2;
-                pacmanRightX = (col + 9) * WALL_W + WALL_W/2;
-                pacmanRightY = row * WALL_H + WALL_H/2;
+                pacmanTopX = col * WALL_W + CHARACTER_W/2;
+                pacmanTopY = row * WALL_H;
+                pacmanBottomX = col * WALL_W + CHARACTER_W/2;
+                pacmanBottomY = row * WALL_H + CHARACTER_H;
+                pacmanLeftX = col * WALL_W;
+                pacmanLeftY = row * WALL_H + CHARACTER_H/2;
+                pacmanRightX = col * WALL_W + CHARACTER_W;
+                pacmanRightY = row * WALL_H + CHARACTER_H/2;
             }
         }
     }
@@ -703,6 +704,40 @@ function pointsEaten() {
     bonusPointPosition.forEach(pos => {
         if ((pacmanLeftX <= pos[0] && pacmanRightX >= pos[0]) && (pacmanTopY <= pos[1] && pacmanBottomY >= pos[1])) {
             wallGrid[pos[2]] = 0;
+            hurtGhostFirstLoaded = true;
+            hurtGhostSecondLoaded = true;
+            blinkyDownFirstLoaded = false;
+            blinkyDownSecondLoaded = false;
+            blinkyLeftFirstLoaded = false;
+            blinkyLeftSecondLoaded = false;
+            blinkyRightFirstLoaded = false;
+            blinkyRightFirstLoaded = false;
+            blinkyUpFirstLoaded = false;
+            blinkyUpSecondLoaded = false;
+            pinkyDownFirstLoaded = false;
+            pinkyDownSecondLoaded = false;
+            pinkyLeftFirstLoaded = false;
+            pinkyLeftSecondLoaded = false;
+            pinkyRightFirstLoaded = false;
+            pinkyRightSecondLoaded = false;
+            pinkyUpFirstLoaded = false;
+            pinkyUpSecondLoaded = false;
+            inkyDownFirstLoaded = false;
+            inkyDownSecondLoaded = false;
+            inkyLeftFirstLoaded = false;
+            inkyLeftSecondLoaded = false;
+            inkyRightFirstLoaded = false;
+            inkyRightSecondLoaded = false;
+            inkyUpFirstLoaded = false;
+            inkyUpSecondLoaded = false;
+            clydeDownFirstLoaded = false;
+            clydeDownSecondLoaded = false;
+            clydeLeftFirstLoaded = false;
+            clydeLeftSecondLoaded = false;
+            clydeRightFirstLoaded = false;
+            clydeRightSecondLoaded = false;
+            clydeUpFirstLoaded = false;
+            clydeUpSecondLoaded = false;
             let array = [];
             bonusPointLocation.forEach(loc => {
                 if (pos[2] != loc[3]) {
@@ -795,20 +830,20 @@ function drawBitmapWithDirection(useBitmap, atX, atY, withAng) {
 // }
 
 function pacmanMove() {
-    console.log(pacmanLeftX);
     if (keyHeldLeft) {
-        if ((pacmanLeftX > 90 && pacmanLeftX < 202 && pacmanLeftY > 89 && pacmanLeftY < 173) || (pacmanLeftX > 254 && pacmanLeftX < 394 && pacmanLeftY < 173 && pacmanLeftY > 89) || (pacmanLeftX > 440 && pacmanLeftX < 484 && pacmanLeftY < 173) || (pacmanLeftX > 530 && pacmanLeftX < 673 && pacmanLeftY < 173 && pacmanLeftY > 89) || (pacmanLeftX > 718 && pacmanLeftX < 834 && pacmanLeftY < 173 && pacmanLeftY > 89) || 
-        (pacmanLeftX > 90 && pacmanLeftX < 394 && pacmanLeftY > 839 && pacmanLeftY < 874) || (pacmanLeftX > 530 && pacmanLeftX < 834 && pacmanLeftY > 839 && pacmanLeftY < 874) || (pacmanLeftX > 255 && pacmanLeftX < 294 && pacmanLeftY > 749 && pacmanLeftY < 874) || (pacmanLeftX > 630 && pacmanLeftX < 669 && pacmanLeftY > 749 && pacmanLeftY < 874) || 
-        (pacmanLeftX > 440 && pacmanLeftX < 484 && pacmanLeftY > 749 && pacmanLeftY < 874) || (pacmanLeftX > 343 && pacmanLeftX < 581 && pacmanLeftY > 749 && pacmanLeftY < 800) || (pacmanLeftX < 109 && pacmanLeftY > 749 && pacmanLeftY < 800) || (pacmanLeftX > 815 && pacmanLeftY > 749 && pacmanLeftY < 800) || 
-        (pacmanLeftX > 715 && pacmanLeftX < 764 && pacmanLeftY > 662 && pacmanLeftY < 800) || (pacmanLeftX > 160 && pacmanLeftX < 209 && pacmanLeftY > 662 && pacmanLeftY < 800) || (pacmanLeftX > 90 && pacmanLeftX < 209 && pacmanLeftY > 662 && pacmanLeftY < 703) || (pacmanLeftX > 715 && pacmanLeftX < 764 && pacmanLeftY > 662 && pacmanLeftY < 703) || (pacmanLeftX > 715 && pacmanLeftX < 835 && pacmanLeftY > 662 && pacmanLeftY < 703) || 
-        (pacmanLeftX > 530 && pacmanLeftX < 673 && pacmanLeftY > 662 && pacmanLeftY < 703) || (pacmanLeftX > 254 && pacmanLeftX < 394 && pacmanLeftY > 662 && pacmanLeftY < 703) || (pacmanLeftX > 715 && pacmanLeftY > 484 && pacmanLeftY < 613) || (pacmanLeftX < 209 && pacmanLeftY > 484 && pacmanLeftY < 613) || (pacmanLeftX > 630 && pacmanLeftX < 669 && pacmanLeftY > 484 && pacmanLeftY < 613) || (pacmanLeftX > 255 && pacmanLeftX < 294 && pacmanLeftY > 484 && pacmanLeftY < 613) || 
-        (pacmanLeftX > 440 && pacmanLeftX < 484 && pacmanLeftY > 572 && pacmanLeftY < 703) || (pacmanLeftX > 343 && pacmanLeftX < 581 && pacmanLeftY > 574 && pacmanLeftY < 613) || (pacmanLeftX > 630 && pacmanLeftX < 669 && pacmanLeftY > 484 && pacmanLeftY < 613) || 
-        (pacmanLeftX > 343 && pacmanLeftX < 581 && pacmanLeftY > 508 && pacmanLeftY < 528) || (pacmanLeftX > 343 && pacmanLeftX < 360 && pacmanLeftY > 402 && pacmanLeftY < 528) || (pacmanLeftX > 343 && pacmanLeftX < 581 && pacmanLeftY > 399 && pacmanLeftY < 414) || (pacmanLeftX > 564 && pacmanLeftX < 581 && pacmanLeftY > 402 && pacmanLeftY < 528) ||
-        (pacmanLeftX > 715 && pacmanLeftY > 309 && pacmanLeftY < 438) || (pacmanLeftX < 209 && pacmanLeftY > 309 && pacmanLeftY < 438) || (pacmanLeftX > 255 && pacmanLeftX < 294 && pacmanLeftY > 484 && pacmanLeftY < 613) || (pacmanLeftX > 630 && pacmanLeftX < 669 && pacmanLeftY > 484 && pacmanLeftY < 613) || 
-        (pacmanLeftX > 255 && pacmanLeftX < 294 && pacmanLeftY > 221 && pacmanLeftY < 438) || (pacmanLeftX > 630 && pacmanLeftX < 669 && pacmanLeftY > 221 && pacmanLeftY < 438) || (pacmanLeftX > 255 && pacmanLeftX < 394 && pacmanLeftY > 309 && pacmanLeftY < 348) || (pacmanLeftX > 530 && pacmanLeftX < 669 && pacmanLeftY > 309 && pacmanLeftY < 348) || 
-        (pacmanLeftX > 440 && pacmanLeftX < 484 && pacmanLeftY > 221 && pacmanLeftY < 348) || (pacmanLeftX > 343 && pacmanLeftX < 581 && pacmanLeftY > 221 && pacmanLeftY < 263) || (pacmanLeftX > 90 && pacmanLeftX < 202 && pacmanLeftY > 221 && pacmanLeftY < 263) || (pacmanLeftX > 718 && pacmanLeftX < 834 && pacmanLeftY > 221 && pacmanLeftY < 263) || 
-        (pacmanLeftX < 44)) {
-            pacmanX -= 0;
+        console.log(pacmanLeftX);
+        if ((pacmanLeftX < 68) || (pacmanLeftX > 70 && pacmanLeftX < 232 && pacmanLeftY > 70 && pacmanLeftY < 196) || (pacmanLeftX > 232 && pacmanLeftX < 420 && pacmanLeftY < 196 && pacmanLeftY > 70) || (pacmanLeftX > 424 && pacmanLeftX < 508 && pacmanLeftY < 196) || (pacmanLeftX > 512 && pacmanLeftX < 673 && pacmanLeftY < 196 && pacmanLeftY > 70) || (pacmanLeftX > 700 && pacmanLeftX < 856 && pacmanLeftY < 196 && pacmanLeftY > 70) || 
+        (pacmanLeftX > 70 && pacmanLeftX < 420 && pacmanLeftY > 816 && pacmanLeftY < 856) || (pacmanLeftX > 512 && pacmanLeftX < 856 && pacmanLeftY > 816 && pacmanLeftY < 856) || (pacmanLeftX > 236 && pacmanLeftX < 320 && pacmanLeftY > 732 && pacmanLeftY < 856) || (pacmanLeftX > 612 && pacmanLeftX < 696 && pacmanLeftY > 732 && pacmanLeftY < 856) || 
+        (pacmanLeftX > 424 && pacmanLeftX < 508 && pacmanLeftY > 732 && pacmanLeftY < 856) || (pacmanLeftX > 328 && pacmanLeftX < 608 && pacmanLeftY > 732 && pacmanLeftY < 816) || (pacmanLeftX < 109 && pacmanLeftY > 732 && pacmanLeftY < 816) || (pacmanLeftX > 796 && pacmanLeftY > 732 && pacmanLeftY < 816) || 
+        (pacmanLeftX > 700 && pacmanLeftX < 788 && pacmanLeftY > 644 && pacmanLeftY < 816) || (pacmanLeftX > 148 && pacmanLeftX < 232 && pacmanLeftY > 644 && pacmanLeftY < 816) || (pacmanLeftX > 70 && pacmanLeftX < 232 && pacmanLeftY > 644 && pacmanLeftY < 728) || (pacmanLeftX > 700 && pacmanLeftX < 788 && pacmanLeftY > 644 && pacmanLeftY < 728) || (pacmanLeftX > 700 && pacmanLeftX < 835 && pacmanLeftY > 644 && pacmanLeftY < 728) || 
+        (pacmanLeftX > 512 && pacmanLeftX < 673 && pacmanLeftY > 644 && pacmanLeftY < 728) || (pacmanLeftX > 232 && pacmanLeftX < 420 && pacmanLeftY > 644 && pacmanLeftY < 728) || (pacmanLeftX > 700 && pacmanLeftY > 468 && pacmanLeftY < 644) || (pacmanLeftX < 232 && pacmanLeftY > 468 && pacmanLeftY < 644) || (pacmanLeftX > 612 && pacmanLeftX < 696 && pacmanLeftY > 468 && pacmanLeftY < 644) || (pacmanLeftX > 236 && pacmanLeftX < 320 && pacmanLeftY > 468 && pacmanLeftY < 644) || 
+        (pacmanLeftX > 424 && pacmanLeftX < 508 && pacmanLeftY > 576 && pacmanLeftY < 728) || (pacmanLeftX > 328 && pacmanLeftX < 608 && pacmanLeftY > 574 && pacmanLeftY < 644) || (pacmanLeftX > 612 && pacmanLeftX < 696 && pacmanLeftY > 468 && pacmanLeftY < 644) || 
+        (pacmanLeftX > 328 && pacmanLeftX < 608 && pacmanLeftY > 468 && pacmanLeftY < 552) || (pacmanLeftX > 328 && pacmanLeftX < 360 && pacmanLeftY > 380 && pacmanLeftY < 552) || (pacmanLeftX > 328 && pacmanLeftX < 608 && pacmanLeftY > 428 && pacmanLeftY < 414) || (pacmanLeftX > 564 && pacmanLeftX < 608 && pacmanLeftY > 380 && pacmanLeftY < 552) ||
+        (pacmanLeftX > 700 && pacmanLeftY > 292 && pacmanLeftY < 464) || (pacmanLeftX < 232 && pacmanLeftY > 292 && pacmanLeftY < 464) || (pacmanLeftX > 236 && pacmanLeftX < 320 && pacmanLeftY > 468 && pacmanLeftY < 644) || (pacmanLeftX > 612 && pacmanLeftX < 696 && pacmanLeftY > 468 && pacmanLeftY < 644) || 
+        (pacmanLeftX > 236 && pacmanLeftX < 320 && pacmanLeftY > 204 && pacmanLeftY < 464) || (pacmanLeftX > 612 && pacmanLeftX < 696 && pacmanLeftY > 204 && pacmanLeftY < 464) || (pacmanLeftX > 236 && pacmanLeftX < 420 && pacmanLeftY > 292 && pacmanLeftY < 376) || (pacmanLeftX > 512 && pacmanLeftX < 696 && pacmanLeftY > 292 && pacmanLeftY < 376) || 
+        (pacmanLeftX > 424 && pacmanLeftX < 508 && pacmanLeftY > 204 && pacmanLeftY < 376) || (pacmanLeftX > 328 && pacmanLeftX < 608 && pacmanLeftY > 204 && pacmanLeftY < 284) || (pacmanLeftX > 70 && pacmanLeftX < 232 && pacmanLeftY > 204 && pacmanLeftY < 284) || (pacmanLeftX > 700 && pacmanLeftX < 856 && pacmanLeftY > 204 && pacmanLeftY < 284)
+        ) {
+            pacmanX += 0;
         } else {
             if (pacmanLeftLoaded) {
                 pacmanLeftLoaded = false;
@@ -834,16 +869,16 @@ function pacmanMove() {
                 pacmanLeftLoaded = true;
             }
         }
-        // if ((inkyLeftX > 90 && inkyLeftX < 202 && inkyLeftY > 89 && inkyLeftY < 173) || (inkyLeftX > 254 && inkyLeftX < 394 && inkyLeftY < 173 && inkyLeftY > 89) || (inkyLeftX > 440 && inkyLeftX < 484 && inkyLeftY < 173) || (inkyLeftX > 530 && inkyLeftX < 673 && inkyLeftY < 173 && inkyLeftY > 89) || (inkyLeftX > 718 && inkyLeftX < 834 && inkyLeftY < 173 && inkyLeftY > 89) || 
-        // (inkyLeftX > 90 && inkyLeftX < 394 && inkyLeftY > 839 && inkyLeftY < 874) || (inkyLeftX > 530 && inkyLeftX < 834 && inkyLeftY > 839 && inkyLeftY < 874) || (inkyLeftX > 255 && inkyLeftX < 294 && inkyLeftY > 749 && inkyLeftY < 874) || (inkyLeftX > 630 && inkyLeftX < 669 && inkyLeftY > 749 && inkyLeftY < 874) || 
-        // (inkyLeftX > 440 && inkyLeftX < 484 && inkyLeftY > 749 && inkyLeftY < 874) || (inkyLeftX > 343 && inkyLeftX < 581 && inkyLeftY > 749 && inkyLeftY < 800) || (inkyLeftX < 109 && inkyLeftY > 749 && inkyLeftY < 800) || (inkyLeftX > 815 && inkyLeftY > 749 && inkyLeftY < 800) || 
-        // (inkyLeftX > 715 && inkyLeftX < 764 && inkyLeftY > 662 && inkyLeftY < 800) || (inkyLeftX > 160 && inkyLeftX < 209 && inkyLeftY > 662 && inkyLeftY < 800) || (inkyLeftX > 90 && inkyLeftX < 209 && inkyLeftY > 662 && inkyLeftY < 703) || (inkyLeftX > 715 && inkyLeftX < 764 && inkyLeftY > 662 && inkyLeftY < 703) || (inkyLeftX > 715 && inkyLeftX < 835 && inkyLeftY > 662 && inkyLeftY < 703) || 
-        // (inkyLeftX > 530 && inkyLeftX < 673 && inkyLeftY > 662 && inkyLeftY < 703) || (inkyLeftX > 254 && inkyLeftX < 394 && inkyLeftY > 662 && inkyLeftY < 703) || (inkyLeftX > 715 && inkyLeftY > 484 && inkyLeftY < 613) || (inkyLeftX < 209 && inkyLeftY > 484 && inkyLeftY < 613) || (inkyLeftX > 630 && inkyLeftX < 669 && inkyLeftY > 484 && inkyLeftY < 613) || (inkyLeftX > 255 && inkyLeftX < 294 && inkyLeftY > 484 && inkyLeftY < 613) || 
-        // (inkyLeftX > 440 && inkyLeftX < 484 && inkyLeftY > 572 && inkyLeftY < 703) || (inkyLeftX > 343 && inkyLeftX < 581 && inkyLeftY > 574 && inkyLeftY < 613) || (inkyLeftX > 630 && inkyLeftX < 669 && inkyLeftY > 484 && inkyLeftY < 613) || 
-        // (inkyLeftX > 343 && inkyLeftX < 581 && inkyLeftY > 508 && inkyLeftY < 528) || (inkyLeftX > 343 && inkyLeftX < 360 && inkyLeftY > 402 && inkyLeftY < 528) || (inkyLeftX > 343 && inkyLeftX < 581 && inkyLeftY > 399 && inkyLeftY < 414) || (inkyLeftX > 564 && inkyLeftX < 581 && inkyLeftY > 402 && inkyLeftY < 528) ||
-        // (inkyLeftX > 715 && inkyLeftY > 309 && inkyLeftY < 438) || (inkyLeftX < 209 && inkyLeftY > 309 && inkyLeftY < 438) || (inkyLeftX > 255 && inkyLeftX < 294 && inkyLeftY > 484 && inkyLeftY < 613) || (inkyLeftX > 630 && inkyLeftX < 669 && inkyLeftY > 484 && inkyLeftY < 613) || 
-        // (inkyLeftX > 255 && inkyLeftX < 294 && inkyLeftY > 221 && inkyLeftY < 438) || (inkyLeftX > 630 && inkyLeftX < 669 && inkyLeftY > 221 && inkyLeftY < 438) || (inkyLeftX > 255 && inkyLeftX < 394 && inkyLeftY > 309 && inkyLeftY < 348) || (inkyLeftX > 530 && inkyLeftX < 669 && inkyLeftY > 309 && inkyLeftY < 348) || 
-        // (inkyLeftX > 440 && inkyLeftX < 484 && inkyLeftY > 221 && inkyLeftY < 348) || (inkyLeftX > 343 && inkyLeftX < 581 && inkyLeftY > 221 && inkyLeftY < 263) || (inkyLeftX > 90 && inkyLeftX < 202 && inkyLeftY > 221 && inkyLeftY < 263) || (inkyLeftX > 718 && inkyLeftX < 834 && inkyLeftY > 221 && inkyLeftY < 263) || 
+        // if ((inkyLeftX > 70 && inkyLeftX < 232 && inkyLeftY > 70 && inkyLeftY < 196) || (inkyLeftX > 232 && inkyLeftX < 420 && inkyLeftY < 196 && inkyLeftY > 70) || (inkyLeftX > 424 && inkyLeftX < 508 && inkyLeftY < 196) || (inkyLeftX > 512 && inkyLeftX < 673 && inkyLeftY < 196 && inkyLeftY > 70) || (inkyLeftX > 700 && inkyLeftX < 856 && inkyLeftY < 196 && inkyLeftY > 70) || 
+        // (inkyLeftX > 70 && inkyLeftX < 420 && inkyLeftY > 856 && inkyLeftY < 856) || (inkyLeftX > 512 && inkyLeftX < 856 && inkyLeftY > 856 && inkyLeftY < 856) || (inkyLeftX > 236 && inkyLeftX < 320 && inkyLeftY > 732 && inkyLeftY < 856) || (inkyLeftX > 612 && inkyLeftX < 696 && inkyLeftY > 732 && inkyLeftY < 856) || 
+        // (inkyLeftX > 424 && inkyLeftX < 508 && inkyLeftY > 732 && inkyLeftY < 856) || (inkyLeftX > 328 && inkyLeftX < 608 && inkyLeftY > 732 && inkyLeftY < 816) || (inkyLeftX < 109 && inkyLeftY > 732 && inkyLeftY < 816) || (inkyLeftX > 796 && inkyLeftY > 732 && inkyLeftY < 816) || 
+        // (inkyLeftX > 700 && inkyLeftX < 788 && inkyLeftY > 644 && inkyLeftY < 816) || (inkyLeftX > 148 && inkyLeftX < 232 && inkyLeftY > 644 && inkyLeftY < 816) || (inkyLeftX > 70 && inkyLeftX < 232 && inkyLeftY > 644 && inkyLeftY < 728) || (inkyLeftX > 700 && inkyLeftX < 788 && inkyLeftY > 644 && inkyLeftY < 728) || (inkyLeftX > 700 && inkyLeftX < 835 && inkyLeftY > 644 && inkyLeftY < 728) || 
+        // (inkyLeftX > 512 && inkyLeftX < 673 && inkyLeftY > 644 && inkyLeftY < 728) || (inkyLeftX > 232 && inkyLeftX < 420 && inkyLeftY > 644 && inkyLeftY < 728) || (inkyLeftX > 700 && inkyLeftY > 468 && inkyLeftY < 644) || (inkyLeftX < 232 && inkyLeftY > 468 && inkyLeftY < 644) || (inkyLeftX > 612 && inkyLeftX < 696 && inkyLeftY > 468 && inkyLeftY < 644) || (inkyLeftX > 236 && inkyLeftX < 320 && inkyLeftY > 468 && inkyLeftY < 644) || 
+        // (inkyLeftX > 424 && inkyLeftX < 508 && inkyLeftY > 572 && inkyLeftY < 728) || (inkyLeftX > 328 && inkyLeftX < 608 && inkyLeftY > 574 && inkyLeftY < 644) || (inkyLeftX > 612 && inkyLeftX < 696 && inkyLeftY > 468 && inkyLeftY < 644) || 
+        // (inkyLeftX > 328 && inkyLeftX < 608 && inkyLeftY > 468 && inkyLeftY < 552) || (inkyLeftX > 328 && inkyLeftX < 360 && inkyLeftY > 380 && inkyLeftY < 552) || (inkyLeftX > 328 && inkyLeftX < 608 && inkyLeftY > 428 && inkyLeftY < 414) || (inkyLeftX > 564 && inkyLeftX < 608 && inkyLeftY > 380 && inkyLeftY < 552) ||
+        // (inkyLeftX > 700 && inkyLeftY > 292 && inkyLeftY < 464) || (inkyLeftX < 232 && inkyLeftY > 292 && inkyLeftY < 464) || (inkyLeftX > 236 && inkyLeftX < 320 && inkyLeftY > 468 && inkyLeftY < 644) || (inkyLeftX > 612 && inkyLeftX < 696 && inkyLeftY > 468 && inkyLeftY < 644) || 
+        // (inkyLeftX > 236 && inkyLeftX < 320 && inkyLeftY > 204 && inkyLeftY < 464) || (inkyLeftX > 612 && inkyLeftX < 696 && inkyLeftY > 204 && inkyLeftY < 464) || (inkyLeftX > 236 && inkyLeftX < 420 && inkyLeftY > 292 && inkyLeftY < 376) || (inkyLeftX > 512 && inkyLeftX < 696 && inkyLeftY > 292 && inkyLeftY < 376) || 
+        // (inkyLeftX > 424 && inkyLeftX < 508 && inkyLeftY > 204 && inkyLeftY < 376) || (inkyLeftX > 328 && inkyLeftX < 608 && inkyLeftY > 204 && inkyLeftY < 284) || (inkyLeftX > 70 && inkyLeftX < 232 && inkyLeftY > 204 && inkyLeftY < 284) || (inkyLeftX > 700 && inkyLeftX < 856 && inkyLeftY > 204 && inkyLeftY < 284) || 
         // (inkyLeftX < 44)) {
         //     inkyX -= 0;
         // } else {
@@ -871,16 +906,16 @@ function pacmanMove() {
         //         inkyLeftFirstLoaded = true;
         //     }
         // }
-        // if ((clydeLeftX > 90 && clydeLeftX < 202 && clydeLeftY > 89 && clydeLeftY < 173) || (clydeLeftX > 254 && clydeLeftX < 394 && clydeLeftY < 173 && clydeLeftY > 89) || (clydeLeftX > 440 && clydeLeftX < 484 && clydeLeftY < 173) || (clydeLeftX > 530 && clydeLeftX < 673 && clydeLeftY < 173 && clydeLeftY > 89) || (clydeLeftX > 718 && clydeLeftX < 834 && clydeLeftY < 173 && clydeLeftY > 89) || 
-        // (clydeLeftX > 90 && clydeLeftX < 394 && clydeLeftY > 839 && clydeLeftY < 874) || (clydeLeftX > 530 && clydeLeftX < 834 && clydeLeftY > 839 && clydeLeftY < 874) || (clydeLeftX > 255 && clydeLeftX < 294 && clydeLeftY > 749 && clydeLeftY < 874) || (clydeLeftX > 630 && clydeLeftX < 669 && clydeLeftY > 749 && clydeLeftY < 874) || 
-        // (clydeLeftX > 440 && clydeLeftX < 484 && clydeLeftY > 749 && clydeLeftY < 874) || (clydeLeftX > 343 && clydeLeftX < 581 && clydeLeftY > 749 && clydeLeftY < 800) || (clydeLeftX < 109 && clydeLeftY > 749 && clydeLeftY < 800) || (clydeLeftX > 815 && clydeLeftY > 749 && clydeLeftY < 800) || 
-        // (clydeLeftX > 715 && clydeLeftX < 764 && clydeLeftY > 662 && clydeLeftY < 800) || (clydeLeftX > 160 && clydeLeftX < 209 && clydeLeftY > 662 && clydeLeftY < 800) || (clydeLeftX > 90 && clydeLeftX < 209 && clydeLeftY > 662 && clydeLeftY < 703) || (clydeLeftX > 715 && clydeLeftX < 764 && clydeLeftY > 662 && clydeLeftY < 703) || (clydeLeftX > 715 && clydeLeftX < 835 && clydeLeftY > 662 && clydeLeftY < 703) || 
-        // (clydeLeftX > 530 && clydeLeftX < 673 && clydeLeftY > 662 && clydeLeftY < 703) || (clydeLeftX > 254 && clydeLeftX < 394 && clydeLeftY > 662 && clydeLeftY < 703) || (clydeLeftX > 715 && clydeLeftY > 484 && clydeLeftY < 613) || (clydeLeftX < 209 && clydeLeftY > 484 && clydeLeftY < 613) || (clydeLeftX > 630 && clydeLeftX < 669 && clydeLeftY > 484 && clydeLeftY < 613) || (clydeLeftX > 255 && clydeLeftX < 294 && clydeLeftY > 484 && clydeLeftY < 613) || 
-        // (clydeLeftX > 440 && clydeLeftX < 484 && clydeLeftY > 572 && clydeLeftY < 703) || (clydeLeftX > 343 && clydeLeftX < 581 && clydeLeftY > 574 && clydeLeftY < 613) || (clydeLeftX > 630 && clydeLeftX < 669 && clydeLeftY > 484 && clydeLeftY < 613) || 
-        // (clydeLeftX > 343 && clydeLeftX < 581 && clydeLeftY > 508 && clydeLeftY < 528) || (clydeLeftX > 343 && clydeLeftX < 360 && clydeLeftY > 402 && clydeLeftY < 528) || (clydeLeftX > 343 && clydeLeftX < 581 && clydeLeftY > 399 && clydeLeftY < 414) || (clydeLeftX > 564 && clydeLeftX < 581 && clydeLeftY > 402 && clydeLeftY < 528) ||
-        // (clydeLeftX > 715 && clydeLeftY > 309 && clydeLeftY < 438) || (clydeLeftX < 209 && clydeLeftY > 309 && clydeLeftY < 438) || (clydeLeftX > 255 && clydeLeftX < 294 && clydeLeftY > 484 && clydeLeftY < 613) || (clydeLeftX > 630 && clydeLeftX < 669 && clydeLeftY > 484 && clydeLeftY < 613) || 
-        // (clydeLeftX > 255 && clydeLeftX < 294 && clydeLeftY > 221 && clydeLeftY < 438) || (clydeLeftX > 630 && clydeLeftX < 669 && clydeLeftY > 221 && clydeLeftY < 438) || (clydeLeftX > 255 && clydeLeftX < 394 && clydeLeftY > 309 && clydeLeftY < 348) || (clydeLeftX > 530 && clydeLeftX < 669 && clydeLeftY > 309 && clydeLeftY < 348) || 
-        // (clydeLeftX > 440 && clydeLeftX < 484 && clydeLeftY > 221 && clydeLeftY < 348) || (clydeLeftX > 343 && clydeLeftX < 581 && clydeLeftY > 221 && clydeLeftY < 263) || (clydeLeftX > 90 && clydeLeftX < 202 && clydeLeftY > 221 && clydeLeftY < 263) || (clydeLeftX > 718 && clydeLeftX < 834 && clydeLeftY > 221 && clydeLeftY < 263) || 
+        // if ((clydeLeftX > 70 && clydeLeftX < 232 && clydeLeftY > 70 && clydeLeftY < 196) || (clydeLeftX > 232 && clydeLeftX < 420 && clydeLeftY < 196 && clydeLeftY > 70) || (clydeLeftX > 424 && clydeLeftX < 508 && clydeLeftY < 196) || (clydeLeftX > 512 && clydeLeftX < 673 && clydeLeftY < 196 && clydeLeftY > 70) || (clydeLeftX > 700 && clydeLeftX < 856 && clydeLeftY < 196 && clydeLeftY > 70) || 
+        // (clydeLeftX > 70 && clydeLeftX < 420 && clydeLeftY > 856 && clydeLeftY < 856) || (clydeLeftX > 512 && clydeLeftX < 856 && clydeLeftY > 856 && clydeLeftY < 856) || (clydeLeftX > 236 && clydeLeftX < 320 && clydeLeftY > 732 && clydeLeftY < 856) || (clydeLeftX > 612 && clydeLeftX < 696 && clydeLeftY > 732 && clydeLeftY < 856) || 
+        // (clydeLeftX > 424 && clydeLeftX < 508 && clydeLeftY > 732 && clydeLeftY < 856) || (clydeLeftX > 328 && clydeLeftX < 608 && clydeLeftY > 732 && clydeLeftY < 816) || (clydeLeftX < 109 && clydeLeftY > 732 && clydeLeftY < 816) || (clydeLeftX > 796 && clydeLeftY > 732 && clydeLeftY < 816) || 
+        // (clydeLeftX > 700 && clydeLeftX < 788 && clydeLeftY > 644 && clydeLeftY < 816) || (clydeLeftX > 148 && clydeLeftX < 232 && clydeLeftY > 644 && clydeLeftY < 816) || (clydeLeftX > 70 && clydeLeftX < 232 && clydeLeftY > 644 && clydeLeftY < 728) || (clydeLeftX > 700 && clydeLeftX < 788 && clydeLeftY > 644 && clydeLeftY < 728) || (clydeLeftX > 700 && clydeLeftX < 835 && clydeLeftY > 644 && clydeLeftY < 728) || 
+        // (clydeLeftX > 512 && clydeLeftX < 673 && clydeLeftY > 644 && clydeLeftY < 728) || (clydeLeftX > 232 && clydeLeftX < 420 && clydeLeftY > 644 && clydeLeftY < 728) || (clydeLeftX > 700 && clydeLeftY > 468 && clydeLeftY < 644) || (clydeLeftX < 232 && clydeLeftY > 468 && clydeLeftY < 644) || (clydeLeftX > 612 && clydeLeftX < 696 && clydeLeftY > 468 && clydeLeftY < 644) || (clydeLeftX > 236 && clydeLeftX < 320 && clydeLeftY > 468 && clydeLeftY < 644) || 
+        // (clydeLeftX > 424 && clydeLeftX < 508 && clydeLeftY > 572 && clydeLeftY < 728) || (clydeLeftX > 328 && clydeLeftX < 608 && clydeLeftY > 574 && clydeLeftY < 644) || (clydeLeftX > 612 && clydeLeftX < 696 && clydeLeftY > 468 && clydeLeftY < 644) || 
+        // (clydeLeftX > 328 && clydeLeftX < 608 && clydeLeftY > 468 && clydeLeftY < 552) || (clydeLeftX > 328 && clydeLeftX < 360 && clydeLeftY > 380 && clydeLeftY < 552) || (clydeLeftX > 328 && clydeLeftX < 608 && clydeLeftY > 428 && clydeLeftY < 414) || (clydeLeftX > 564 && clydeLeftX < 608 && clydeLeftY > 380 && clydeLeftY < 552) ||
+        // (clydeLeftX > 700 && clydeLeftY > 292 && clydeLeftY < 464) || (clydeLeftX < 232 && clydeLeftY > 292 && clydeLeftY < 464) || (clydeLeftX > 236 && clydeLeftX < 320 && clydeLeftY > 468 && clydeLeftY < 644) || (clydeLeftX > 612 && clydeLeftX < 696 && clydeLeftY > 468 && clydeLeftY < 644) || 
+        // (clydeLeftX > 236 && clydeLeftX < 320 && clydeLeftY > 204 && clydeLeftY < 464) || (clydeLeftX > 612 && clydeLeftX < 696 && clydeLeftY > 204 && clydeLeftY < 464) || (clydeLeftX > 236 && clydeLeftX < 420 && clydeLeftY > 292 && clydeLeftY < 376) || (clydeLeftX > 512 && clydeLeftX < 696 && clydeLeftY > 292 && clydeLeftY < 376) || 
+        // (clydeLeftX > 424 && clydeLeftX < 508 && clydeLeftY > 204 && clydeLeftY < 376) || (clydeLeftX > 328 && clydeLeftX < 608 && clydeLeftY > 204 && clydeLeftY < 284) || (clydeLeftX > 70 && clydeLeftX < 232 && clydeLeftY > 204 && clydeLeftY < 284) || (clydeLeftX > 700 && clydeLeftX < 856 && clydeLeftY > 204 && clydeLeftY < 284) || 
         // (clydeLeftX < 44)) {
         //     clydeX -= 0;
         // } else {
@@ -911,17 +946,17 @@ function pacmanMove() {
     }
     if (keyHeldRight) {
         console.log(pacmanRightX);
-        if ((pacmanRightX > 90 && pacmanRightX < 202 && pacmanRightY > 89 && pacmanRightY < 173) || (pacmanRightX > 254 && pacmanRightX < 394 && pacmanRightY < 173 && pacmanRightY > 89) || (pacmanRightX > 440 && pacmanRightX < 484 && pacmanRightY < 173) || (pacmanRightX > 530 && pacmanRightX < 673 && pacmanRightY < 173 && pacmanRightY > 89) || (pacmanRightX > 718 && pacmanRightX < 834 && pacmanRightY < 173 && pacmanRightY > 89) ||
-        (pacmanRightX > 90 && pacmanRightX < 394 && pacmanRightY > 839 && pacmanRightY < 874) || (pacmanRightX > 530 && pacmanRightX < 834 && pacmanRightY > 839 && pacmanRightY < 874) || (pacmanRightX > 255 && pacmanRightX < 294 && pacmanRightY > 749 && pacmanRightY < 874) || (pacmanRightX > 630 && pacmanRightX < 669 && pacmanRightY > 749 && pacmanRightY < 874) || 
-        (pacmanRightX > 440 && pacmanRightX < 484 && pacmanRightY > 749 && pacmanRightY < 874) || (pacmanRightX > 343 && pacmanRightX < 581 && pacmanRightY > 749 && pacmanRightY < 800) || (pacmanRightX < 109 && pacmanRightY > 749 && pacmanRightY < 800) || (pacmanRightX > 815 && pacmanRightY > 749 && pacmanRightY < 800) || 
-        (pacmanRightX > 715 && pacmanRightX < 764 && pacmanRightY > 662 && pacmanRightY < 800) || (pacmanRightX > 160 && pacmanRightX < 209 && pacmanRightY > 662 && pacmanRightY < 800) || (pacmanRightX > 90 && pacmanRightX < 209 && pacmanRightY > 662 && pacmanRightY < 703) || (pacmanRightX > 715 && pacmanRightX < 764 && pacmanRightY > 662 && pacmanRightY < 703) || (pacmanRightX > 715 && pacmanRightX < 835 && pacmanRightY > 662 && pacmanRightY < 703) || 
-        (pacmanRightX > 530 && pacmanRightX < 673 && pacmanRightY > 662 && pacmanRightY < 703) || (pacmanRightX > 254 && pacmanRightX < 394 && pacmanRightY > 662 && pacmanRightY < 703) || (pacmanRightX > 715 && pacmanRightY > 484 && pacmanRightY < 613) || (pacmanRightX < 209 && pacmanRightY > 484 && pacmanRightY < 613) || 
-        (pacmanRightX > 440 && pacmanRightX < 484 && pacmanRightY > 572 && pacmanRightY < 703) || (pacmanRightX > 343 && pacmanRightX < 581 && pacmanRightY > 574 && pacmanRightY < 613) || (pacmanRightX > 630 && pacmanRightX < 669 && pacmanRightY > 484 && pacmanRightY < 613) || (pacmanRightX > 630 && pacmanRightX < 669 && pacmanRightY > 484 && pacmanRightY < 613) || (pacmanRightX > 255 && pacmanRightX < 294 && pacmanRightY > 484 && pacmanRightY < 613) || 
-        (pacmanRightX > 343 && pacmanRightX < 581 && pacmanRightY > 508 && pacmanRightY < 528) || (pacmanRightX > 343 && pacmanRightX < 360 && pacmanRightY > 402 && pacmanRightY < 528) || (pacmanRightX > 343 && pacmanRightX < 581 && pacmanRightY > 399 && pacmanRightY < 414) || (pacmanRightX > 564 && pacmanRightX < 581 && pacmanRightY > 402 && pacmanRightY < 528) ||
-        (pacmanRightX > 715 && pacmanRightY > 309 && pacmanRightY < 438) || (pacmanRightX < 209 && pacmanRightY > 309 && pacmanRightY < 438) || (pacmanRightX > 255 && pacmanRightX < 294 && pacmanRightY > 484 && pacmanRightY < 613) || (pacmanRightX > 630 && pacmanRightX < 669 && pacmanRightY > 484 && pacmanRightY < 613) || 
-        (pacmanRightX > 255 && pacmanRightX < 294 && pacmanRightY > 221 && pacmanRightY < 438) || (pacmanRightX > 630 && pacmanRightX < 669 && pacmanRightY > 221 && pacmanRightY < 438) || (pacmanRightX > 255 && pacmanRightX < 394 && pacmanRightY > 309 && pacmanRightY < 348) || (pacmanRightX > 530 && pacmanRightX < 669 && pacmanRightY > 309 && pacmanRightY < 348) || 
-        (pacmanRightX > 440 && pacmanRightX < 484 && pacmanRightY > 221 && pacmanRightY < 348) || (pacmanRightX > 343 && pacmanRightX < 581 && pacmanRightY > 221 && pacmanRightY < 263) || (pacmanRightX > 90 && pacmanRightX < 202 && pacmanRightY > 221 && pacmanRightY < 263) || (pacmanRightX > 718 && pacmanRightX < 834 && pacmanRightY > 221 && pacmanRightY < 263) || 
-        (pacmanRightX > 880)) {
+        if ((pacmanRightX > 74 && pacmanRightX < 232 && pacmanRightY > 70 && pacmanRightY < 196) || (pacmanRightX > 232 && pacmanRightX < 420 && pacmanRightY < 196 && pacmanRightY > 70) || (pacmanRightX > 424 && pacmanRightX < 508 && pacmanRightY < 196) || (pacmanRightX > 512 && pacmanRightX < 673 && pacmanRightY < 196 && pacmanRightY > 70) || (pacmanRightX > 700 && pacmanRightX < 856 && pacmanRightY < 196 && pacmanRightY > 70) ||
+        (pacmanRightX > 70 && pacmanRightX < 420 && pacmanRightY > 816 && pacmanRightY < 856) || (pacmanRightX > 512 && pacmanRightX < 816 && pacmanRightY > 816 && pacmanRightY < 856) || (pacmanRightX > 236 && pacmanRightX < 320 && pacmanRightY > 732 && pacmanRightY < 856) || (pacmanRightX > 612 && pacmanRightX < 696 && pacmanRightY > 732 && pacmanRightY < 856) || 
+        (pacmanRightX > 424 && pacmanRightX < 508 && pacmanRightY > 732 && pacmanRightY < 856) || (pacmanRightX > 328 && pacmanRightX < 608 && pacmanRightY > 732 && pacmanRightY < 816) || (pacmanRightX < 109 && pacmanRightY > 732 && pacmanRightY < 816) || (pacmanRightX > 796 && pacmanRightY > 732 && pacmanRightY < 816) || 
+        (pacmanRightX > 700 && pacmanRightX < 788 && pacmanRightY > 644 && pacmanRightY < 816) || (pacmanRightX > 148 && pacmanRightX < 232 && pacmanRightY > 644 && pacmanRightY < 816) || (pacmanRightX > 70 && pacmanRightX < 232 && pacmanRightY > 644 && pacmanRightY < 728) || (pacmanRightX > 700 && pacmanRightX < 788 && pacmanRightY > 644 && pacmanRightY < 728) || (pacmanRightX > 700 && pacmanRightX < 835 && pacmanRightY > 644 && pacmanRightY < 728) || 
+        (pacmanRightX > 512 && pacmanRightX < 673 && pacmanRightY > 644 && pacmanRightY < 728) || (pacmanRightX > 232 && pacmanRightX < 420 && pacmanRightY > 644 && pacmanRightY < 728) || (pacmanRightX > 700 && pacmanRightY > 468 && pacmanRightY < 644) || (pacmanRightX < 232 && pacmanRightY > 468 && pacmanRightY < 644) || 
+        (pacmanRightX > 424 && pacmanRightX < 508 && pacmanRightY > 572 && pacmanRightY < 728) || (pacmanRightX > 328 && pacmanRightX < 608 && pacmanRightY > 574 && pacmanRightY < 644) || (pacmanRightX > 612 && pacmanRightX < 696 && pacmanRightY > 468 && pacmanRightY < 644) || (pacmanRightX > 612 && pacmanRightX < 696 && pacmanRightY > 468 && pacmanRightY < 644) || (pacmanRightX > 236 && pacmanRightX < 320 && pacmanRightY > 468 && pacmanRightY < 644) || 
+        (pacmanRightX > 328 && pacmanRightX < 608 && pacmanRightY > 468 && pacmanRightY < 552) || (pacmanRightX > 328 && pacmanRightX < 360 && pacmanRightY > 380 && pacmanRightY < 552) || (pacmanRightX > 328 && pacmanRightX < 608 && pacmanRightY > 428 && pacmanRightY < 414) || (pacmanRightX > 564 && pacmanRightX < 608 && pacmanRightY > 380 && pacmanRightY < 552) ||
+        (pacmanRightX > 700 && pacmanRightY > 292 && pacmanRightY < 464) || (pacmanRightX < 232 && pacmanRightY > 292 && pacmanRightY < 464) || (pacmanRightX > 236 && pacmanRightX < 320 && pacmanRightY > 468 && pacmanRightY < 644) || (pacmanRightX > 612 && pacmanRightX < 696 && pacmanRightY > 468 && pacmanRightY < 644) || 
+        (pacmanRightX > 236 && pacmanRightX < 320 && pacmanRightY > 204 && pacmanRightY < 464) || (pacmanRightX > 612 && pacmanRightX < 696 && pacmanRightY > 204 && pacmanRightY < 464) || (pacmanRightX > 236 && pacmanRightX < 420 && pacmanRightY > 292 && pacmanRightY < 376) || (pacmanRightX > 512 && pacmanRightX < 696 && pacmanRightY > 292 && pacmanRightY < 376) || 
+        (pacmanRightX > 424 && pacmanRightX < 508 && pacmanRightY > 204 && pacmanRightY < 376) || (pacmanRightX > 328 && pacmanRightX < 608 && pacmanRightY > 204 && pacmanRightY < 284) || (pacmanRightX > 70 && pacmanRightX < 232 && pacmanRightY > 204 && pacmanRightY < 284) || (pacmanRightX > 700 && pacmanRightX < 856 && pacmanRightY > 204 && pacmanRightY < 284) || 
+        (pacmanRightX > 864)) {
             pacmanX -= 0;
         } else {
             if (pacmanRightLoaded) {
@@ -950,16 +985,16 @@ function pacmanMove() {
         }
         
         
-        // if ((inkyRightX > 90 && inkyRightX < 202 && inkyRightY > 89 && inkyRightY < 173) || (inkyRightX > 254 && inkyRightX < 394 && inkyRightY < 173 && inkyRightY > 89) || (inkyRightX > 440 && inkyRightX < 484 && inkyRightY < 173) || (inkyRightX > 530 && inkyRightX < 673 && inkyRightY < 173 && inkyRightY > 89) || (inkyRightX > 718 && inkyRightX < 834 && inkyRightY < 173 && inkyRightY > 89) ||
-        // (inkyRightX > 90 && inkyRightX < 394 && inkyRightY > 839 && inkyRightY < 874) || (inkyRightX > 530 && inkyRightX < 834 && inkyRightY > 839 && inkyRightY < 874) || (inkyRightX > 255 && inkyRightX < 294 && inkyRightY > 749 && inkyRightY < 874) || (inkyRightX > 630 && inkyRightX < 669 && inkyRightY > 749 && inkyRightY < 874) || 
-        // (inkyRightX > 440 && inkyRightX < 484 && inkyRightY > 749 && inkyRightY < 874) || (inkyRightX > 343 && inkyRightX < 581 && inkyRightY > 749 && inkyRightY < 800) || (inkyRightX < 109 && inkyRightY > 749 && inkyRightY < 800) || (inkyRightX > 815 && inkyRightY > 749 && inkyRightY < 800) || 
-        // (inkyRightX > 715 && inkyRightX < 764 && inkyRightY > 662 && inkyRightY < 800) || (inkyRightX > 160 && inkyRightX < 209 && inkyRightY > 662 && inkyRightY < 800) || (inkyRightX > 90 && inkyRightX < 209 && inkyRightY > 662 && inkyRightY < 703) || (inkyRightX > 715 && inkyRightX < 764 && inkyRightY > 662 && inkyRightY < 703) || (inkyRightX > 715 && inkyRightX < 835 && inkyRightY > 662 && inkyRightY < 703) || 
-        // (inkyRightX > 530 && inkyRightX < 673 && inkyRightY > 662 && inkyRightY < 703) || (inkyRightX > 254 && inkyRightX < 394 && inkyRightY > 662 && inkyRightY < 703) || (inkyRightX > 715 && inkyRightY > 484 && inkyRightY < 613) || (inkyRightX < 209 && inkyRightY > 484 && inkyRightY < 613) || 
-        // (inkyRightX > 440 && inkyRightX < 484 && inkyRightY > 572 && inkyRightY < 703) || (inkyRightX > 343 && inkyRightX < 581 && inkyRightY > 574 && inkyRightY < 613) || (inkyRightX > 630 && inkyRightX < 669 && inkyRightY > 484 && inkyRightY < 613) || (inkyRightX > 630 && inkyRightX < 669 && inkyRightY > 484 && inkyRightY < 613) || (inkyRightX > 255 && inkyRightX < 294 && inkyRightY > 484 && inkyRightY < 613) || 
-        // (inkyRightX > 343 && inkyRightX < 581 && inkyRightY > 508 && inkyRightY < 528) || (inkyRightX > 343 && inkyRightX < 360 && inkyRightY > 402 && inkyRightY < 528) || (inkyRightX > 343 && inkyRightX < 581 && inkyRightY > 399 && inkyRightY < 414) || (inkyRightX > 564 && inkyRightX < 581 && inkyRightY > 402 && inkyRightY < 528) ||
-        // (inkyRightX > 715 && inkyRightY > 309 && inkyRightY < 438) || (inkyRightX < 209 && inkyRightY > 309 && inkyRightY < 438) || (inkyRightX > 255 && inkyRightX < 294 && inkyRightY > 484 && inkyRightY < 613) || (inkyRightX > 630 && inkyRightX < 669 && inkyRightY > 484 && inkyRightY < 613) || 
-        // (inkyRightX > 255 && inkyRightX < 294 && inkyRightY > 221 && inkyRightY < 438) || (inkyRightX > 630 && inkyRightX < 669 && inkyRightY > 221 && inkyRightY < 438) || (inkyRightX > 255 && inkyRightX < 394 && inkyRightY > 309 && inkyRightY < 348) || (inkyRightX > 530 && inkyRightX < 669 && inkyRightY > 309 && inkyRightY < 348) || 
-        // (inkyRightX > 440 && inkyRightX < 484 && inkyRightY > 221 && inkyRightY < 348) || (inkyRightX > 343 && inkyRightX < 581 && inkyRightY > 221 && inkyRightY < 263) || (inkyRightX > 90 && inkyRightX < 202 && inkyRightY > 221 && inkyRightY < 263) || (inkyRightX > 718 && inkyRightX < 834 && inkyRightY > 221 && inkyRightY < 263) || 
+        // if ((inkyRightX > 70 && inkyRightX < 232 && inkyRightY > 70 && inkyRightY < 196) || (inkyRightX > 232 && inkyRightX < 420 && inkyRightY < 196 && inkyRightY > 70) || (inkyRightX > 424 && inkyRightX < 508 && inkyRightY < 196) || (inkyRightX > 512 && inkyRightX < 673 && inkyRightY < 196 && inkyRightY > 70) || (inkyRightX > 700 && inkyRightX < 856 && inkyRightY < 196 && inkyRightY > 70) ||
+        // (inkyRightX > 70 && inkyRightX < 420 && inkyRightY > 856 && inkyRightY < 856) || (inkyRightX > 512 && inkyRightX < 856 && inkyRightY > 856 && inkyRightY < 856) || (inkyRightX > 236 && inkyRightX < 320 && inkyRightY > 732 && inkyRightY < 856) || (inkyRightX > 612 && inkyRightX < 696 && inkyRightY > 732 && inkyRightY < 856) || 
+        // (inkyRightX > 424 && inkyRightX < 508 && inkyRightY > 732 && inkyRightY < 856) || (inkyRightX > 328 && inkyRightX < 608 && inkyRightY > 732 && inkyRightY < 816) || (inkyRightX < 109 && inkyRightY > 732 && inkyRightY < 816) || (inkyRightX > 796 && inkyRightY > 732 && inkyRightY < 816) || 
+        // (inkyRightX > 700 && inkyRightX < 788 && inkyRightY > 644 && inkyRightY < 816) || (inkyRightX > 148 && inkyRightX < 232 && inkyRightY > 644 && inkyRightY < 816) || (inkyRightX > 70 && inkyRightX < 232 && inkyRightY > 644 && inkyRightY < 728) || (inkyRightX > 700 && inkyRightX < 788 && inkyRightY > 644 && inkyRightY < 728) || (inkyRightX > 700 && inkyRightX < 835 && inkyRightY > 644 && inkyRightY < 728) || 
+        // (inkyRightX > 512 && inkyRightX < 673 && inkyRightY > 644 && inkyRightY < 728) || (inkyRightX > 232 && inkyRightX < 420 && inkyRightY > 644 && inkyRightY < 728) || (inkyRightX > 700 && inkyRightY > 468 && inkyRightY < 644) || (inkyRightX < 232 && inkyRightY > 468 && inkyRightY < 644) || 
+        // (inkyRightX > 424 && inkyRightX < 508 && inkyRightY > 572 && inkyRightY < 728) || (inkyRightX > 328 && inkyRightX < 608 && inkyRightY > 574 && inkyRightY < 644) || (inkyRightX > 612 && inkyRightX < 696 && inkyRightY > 468 && inkyRightY < 644) || (inkyRightX > 612 && inkyRightX < 696 && inkyRightY > 468 && inkyRightY < 644) || (inkyRightX > 236 && inkyRightX < 320 && inkyRightY > 468 && inkyRightY < 644) || 
+        // (inkyRightX > 328 && inkyRightX < 608 && inkyRightY > 468 && inkyRightY < 552) || (inkyRightX > 328 && inkyRightX < 360 && inkyRightY > 380 && inkyRightY < 552) || (inkyRightX > 328 && inkyRightX < 608 && inkyRightY > 428 && inkyRightY < 414) || (inkyRightX > 564 && inkyRightX < 608 && inkyRightY > 380 && inkyRightY < 552) ||
+        // (inkyRightX > 700 && inkyRightY > 292 && inkyRightY < 464) || (inkyRightX < 232 && inkyRightY > 292 && inkyRightY < 464) || (inkyRightX > 236 && inkyRightX < 320 && inkyRightY > 468 && inkyRightY < 644) || (inkyRightX > 612 && inkyRightX < 696 && inkyRightY > 468 && inkyRightY < 644) || 
+        // (inkyRightX > 236 && inkyRightX < 320 && inkyRightY > 204 && inkyRightY < 464) || (inkyRightX > 612 && inkyRightX < 696 && inkyRightY > 204 && inkyRightY < 464) || (inkyRightX > 236 && inkyRightX < 420 && inkyRightY > 292 && inkyRightY < 376) || (inkyRightX > 512 && inkyRightX < 696 && inkyRightY > 292 && inkyRightY < 376) || 
+        // (inkyRightX > 424 && inkyRightX < 508 && inkyRightY > 204 && inkyRightY < 376) || (inkyRightX > 328 && inkyRightX < 608 && inkyRightY > 204 && inkyRightY < 284) || (inkyRightX > 70 && inkyRightX < 232 && inkyRightY > 204 && inkyRightY < 284) || (inkyRightX > 700 && inkyRightX < 856 && inkyRightY > 204 && inkyRightY < 284) || 
         // (inkyRightX > 880)) {
         //     inkyX -= 0;
         // } else {
@@ -987,16 +1022,16 @@ function pacmanMove() {
         //         inkyRightFirstLoaded = true;
         //     }
         // }
-        // if ((clydeRightX > 90 && clydeRightX < 202 && clydeRightY > 89 && clydeRightY < 173) || (clydeRightX > 254 && clydeRightX < 394 && clydeRightY < 173 && clydeRightY > 89) || (clydeRightX > 440 && clydeRightX < 484 && clydeRightY < 173) || (clydeRightX > 530 && clydeRightX < 673 && clydeRightY < 173 && clydeRightY > 89) || (clydeRightX > 718 && clydeRightX < 834 && clydeRightY < 173 && clydeRightY > 89) ||
-        // (clydeRightX > 90 && clydeRightX < 394 && clydeRightY > 839 && clydeRightY < 874) || (clydeRightX > 530 && clydeRightX < 834 && clydeRightY > 839 && clydeRightY < 874) || (clydeRightX > 255 && clydeRightX < 294 && clydeRightY > 749 && clydeRightY < 874) || (clydeRightX > 630 && clydeRightX < 669 && clydeRightY > 749 && clydeRightY < 874) || 
-        // (clydeRightX > 440 && clydeRightX < 484 && clydeRightY > 749 && clydeRightY < 874) || (clydeRightX > 343 && clydeRightX < 581 && clydeRightY > 749 && clydeRightY < 800) || (clydeRightX < 109 && clydeRightY > 749 && clydeRightY < 800) || (clydeRightX > 815 && clydeRightY > 749 && clydeRightY < 800) || 
-        // (clydeRightX > 715 && clydeRightX < 764 && clydeRightY > 662 && clydeRightY < 800) || (clydeRightX > 160 && clydeRightX < 209 && clydeRightY > 662 && clydeRightY < 800) || (clydeRightX > 90 && clydeRightX < 209 && clydeRightY > 662 && clydeRightY < 703) || (clydeRightX > 715 && clydeRightX < 764 && clydeRightY > 662 && clydeRightY < 703) || (clydeRightX > 715 && clydeRightX < 835 && clydeRightY > 662 && clydeRightY < 703) || 
-        // (clydeRightX > 530 && clydeRightX < 673 && clydeRightY > 662 && clydeRightY < 703) || (clydeRightX > 254 && clydeRightX < 394 && clydeRightY > 662 && clydeRightY < 703) || (clydeRightX > 715 && clydeRightY > 484 && clydeRightY < 613) || (clydeRightX < 209 && clydeRightY > 484 && clydeRightY < 613) || 
-        // (clydeRightX > 440 && clydeRightX < 484 && clydeRightY > 572 && clydeRightY < 703) || (clydeRightX > 343 && clydeRightX < 581 && clydeRightY > 574 && clydeRightY < 613) || (clydeRightX > 630 && clydeRightX < 669 && clydeRightY > 484 && clydeRightY < 613) || (clydeRightX > 630 && clydeRightX < 669 && clydeRightY > 484 && clydeRightY < 613) || (clydeRightX > 255 && clydeRightX < 294 && clydeRightY > 484 && clydeRightY < 613) || 
-        // (clydeRightX > 343 && clydeRightX < 581 && clydeRightY > 508 && clydeRightY < 528) || (clydeRightX > 343 && clydeRightX < 360 && clydeRightY > 402 && clydeRightY < 528) || (clydeRightX > 343 && clydeRightX < 581 && clydeRightY > 399 && clydeRightY < 414) || (clydeRightX > 564 && clydeRightX < 581 && clydeRightY > 402 && clydeRightY < 528) ||
-        // (clydeRightX > 715 && clydeRightY > 309 && clydeRightY < 438) || (clydeRightX < 209 && clydeRightY > 309 && clydeRightY < 438) || (clydeRightX > 255 && clydeRightX < 294 && clydeRightY > 484 && clydeRightY < 613) || (clydeRightX > 630 && clydeRightX < 669 && clydeRightY > 484 && clydeRightY < 613) || 
-        // (clydeRightX > 255 && clydeRightX < 294 && clydeRightY > 221 && clydeRightY < 438) || (clydeRightX > 630 && clydeRightX < 669 && clydeRightY > 221 && clydeRightY < 438) || (clydeRightX > 255 && clydeRightX < 394 && clydeRightY > 309 && clydeRightY < 348) || (clydeRightX > 530 && clydeRightX < 669 && clydeRightY > 309 && clydeRightY < 348) || 
-        // (clydeRightX > 440 && clydeRightX < 484 && clydeRightY > 221 && clydeRightY < 348) || (clydeRightX > 343 && clydeRightX < 581 && clydeRightY > 221 && clydeRightY < 263) || (clydeRightX > 90 && clydeRightX < 202 && clydeRightY > 221 && clydeRightY < 263) || (clydeRightX > 718 && clydeRightX < 834 && clydeRightY > 221 && clydeRightY < 263) || 
+        // if ((clydeRightX > 70 && clydeRightX < 232 && clydeRightY > 70 && clydeRightY < 196) || (clydeRightX > 232 && clydeRightX < 420 && clydeRightY < 196 && clydeRightY > 70) || (clydeRightX > 424 && clydeRightX < 508 && clydeRightY < 196) || (clydeRightX > 512 && clydeRightX < 673 && clydeRightY < 196 && clydeRightY > 70) || (clydeRightX > 700 && clydeRightX < 856 && clydeRightY < 196 && clydeRightY > 70) ||
+        // (clydeRightX > 70 && clydeRightX < 420 && clydeRightY > 856 && clydeRightY < 856) || (clydeRightX > 512 && clydeRightX < 856 && clydeRightY > 856 && clydeRightY < 856) || (clydeRightX > 236 && clydeRightX < 320 && clydeRightY > 732 && clydeRightY < 856) || (clydeRightX > 612 && clydeRightX < 696 && clydeRightY > 732 && clydeRightY < 856) || 
+        // (clydeRightX > 424 && clydeRightX < 508 && clydeRightY > 732 && clydeRightY < 856) || (clydeRightX > 328 && clydeRightX < 608 && clydeRightY > 732 && clydeRightY < 816) || (clydeRightX < 109 && clydeRightY > 732 && clydeRightY < 816) || (clydeRightX > 796 && clydeRightY > 732 && clydeRightY < 816) || 
+        // (clydeRightX > 700 && clydeRightX < 788 && clydeRightY > 644 && clydeRightY < 816) || (clydeRightX > 148 && clydeRightX < 232 && clydeRightY > 644 && clydeRightY < 816) || (clydeRightX > 70 && clydeRightX < 232 && clydeRightY > 644 && clydeRightY < 728) || (clydeRightX > 700 && clydeRightX < 788 && clydeRightY > 644 && clydeRightY < 728) || (clydeRightX > 700 && clydeRightX < 835 && clydeRightY > 644 && clydeRightY < 728) || 
+        // (clydeRightX > 512 && clydeRightX < 673 && clydeRightY > 644 && clydeRightY < 728) || (clydeRightX > 232 && clydeRightX < 420 && clydeRightY > 644 && clydeRightY < 728) || (clydeRightX > 700 && clydeRightY > 468 && clydeRightY < 644) || (clydeRightX < 232 && clydeRightY > 468 && clydeRightY < 644) || 
+        // (clydeRightX > 424 && clydeRightX < 508 && clydeRightY > 572 && clydeRightY < 728) || (clydeRightX > 328 && clydeRightX < 608 && clydeRightY > 574 && clydeRightY < 644) || (clydeRightX > 612 && clydeRightX < 696 && clydeRightY > 468 && clydeRightY < 644) || (clydeRightX > 612 && clydeRightX < 696 && clydeRightY > 468 && clydeRightY < 644) || (clydeRightX > 236 && clydeRightX < 320 && clydeRightY > 468 && clydeRightY < 644) || 
+        // (clydeRightX > 328 && clydeRightX < 608 && clydeRightY > 468 && clydeRightY < 552) || (clydeRightX > 328 && clydeRightX < 360 && clydeRightY > 380 && clydeRightY < 552) || (clydeRightX > 328 && clydeRightX < 608 && clydeRightY > 428 && clydeRightY < 414) || (clydeRightX > 564 && clydeRightX < 608 && clydeRightY > 380 && clydeRightY < 552) ||
+        // (clydeRightX > 700 && clydeRightY > 292 && clydeRightY < 464) || (clydeRightX < 232 && clydeRightY > 292 && clydeRightY < 464) || (clydeRightX > 236 && clydeRightX < 320 && clydeRightY > 468 && clydeRightY < 644) || (clydeRightX > 612 && clydeRightX < 696 && clydeRightY > 468 && clydeRightY < 644) || 
+        // (clydeRightX > 236 && clydeRightX < 320 && clydeRightY > 204 && clydeRightY < 464) || (clydeRightX > 612 && clydeRightX < 696 && clydeRightY > 204 && clydeRightY < 464) || (clydeRightX > 236 && clydeRightX < 420 && clydeRightY > 292 && clydeRightY < 376) || (clydeRightX > 512 && clydeRightX < 696 && clydeRightY > 292 && clydeRightY < 376) || 
+        // (clydeRightX > 424 && clydeRightX < 508 && clydeRightY > 204 && clydeRightY < 376) || (clydeRightX > 328 && clydeRightX < 608 && clydeRightY > 204 && clydeRightY < 284) || (clydeRightX > 70 && clydeRightX < 232 && clydeRightY > 204 && clydeRightY < 284) || (clydeRightX > 700 && clydeRightX < 856 && clydeRightY > 204 && clydeRightY < 284) || 
         // (clydeRightX > 880)) {
         //     clydeX -= 0;
         // } else {
@@ -1027,17 +1062,17 @@ function pacmanMove() {
     }
     if (keyHeldUp) {
         console.log(pacmanTopY);
-        if ((pacmanTopX > 90 && pacmanTopX < 202 && pacmanTopY > 89 && pacmanTopY < 173) || (pacmanTopX > 254 && pacmanTopX < 394 && pacmanTopY < 173 && pacmanTopY > 89) || (pacmanTopX > 440 && pacmanTopX < 484 && pacmanTopY < 173) || (pacmanTopX > 530 && pacmanTopX < 673 && pacmanTopY < 173 && pacmanTopY > 89) || (pacmanTopX > 718 && pacmanTopX < 834 && pacmanTopY < 173 && pacmanTopY > 89) || 
-        (pacmanTopX > 90 && pacmanTopX < 394 && pacmanTopY > 839 && pacmanTopY < 874) || (pacmanTopX > 530 && pacmanTopX < 834 && pacmanTopY > 839 && pacmanTopY < 874) || (pacmanTopX > 255 && pacmanTopX < 294 && pacmanTopY > 749 && pacmanTopY < 874) || (pacmanTopX > 630 && pacmanTopX < 669 && pacmanTopY > 749 && pacmanTopY < 874) || 
-        (pacmanTopX > 440 && pacmanTopX < 484 && pacmanTopY > 749 && pacmanTopY < 874) || (pacmanTopX > 343 && pacmanTopX < 581 && pacmanTopY > 749 && pacmanTopY < 800) || (pacmanTopX < 109 && pacmanTopY > 749 && pacmanTopY < 800) || (pacmanTopX > 815 && pacmanTopY > 749 && pacmanTopY < 800) || 
-        (pacmanTopX > 715 && pacmanTopX < 764 && pacmanTopY > 662 && pacmanTopY < 800) || (pacmanTopX > 160 && pacmanTopX < 209 && pacmanTopY > 662 && pacmanTopY < 800) || (pacmanTopX > 90 && pacmanTopX < 209 && pacmanTopY > 662 && pacmanTopY < 703) || (pacmanTopX > 715 && pacmanTopX < 764 && pacmanTopY > 662 && pacmanTopY < 703) || (pacmanTopX > 715 && pacmanTopX < 835 && pacmanTopY > 662 && pacmanTopY < 703) || 
-        (pacmanTopX > 530 && pacmanTopX < 673 && pacmanTopY > 662 && pacmanTopY < 703) || (pacmanTopX > 254 && pacmanTopX < 394 && pacmanTopY > 662 && pacmanTopY < 703) || (pacmanTopX > 715 && pacmanTopY > 484 && pacmanTopY < 613) || (pacmanTopX < 209 && pacmanTopY > 484 && pacmanTopY < 613) || 
-        (pacmanTopX > 440 && pacmanTopX < 484 && pacmanTopY > 572 && pacmanTopY < 703) || (pacmanTopX > 343 && pacmanTopX < 581 && pacmanTopY > 574 && pacmanTopY < 613) || (pacmanTopX > 630 && pacmanTopX < 669 && pacmanTopY > 484 && pacmanTopY < 613) || (pacmanTopX > 630 && pacmanTopX < 669 && pacmanTopY > 484 && pacmanTopY < 613) || (pacmanTopX > 255 && pacmanTopX < 294 && pacmanTopY > 484 && pacmanTopY < 613) || 
-        (pacmanTopX > 343 && pacmanTopX < 581 && pacmanTopY > 508 && pacmanTopY < 528) || (pacmanTopX > 343 && pacmanTopX < 360 && pacmanTopY > 402 && pacmanTopY < 528) || (pacmanTopX > 343 && pacmanTopX < 581 && pacmanTopY > 399 && pacmanTopY < 414) || (pacmanTopX > 564 && pacmanTopX < 581 && pacmanTopY > 402 && pacmanTopY < 528) ||
-        (pacmanTopX > 715 && pacmanTopY > 309 && pacmanTopY < 438) || (pacmanTopX < 209 && pacmanTopY > 309 && pacmanTopY < 438) || (pacmanTopX > 255 && pacmanTopX < 294 && pacmanTopY > 484 && pacmanTopY < 613) || (pacmanTopX > 630 && pacmanTopX < 669 && pacmanTopY > 484 && pacmanTopY < 613) || 
-        (pacmanTopX > 255 && pacmanTopX < 294 && pacmanTopY > 221 && pacmanTopY < 438) || (pacmanTopX > 630 && pacmanTopX < 669 && pacmanTopY > 221 && pacmanTopY < 438) || (pacmanTopX > 255 && pacmanTopX < 394 && pacmanTopY > 309 && pacmanTopY < 348) || (pacmanTopX > 530 && pacmanTopX < 669 && pacmanTopY > 309 && pacmanTopY < 348) || 
-        (pacmanTopX > 440 && pacmanTopX < 484 && pacmanTopY > 221 && pacmanTopY < 348) || (pacmanTopX > 343 && pacmanTopX < 581 && pacmanTopY > 221 && pacmanTopY < 263) || (pacmanTopX > 90 && pacmanTopX < 202 && pacmanTopY > 221 && pacmanTopY < 263) || (pacmanTopX > 718 && pacmanTopX < 834 && pacmanTopY > 221 && pacmanTopY < 263) || 
-        (pacmanTopY < 43)) {
+        if ((pacmanTopX > 70 && pacmanTopX < 232 && pacmanTopY > 70 && pacmanTopY < 196) || (pacmanTopX > 232 && pacmanTopX < 420 && pacmanTopY < 196 && pacmanTopY > 70) || (pacmanTopX > 424 && pacmanTopX < 508 && pacmanTopY < 196) || (pacmanTopX > 512 && pacmanTopX < 673 && pacmanTopY < 196 && pacmanTopY > 70) || (pacmanTopX > 700 && pacmanTopX < 856 && pacmanTopY < 196 && pacmanTopY > 70) || 
+        (pacmanTopX > 70 && pacmanTopX < 420 && pacmanTopY > 816 && pacmanTopY < 856) || (pacmanTopX > 512 && pacmanTopX < 856 && pacmanTopY > 816 && pacmanTopY < 856) || (pacmanTopX > 236 && pacmanTopX < 320 && pacmanTopY > 732 && pacmanTopY < 856) || (pacmanTopX > 612 && pacmanTopX < 696 && pacmanTopY > 732 && pacmanTopY < 856) || 
+        (pacmanTopX > 424 && pacmanTopX < 508 && pacmanTopY > 732 && pacmanTopY < 856) || (pacmanTopX > 328 && pacmanTopX < 608 && pacmanTopY > 732 && pacmanTopY < 816) || (pacmanTopX < 109 && pacmanTopY > 732 && pacmanTopY < 816) || (pacmanTopX > 796 && pacmanTopY > 732 && pacmanTopY < 816) || 
+        (pacmanTopX > 700 && pacmanTopX < 788 && pacmanTopY > 644 && pacmanTopY < 816) || (pacmanTopX > 148 && pacmanTopX < 232 && pacmanTopY > 644 && pacmanTopY < 816) || (pacmanTopX > 70 && pacmanTopX < 232 && pacmanTopY > 644 && pacmanTopY < 728) || (pacmanTopX > 700 && pacmanTopX < 788 && pacmanTopY > 644 && pacmanTopY < 728) || (pacmanTopX > 700 && pacmanTopX < 835 && pacmanTopY > 644 && pacmanTopY < 728) || 
+        (pacmanTopX > 512 && pacmanTopX < 673 && pacmanTopY > 644 && pacmanTopY < 728) || (pacmanTopX > 232 && pacmanTopX < 420 && pacmanTopY > 644 && pacmanTopY < 728) || (pacmanTopX > 700 && pacmanTopY > 468 && pacmanTopY < 644) || (pacmanTopX < 232 && pacmanTopY > 468 && pacmanTopY < 644) || 
+        (pacmanTopX > 424 && pacmanTopX < 508 && pacmanTopY > 572 && pacmanTopY < 728) || (pacmanTopX > 328 && pacmanTopX < 608 && pacmanTopY > 574 && pacmanTopY < 644) || (pacmanTopX > 612 && pacmanTopX < 696 && pacmanTopY > 468 && pacmanTopY < 644) || (pacmanTopX > 612 && pacmanTopX < 696 && pacmanTopY > 468 && pacmanTopY < 644) || (pacmanTopX > 236 && pacmanTopX < 320 && pacmanTopY > 468 && pacmanTopY < 644) || 
+        (pacmanTopX > 328 && pacmanTopX < 608 && pacmanTopY > 468 && pacmanTopY < 552) || (pacmanTopX > 328 && pacmanTopX < 360 && pacmanTopY > 380 && pacmanTopY < 552) || (pacmanTopX > 328 && pacmanTopX < 608 && pacmanTopY > 428 && pacmanTopY < 414) || (pacmanTopX > 564 && pacmanTopX < 608 && pacmanTopY > 380 && pacmanTopY < 552) ||
+        (pacmanTopX > 700 && pacmanTopY > 292 && pacmanTopY < 464) || (pacmanTopX < 232 && pacmanTopY > 292 && pacmanTopY < 464) || (pacmanTopX > 236 && pacmanTopX < 320 && pacmanTopY > 468 && pacmanTopY < 644) || (pacmanTopX > 612 && pacmanTopX < 696 && pacmanTopY > 468 && pacmanTopY < 644) || 
+        (pacmanTopX > 236 && pacmanTopX < 320 && pacmanTopY > 204 && pacmanTopY < 464) || (pacmanTopX > 612 && pacmanTopX < 696 && pacmanTopY > 204 && pacmanTopY < 464) || (pacmanTopX > 236 && pacmanTopX < 420 && pacmanTopY > 292 && pacmanTopY < 376) || (pacmanTopX > 512 && pacmanTopX < 696 && pacmanTopY > 292 && pacmanTopY < 376) || 
+        (pacmanTopX > 424 && pacmanTopX < 508 && pacmanTopY > 204 && pacmanTopY < 376) || (pacmanTopX > 328 && pacmanTopX < 608 && pacmanTopY > 204 && pacmanTopY < 284) || (pacmanTopX > 70 && pacmanTopX < 232 && pacmanTopY > 204 && pacmanTopY < 284) || (pacmanTopX > 700 && pacmanTopX < 856 && pacmanTopY > 204 && pacmanTopY < 284) || 
+        (pacmanTopY < 68)) {
             pacmanY -= 0;
         } else {
             if (pacmanUpLoaded) {
@@ -1066,16 +1101,16 @@ function pacmanMove() {
         }
         
         
-        // if ((inkyTopX > 90 && inkyTopX < 202 && inkyTopY > 89 && inkyTopY < 173) || (inkyTopX > 254 && inkyTopX < 394 && inkyTopY < 173 && inkyTopY > 89) || (inkyTopX > 440 && inkyTopX < 484 && inkyTopY < 173) || (inkyTopX > 530 && inkyTopX < 673 && inkyTopY < 173 && inkyTopY > 89) || (inkyTopX > 718 && inkyTopX < 834 && inkyTopY < 173 && inkyTopY > 89) || 
-        // (inkyTopX > 90 && inkyTopX < 394 && inkyTopY > 839 && inkyTopY < 874) || (inkyTopX > 530 && inkyTopX < 834 && inkyTopY > 839 && inkyTopY < 874) || (inkyTopX > 255 && inkyTopX < 294 && inkyTopY > 749 && inkyTopY < 874) || (inkyTopX > 630 && inkyTopX < 669 && inkyTopY > 749 && inkyTopY < 874) || 
-        // (inkyTopX > 440 && inkyTopX < 484 && inkyTopY > 749 && inkyTopY < 874) || (inkyTopX > 343 && inkyTopX < 581 && inkyTopY > 749 && inkyTopY < 800) || (inkyTopX < 109 && inkyTopY > 749 && inkyTopY < 800) || (inkyTopX > 815 && inkyTopY > 749 && inkyTopY < 800) || 
-        // (inkyTopX > 715 && inkyTopX < 764 && inkyTopY > 662 && inkyTopY < 800) || (inkyTopX > 160 && inkyTopX < 209 && inkyTopY > 662 && inkyTopY < 800) || (inkyTopX > 90 && inkyTopX < 209 && inkyTopY > 662 && inkyTopY < 703) || (inkyTopX > 715 && inkyTopX < 764 && inkyTopY > 662 && inkyTopY < 703) || (inkyTopX > 715 && inkyTopX < 835 && inkyTopY > 662 && inkyTopY < 703) || 
-        // (inkyTopX > 530 && inkyTopX < 673 && inkyTopY > 662 && inkyTopY < 703) || (inkyTopX > 254 && inkyTopX < 394 && inkyTopY > 662 && inkyTopY < 703) || (inkyTopX > 715 && inkyTopY > 484 && inkyTopY < 613) || (inkyTopX < 209 && inkyTopY > 484 && inkyTopY < 613) || 
-        // (inkyTopX > 440 && inkyTopX < 484 && inkyTopY > 572 && inkyTopY < 703) || (inkyTopX > 343 && inkyTopX < 581 && inkyTopY > 574 && inkyTopY < 613) || (inkyTopX > 630 && inkyTopX < 669 && inkyTopY > 484 && inkyTopY < 613) || (inkyTopX > 630 && inkyTopX < 669 && inkyTopY > 484 && inkyTopY < 613) || (inkyTopX > 255 && inkyTopX < 294 && inkyTopY > 484 && inkyTopY < 613) || 
-        // (inkyTopX > 343 && inkyTopX < 581 && inkyTopY > 508 && inkyTopY < 528) || (inkyTopX > 343 && inkyTopX < 360 && inkyTopY > 402 && inkyTopY < 528) || (inkyTopX > 343 && inkyTopX < 581 && inkyTopY > 399 && inkyTopY < 414) || (inkyTopX > 564 && inkyTopX < 581 && inkyTopY > 402 && inkyTopY < 528) ||
-        // (inkyTopX > 715 && inkyTopY > 309 && inkyTopY < 438) || (inkyTopX < 209 && inkyTopY > 309 && inkyTopY < 438) || (inkyTopX > 255 && inkyTopX < 294 && inkyTopY > 484 && inkyTopY < 613) || (inkyTopX > 630 && inkyTopX < 669 && inkyTopY > 484 && inkyTopY < 613) || 
-        // (inkyTopX > 255 && inkyTopX < 294 && inkyTopY > 221 && inkyTopY < 438) || (inkyTopX > 630 && inkyTopX < 669 && inkyTopY > 221 && inkyTopY < 438) || (inkyTopX > 255 && inkyTopX < 394 && inkyTopY > 309 && inkyTopY < 348) || (inkyTopX > 530 && inkyTopX < 669 && inkyTopY > 309 && inkyTopY < 348) || 
-        // (inkyTopX > 440 && inkyTopX < 484 && inkyTopY > 221 && inkyTopY < 348) || (inkyTopX > 343 && inkyTopX < 581 && inkyTopY > 221 && inkyTopY < 263) || (inkyTopX > 90 && inkyTopX < 202 && inkyTopY > 221 && inkyTopY < 263) || (inkyTopX > 718 && inkyTopX < 834 && inkyTopY > 221 && inkyTopY < 263) || 
+        // if ((inkyTopX > 70 && inkyTopX < 232 && inkyTopY > 70 && inkyTopY < 196) || (inkyTopX > 232 && inkyTopX < 420 && inkyTopY < 196 && inkyTopY > 70) || (inkyTopX > 424 && inkyTopX < 508 && inkyTopY < 196) || (inkyTopX > 512 && inkyTopX < 673 && inkyTopY < 196 && inkyTopY > 70) || (inkyTopX > 700 && inkyTopX < 856 && inkyTopY < 196 && inkyTopY > 70) || 
+        // (inkyTopX > 70 && inkyTopX < 420 && inkyTopY > 856 && inkyTopY < 856) || (inkyTopX > 512 && inkyTopX < 856 && inkyTopY > 856 && inkyTopY < 856) || (inkyTopX > 236 && inkyTopX < 320 && inkyTopY > 732 && inkyTopY < 856) || (inkyTopX > 612 && inkyTopX < 696 && inkyTopY > 732 && inkyTopY < 856) || 
+        // (inkyTopX > 424 && inkyTopX < 508 && inkyTopY > 732 && inkyTopY < 856) || (inkyTopX > 328 && inkyTopX < 608 && inkyTopY > 732 && inkyTopY < 816) || (inkyTopX < 109 && inkyTopY > 732 && inkyTopY < 816) || (inkyTopX > 796 && inkyTopY > 732 && inkyTopY < 816) || 
+        // (inkyTopX > 700 && inkyTopX < 788 && inkyTopY > 644 && inkyTopY < 816) || (inkyTopX > 148 && inkyTopX < 232 && inkyTopY > 644 && inkyTopY < 816) || (inkyTopX > 70 && inkyTopX < 232 && inkyTopY > 644 && inkyTopY < 728) || (inkyTopX > 700 && inkyTopX < 788 && inkyTopY > 644 && inkyTopY < 728) || (inkyTopX > 700 && inkyTopX < 835 && inkyTopY > 644 && inkyTopY < 728) || 
+        // (inkyTopX > 512 && inkyTopX < 673 && inkyTopY > 644 && inkyTopY < 728) || (inkyTopX > 232 && inkyTopX < 420 && inkyTopY > 644 && inkyTopY < 728) || (inkyTopX > 700 && inkyTopY > 468 && inkyTopY < 644) || (inkyTopX < 232 && inkyTopY > 468 && inkyTopY < 644) || 
+        // (inkyTopX > 424 && inkyTopX < 508 && inkyTopY > 572 && inkyTopY < 728) || (inkyTopX > 328 && inkyTopX < 608 && inkyTopY > 574 && inkyTopY < 644) || (inkyTopX > 612 && inkyTopX < 696 && inkyTopY > 468 && inkyTopY < 644) || (inkyTopX > 612 && inkyTopX < 696 && inkyTopY > 468 && inkyTopY < 644) || (inkyTopX > 236 && inkyTopX < 320 && inkyTopY > 468 && inkyTopY < 644) || 
+        // (inkyTopX > 328 && inkyTopX < 608 && inkyTopY > 468 && inkyTopY < 552) || (inkyTopX > 328 && inkyTopX < 360 && inkyTopY > 380 && inkyTopY < 552) || (inkyTopX > 328 && inkyTopX < 608 && inkyTopY > 428 && inkyTopY < 414) || (inkyTopX > 564 && inkyTopX < 608 && inkyTopY > 380 && inkyTopY < 552) ||
+        // (inkyTopX > 700 && inkyTopY > 292 && inkyTopY < 464) || (inkyTopX < 232 && inkyTopY > 292 && inkyTopY < 464) || (inkyTopX > 236 && inkyTopX < 320 && inkyTopY > 468 && inkyTopY < 644) || (inkyTopX > 612 && inkyTopX < 696 && inkyTopY > 468 && inkyTopY < 644) || 
+        // (inkyTopX > 236 && inkyTopX < 320 && inkyTopY > 204 && inkyTopY < 464) || (inkyTopX > 612 && inkyTopX < 696 && inkyTopY > 204 && inkyTopY < 464) || (inkyTopX > 236 && inkyTopX < 420 && inkyTopY > 292 && inkyTopY < 376) || (inkyTopX > 512 && inkyTopX < 696 && inkyTopY > 292 && inkyTopY < 376) || 
+        // (inkyTopX > 424 && inkyTopX < 508 && inkyTopY > 204 && inkyTopY < 376) || (inkyTopX > 328 && inkyTopX < 608 && inkyTopY > 204 && inkyTopY < 284) || (inkyTopX > 70 && inkyTopX < 232 && inkyTopY > 204 && inkyTopY < 284) || (inkyTopX > 700 && inkyTopX < 856 && inkyTopY > 204 && inkyTopY < 284) || 
         // (inkyTopY < 43)) {
         //     inkyY -= 0;
         // } else {
@@ -1103,16 +1138,16 @@ function pacmanMove() {
         //         inkyUpFirstLoaded = true;
         //     }
         // }
-        // if ((clydeTopX > 90 && clydeTopX < 202 && clydeTopY > 89 && clydeTopY < 173) || (clydeTopX > 254 && clydeTopX < 394 && clydeTopY < 173 && clydeTopY > 89) || (clydeTopX > 440 && clydeTopX < 484 && clydeTopY < 173) || (clydeTopX > 530 && clydeTopX < 673 && clydeTopY < 173 && clydeTopY > 89) || (clydeTopX > 718 && clydeTopX < 834 && clydeTopY < 173 && clydeTopY > 89) || 
-        // (clydeTopX > 90 && clydeTopX < 394 && clydeTopY > 839 && clydeTopY < 874) || (clydeTopX > 530 && clydeTopX < 834 && clydeTopY > 839 && clydeTopY < 874) || (clydeTopX > 255 && clydeTopX < 294 && clydeTopY > 749 && clydeTopY < 874) || (clydeTopX > 630 && clydeTopX < 669 && clydeTopY > 749 && clydeTopY < 874) || 
-        // (clydeTopX > 440 && clydeTopX < 484 && clydeTopY > 749 && clydeTopY < 874) || (clydeTopX > 343 && clydeTopX < 581 && clydeTopY > 749 && clydeTopY < 800) || (clydeTopX < 109 && clydeTopY > 749 && clydeTopY < 800) || (clydeTopX > 815 && clydeTopY > 749 && clydeTopY < 800) || 
-        // (clydeTopX > 715 && clydeTopX < 764 && clydeTopY > 662 && clydeTopY < 800) || (clydeTopX > 160 && clydeTopX < 209 && clydeTopY > 662 && clydeTopY < 800) || (clydeTopX > 90 && clydeTopX < 209 && clydeTopY > 662 && clydeTopY < 703) || (clydeTopX > 715 && clydeTopX < 764 && clydeTopY > 662 && clydeTopY < 703) || (clydeTopX > 715 && clydeTopX < 835 && clydeTopY > 662 && clydeTopY < 703) || 
-        // (clydeTopX > 530 && clydeTopX < 673 && clydeTopY > 662 && clydeTopY < 703) || (clydeTopX > 254 && clydeTopX < 394 && clydeTopY > 662 && clydeTopY < 703) || (clydeTopX > 715 && clydeTopY > 484 && clydeTopY < 613) || (clydeTopX < 209 && clydeTopY > 484 && clydeTopY < 613) || 
-        // (clydeTopX > 440 && clydeTopX < 484 && clydeTopY > 572 && clydeTopY < 703) || (clydeTopX > 343 && clydeTopX < 581 && clydeTopY > 574 && clydeTopY < 613) || (clydeTopX > 630 && clydeTopX < 669 && clydeTopY > 484 && clydeTopY < 613) || (clydeTopX > 630 && clydeTopX < 669 && clydeTopY > 484 && clydeTopY < 613) || (clydeTopX > 255 && clydeTopX < 294 && clydeTopY > 484 && clydeTopY < 613) || 
-        // (clydeTopX > 343 && clydeTopX < 581 && clydeTopY > 508 && clydeTopY < 528) || (clydeTopX > 343 && clydeTopX < 360 && clydeTopY > 402 && clydeTopY < 528) || (clydeTopX > 343 && clydeTopX < 581 && clydeTopY > 399 && clydeTopY < 414) || (clydeTopX > 564 && clydeTopX < 581 && clydeTopY > 402 && clydeTopY < 528) ||
-        // (clydeTopX > 715 && clydeTopY > 309 && clydeTopY < 438) || (clydeTopX < 209 && clydeTopY > 309 && clydeTopY < 438) || (clydeTopX > 255 && clydeTopX < 294 && clydeTopY > 484 && clydeTopY < 613) || (clydeTopX > 630 && clydeTopX < 669 && clydeTopY > 484 && clydeTopY < 613) || 
-        // (clydeTopX > 255 && clydeTopX < 294 && clydeTopY > 221 && clydeTopY < 438) || (clydeTopX > 630 && clydeTopX < 669 && clydeTopY > 221 && clydeTopY < 438) || (clydeTopX > 255 && clydeTopX < 394 && clydeTopY > 309 && clydeTopY < 348) || (clydeTopX > 530 && clydeTopX < 669 && clydeTopY > 309 && clydeTopY < 348) || 
-        // (clydeTopX > 440 && clydeTopX < 484 && clydeTopY > 221 && clydeTopY < 348) || (clydeTopX > 343 && clydeTopX < 581 && clydeTopY > 221 && clydeTopY < 263) || (clydeTopX > 90 && clydeTopX < 202 && clydeTopY > 221 && clydeTopY < 263) || (clydeTopX > 718 && clydeTopX < 834 && clydeTopY > 221 && clydeTopY < 263) || 
+        // if ((clydeTopX > 70 && clydeTopX < 232 && clydeTopY > 70 && clydeTopY < 196) || (clydeTopX > 232 && clydeTopX < 420 && clydeTopY < 196 && clydeTopY > 70) || (clydeTopX > 424 && clydeTopX < 508 && clydeTopY < 196) || (clydeTopX > 512 && clydeTopX < 673 && clydeTopY < 196 && clydeTopY > 70) || (clydeTopX > 700 && clydeTopX < 856 && clydeTopY < 196 && clydeTopY > 70) || 
+        // (clydeTopX > 70 && clydeTopX < 420 && clydeTopY > 856 && clydeTopY < 856) || (clydeTopX > 512 && clydeTopX < 856 && clydeTopY > 856 && clydeTopY < 856) || (clydeTopX > 236 && clydeTopX < 320 && clydeTopY > 732 && clydeTopY < 856) || (clydeTopX > 612 && clydeTopX < 696 && clydeTopY > 732 && clydeTopY < 856) || 
+        // (clydeTopX > 424 && clydeTopX < 508 && clydeTopY > 732 && clydeTopY < 856) || (clydeTopX > 328 && clydeTopX < 608 && clydeTopY > 732 && clydeTopY < 816) || (clydeTopX < 109 && clydeTopY > 732 && clydeTopY < 816) || (clydeTopX > 796 && clydeTopY > 732 && clydeTopY < 816) || 
+        // (clydeTopX > 700 && clydeTopX < 788 && clydeTopY > 644 && clydeTopY < 816) || (clydeTopX > 148 && clydeTopX < 232 && clydeTopY > 644 && clydeTopY < 816) || (clydeTopX > 70 && clydeTopX < 232 && clydeTopY > 644 && clydeTopY < 728) || (clydeTopX > 700 && clydeTopX < 788 && clydeTopY > 644 && clydeTopY < 728) || (clydeTopX > 700 && clydeTopX < 835 && clydeTopY > 644 && clydeTopY < 728) || 
+        // (clydeTopX > 512 && clydeTopX < 673 && clydeTopY > 644 && clydeTopY < 728) || (clydeTopX > 232 && clydeTopX < 420 && clydeTopY > 644 && clydeTopY < 728) || (clydeTopX > 700 && clydeTopY > 468 && clydeTopY < 644) || (clydeTopX < 232 && clydeTopY > 468 && clydeTopY < 644) || 
+        // (clydeTopX > 424 && clydeTopX < 508 && clydeTopY > 572 && clydeTopY < 728) || (clydeTopX > 328 && clydeTopX < 608 && clydeTopY > 574 && clydeTopY < 644) || (clydeTopX > 612 && clydeTopX < 696 && clydeTopY > 468 && clydeTopY < 644) || (clydeTopX > 612 && clydeTopX < 696 && clydeTopY > 468 && clydeTopY < 644) || (clydeTopX > 236 && clydeTopX < 320 && clydeTopY > 468 && clydeTopY < 644) || 
+        // (clydeTopX > 328 && clydeTopX < 608 && clydeTopY > 468 && clydeTopY < 552) || (clydeTopX > 328 && clydeTopX < 360 && clydeTopY > 380 && clydeTopY < 552) || (clydeTopX > 328 && clydeTopX < 608 && clydeTopY > 428 && clydeTopY < 414) || (clydeTopX > 564 && clydeTopX < 608 && clydeTopY > 380 && clydeTopY < 552) ||
+        // (clydeTopX > 700 && clydeTopY > 292 && clydeTopY < 464) || (clydeTopX < 232 && clydeTopY > 292 && clydeTopY < 464) || (clydeTopX > 236 && clydeTopX < 320 && clydeTopY > 468 && clydeTopY < 644) || (clydeTopX > 612 && clydeTopX < 696 && clydeTopY > 468 && clydeTopY < 644) || 
+        // (clydeTopX > 236 && clydeTopX < 320 && clydeTopY > 204 && clydeTopY < 464) || (clydeTopX > 612 && clydeTopX < 696 && clydeTopY > 204 && clydeTopY < 464) || (clydeTopX > 236 && clydeTopX < 420 && clydeTopY > 292 && clydeTopY < 376) || (clydeTopX > 512 && clydeTopX < 696 && clydeTopY > 292 && clydeTopY < 376) || 
+        // (clydeTopX > 424 && clydeTopX < 508 && clydeTopY > 204 && clydeTopY < 376) || (clydeTopX > 328 && clydeTopX < 608 && clydeTopY > 204 && clydeTopY < 284) || (clydeTopX > 70 && clydeTopX < 232 && clydeTopY > 204 && clydeTopY < 284) || (clydeTopX > 700 && clydeTopX < 856 && clydeTopY > 204 && clydeTopY < 284) || 
         // (clydeTopY < 43)) {
         //     clydeY -= 0;
         // } else {
@@ -1143,17 +1178,17 @@ function pacmanMove() {
     }
     if (keyHeldDown) {
         console.log(pacmanBottomY);
-        if ((pacmanBottomX > 90 && pacmanBottomX < 202 && pacmanBottomY > 89 && pacmanBottomY < 173) || (pacmanBottomX > 254 && pacmanBottomX < 394 && pacmanBottomY < 173 && pacmanBottomY > 89) || (pacmanBottomX > 440 && pacmanBottomX < 484 && pacmanBottomY < 173) || (pacmanBottomX > 530 && pacmanBottomX < 673 && pacmanBottomY < 173 && pacmanBottomY > 89) || (pacmanBottomX > 718 && pacmanBottomX < 834 && pacmanBottomY < 173 && pacmanBottomY > 89) || 
-        (pacmanBottomX > 90 && pacmanBottomX < 394 && pacmanBottomY > 839 && pacmanBottomY < 874) || (pacmanBottomX > 530 && pacmanBottomX < 834 && pacmanBottomY > 839 && pacmanBottomY < 874) || (pacmanBottomX > 255 && pacmanBottomX < 294 && pacmanBottomY > 749 && pacmanBottomY < 874) || (pacmanBottomX > 630 && pacmanBottomX < 669 && pacmanBottomY > 749 && pacmanBottomY < 874) || 
-        (pacmanBottomX > 440 && pacmanBottomX < 484 && pacmanBottomY > 749 && pacmanBottomY < 874) || (pacmanBottomX > 343 && pacmanBottomX < 581 && pacmanBottomY > 749 && pacmanBottomY < 800) || (pacmanBottomX < 109 && pacmanBottomY > 749 && pacmanBottomY < 800) || (pacmanBottomX > 815 && pacmanBottomY > 749 && pacmanBottomY < 800) || 
-        (pacmanBottomX > 715 && pacmanBottomX < 764 && pacmanBottomY > 662 && pacmanBottomY < 800) || (pacmanBottomX > 160 && pacmanBottomX < 209 && pacmanBottomY > 662 && pacmanBottomY < 800) || (pacmanBottomX > 90 && pacmanBottomX < 209 && pacmanBottomY > 662 && pacmanBottomY < 703) || (pacmanBottomX > 715 && pacmanBottomX < 764 && pacmanBottomY > 662 && pacmanBottomY < 703) || (pacmanBottomX > 715 && pacmanBottomX < 835 && pacmanBottomY > 662 && pacmanBottomY < 703) || 
-        (pacmanBottomX > 530 && pacmanBottomX < 673 && pacmanBottomY > 662 && pacmanBottomY < 703) || (pacmanBottomX > 254 && pacmanBottomX < 394 && pacmanBottomY > 662 && pacmanBottomY < 703) || (pacmanBottomX > 715 && pacmanBottomY > 484 && pacmanBottomY < 613) || (pacmanBottomX < 209 && pacmanBottomY > 484 && pacmanBottomY < 613) || 
-        (pacmanBottomX > 440 && pacmanBottomX < 484 && pacmanBottomY > 572 && pacmanBottomY < 703) || (pacmanBottomX > 343 && pacmanBottomX < 581 && pacmanBottomY > 574 && pacmanBottomY < 613) || (pacmanBottomX > 630 && pacmanBottomX < 669 && pacmanBottomY > 484 && pacmanBottomY < 613) || (pacmanBottomX > 255 && pacmanBottomX < 294 && pacmanBottomY > 484 && pacmanBottomY < 613) || 
-        (pacmanBottomX > 343 && pacmanBottomX < 581 && pacmanBottomY > 508 && pacmanBottomY < 528) || (pacmanBottomX > 343 && pacmanBottomX < 360 && pacmanBottomY > 402 && pacmanBottomY < 528) || (pacmanBottomX > 343 && pacmanBottomX < 581 && pacmanBottomY > 399 && pacmanBottomY < 414) || (pacmanBottomX > 564 && pacmanBottomX < 581 && pacmanBottomY > 402 && pacmanBottomY < 528) ||
-        (pacmanBottomX > 715 && pacmanBottomY > 309 && pacmanBottomY < 438) || (pacmanBottomX < 209 && pacmanBottomY > 309 && pacmanBottomY < 438) || (pacmanBottomX > 255 && pacmanBottomX < 294 && pacmanBottomY > 484 && pacmanBottomY < 613) || (pacmanBottomX > 630 && pacmanBottomX < 669 && pacmanBottomY > 484 && pacmanBottomY < 613) || 
-        (pacmanBottomX > 255 && pacmanBottomX < 294 && pacmanBottomY > 221 && pacmanBottomY < 438) || (pacmanBottomX > 630 && pacmanBottomX < 669 && pacmanBottomY > 221 && pacmanBottomY < 438) || (pacmanBottomX > 255 && pacmanBottomX < 394 && pacmanBottomY > 309 && pacmanBottomY < 348) || (pacmanBottomX > 530 && pacmanBottomX < 669 && pacmanBottomY > 309 && pacmanBottomY < 348) || 
-        (pacmanBottomX > 440 && pacmanBottomX < 484 && pacmanBottomY > 221 && pacmanBottomY < 348) || (pacmanBottomX > 343 && pacmanBottomX < 581 && pacmanBottomY > 221 && pacmanBottomY < 263) || (pacmanBottomX > 90 && pacmanBottomX < 202 && pacmanBottomY > 221 && pacmanBottomY < 263) || (pacmanBottomX > 718 && pacmanBottomX < 834 && pacmanBottomY > 221 && pacmanBottomY < 263) || 
-        (pacmanBottomY > 924)) {
+        if ((pacmanBottomX > 70 && pacmanBottomX < 232 && pacmanBottomY > 70 && pacmanBottomY < 196) || (pacmanBottomX > 232 && pacmanBottomX < 420 && pacmanBottomY < 196 && pacmanBottomY > 70) || (pacmanBottomX > 424 && pacmanBottomX < 508 && pacmanBottomY < 196) || (pacmanBottomX > 512 && pacmanBottomX < 673 && pacmanBottomY < 196 && pacmanBottomY > 70) || (pacmanBottomX > 700 && pacmanBottomX < 856 && pacmanBottomY < 196 && pacmanBottomY > 70) || 
+        (pacmanBottomX > 70 && pacmanBottomX < 420 && pacmanBottomY > 816 && pacmanBottomY < 856) || (pacmanBottomX > 512 && pacmanBottomX < 816 && pacmanBottomY > 816 && pacmanBottomY < 856) || (pacmanBottomX > 236 && pacmanBottomX < 320 && pacmanBottomY > 732 && pacmanBottomY < 856) || (pacmanBottomX > 612 && pacmanBottomX < 696 && pacmanBottomY > 732 && pacmanBottomY < 856) || 
+        (pacmanBottomX > 424 && pacmanBottomX < 508 && pacmanBottomY > 732 && pacmanBottomY < 856) || (pacmanBottomX > 328 && pacmanBottomX < 608 && pacmanBottomY > 732 && pacmanBottomY < 816) || (pacmanBottomX < 109 && pacmanBottomY > 732 && pacmanBottomY < 816) || (pacmanBottomX > 796 && pacmanBottomY > 732 && pacmanBottomY < 816) || 
+        (pacmanBottomX > 700 && pacmanBottomX < 788 && pacmanBottomY > 644 && pacmanBottomY < 816) || (pacmanBottomX > 148 && pacmanBottomX < 232 && pacmanBottomY > 644 && pacmanBottomY < 816) || (pacmanBottomX > 70 && pacmanBottomX < 232 && pacmanBottomY > 644 && pacmanBottomY < 728) || (pacmanBottomX > 700 && pacmanBottomX < 788 && pacmanBottomY > 644 && pacmanBottomY < 728) || (pacmanBottomX > 700 && pacmanBottomX < 835 && pacmanBottomY > 644 && pacmanBottomY < 728) || 
+        (pacmanBottomX > 512 && pacmanBottomX < 673 && pacmanBottomY > 644 && pacmanBottomY < 728) || (pacmanBottomX > 232 && pacmanBottomX < 420 && pacmanBottomY > 644 && pacmanBottomY < 728) || (pacmanBottomX > 700 && pacmanBottomY > 468 && pacmanBottomY < 644) || (pacmanBottomX < 232 && pacmanBottomY > 468 && pacmanBottomY < 644) || 
+        (pacmanBottomX > 424 && pacmanBottomX < 508 && pacmanBottomY > 572 && pacmanBottomY < 728) || (pacmanBottomX > 328 && pacmanBottomX < 608 && pacmanBottomY > 574 && pacmanBottomY < 644) || (pacmanBottomX > 612 && pacmanBottomX < 696 && pacmanBottomY > 468 && pacmanBottomY < 644) || (pacmanBottomX > 236 && pacmanBottomX < 320 && pacmanBottomY > 468 && pacmanBottomY < 644) || 
+        (pacmanBottomX > 328 && pacmanBottomX < 608 && pacmanBottomY > 468 && pacmanBottomY < 552) || (pacmanBottomX > 328 && pacmanBottomX < 360 && pacmanBottomY > 380 && pacmanBottomY < 552) || (pacmanBottomX > 328 && pacmanBottomX < 608 && pacmanBottomY > 428 && pacmanBottomY < 414) || (pacmanBottomX > 564 && pacmanBottomX < 608 && pacmanBottomY > 380 && pacmanBottomY < 552) ||
+        (pacmanBottomX > 700 && pacmanBottomY > 292 && pacmanBottomY < 464) || (pacmanBottomX < 232 && pacmanBottomY > 292 && pacmanBottomY < 464) || (pacmanBottomX > 236 && pacmanBottomX < 320 && pacmanBottomY > 468 && pacmanBottomY < 644) || (pacmanBottomX > 612 && pacmanBottomX < 696 && pacmanBottomY > 468 && pacmanBottomY < 644) || 
+        (pacmanBottomX > 236 && pacmanBottomX < 320 && pacmanBottomY > 204 && pacmanBottomY < 464) || (pacmanBottomX > 612 && pacmanBottomX < 696 && pacmanBottomY > 204 && pacmanBottomY < 464) || (pacmanBottomX > 236 && pacmanBottomX < 420 && pacmanBottomY > 292 && pacmanBottomY < 376) || (pacmanBottomX > 512 && pacmanBottomX < 696 && pacmanBottomY > 292 && pacmanBottomY < 376) || 
+        (pacmanBottomX > 424 && pacmanBottomX < 508 && pacmanBottomY > 204 && pacmanBottomY < 376) || (pacmanBottomX > 328 && pacmanBottomX < 608 && pacmanBottomY > 204 && pacmanBottomY < 284) || (pacmanBottomX > 70 && pacmanBottomX < 232 && pacmanBottomY > 204 && pacmanBottomY < 284) || (pacmanBottomX > 700 && pacmanBottomX < 856 && pacmanBottomY > 204 && pacmanBottomY < 284) || 
+        (pacmanBottomY > 908)) {
             pacmanY -= 0;
         } else {
             if (pacmanDownLoaded) {
@@ -1181,16 +1216,16 @@ function pacmanMove() {
             }
         }
         
-        // if ((inkyBottomX > 90 && inkyBottomX < 202 && inkyBottomY > 89 && inkyBottomY < 173) || (inkyBottomX > 254 && inkyBottomX < 394 && inkyBottomY < 173 && inkyBottomY > 89) || (inkyBottomX > 440 && inkyBottomX < 484 && inkyBottomY < 173) || (inkyBottomX > 530 && inkyBottomX < 673 && inkyBottomY < 173 && inkyBottomY > 89) || (inkyBottomX > 718 && inkyBottomX < 834 && inkyBottomY < 173 && inkyBottomY > 89) || 
-        // (inkyBottomX > 90 && inkyBottomX < 394 && inkyBottomY > 839 && inkyBottomY < 874) || (inkyBottomX > 530 && inkyBottomX < 834 && inkyBottomY > 839 && inkyBottomY < 874) || (inkyBottomX > 255 && inkyBottomX < 294 && inkyBottomY > 749 && inkyBottomY < 874) || (inkyBottomX > 630 && inkyBottomX < 669 && inkyBottomY > 749 && inkyBottomY < 874) || 
-        // (inkyBottomX > 440 && inkyBottomX < 484 && inkyBottomY > 749 && inkyBottomY < 874) || (inkyBottomX > 343 && inkyBottomX < 581 && inkyBottomY > 749 && inkyBottomY < 800) || (inkyBottomX < 109 && inkyBottomY > 749 && inkyBottomY < 800) || (inkyBottomX > 815 && inkyBottomY > 749 && inkyBottomY < 800) || 
-        // (inkyBottomX > 715 && inkyBottomX < 764 && inkyBottomY > 662 && inkyBottomY < 800) || (inkyBottomX > 160 && inkyBottomX < 209 && inkyBottomY > 662 && inkyBottomY < 800) || (inkyBottomX > 90 && inkyBottomX < 209 && inkyBottomY > 662 && inkyBottomY < 703) || (inkyBottomX > 715 && inkyBottomX < 764 && inkyBottomY > 662 && inkyBottomY < 703) || (inkyBottomX > 715 && inkyBottomX < 835 && inkyBottomY > 662 && inkyBottomY < 703) || 
-        // (inkyBottomX > 530 && inkyBottomX < 673 && inkyBottomY > 662 && inkyBottomY < 703) || (inkyBottomX > 254 && inkyBottomX < 394 && inkyBottomY > 662 && inkyBottomY < 703) || (inkyBottomX > 715 && inkyBottomY > 484 && inkyBottomY < 613) || (inkyBottomX < 209 && inkyBottomY > 484 && inkyBottomY < 613) || 
-        // (inkyBottomX > 440 && inkyBottomX < 484 && inkyBottomY > 572 && inkyBottomY < 703) || (inkyBottomX > 343 && inkyBottomX < 581 && inkyBottomY > 574 && inkyBottomY < 613) || (inkyBottomX > 630 && inkyBottomX < 669 && inkyBottomY > 484 && inkyBottomY < 613) || (inkyBottomX > 255 && inkyBottomX < 294 && inkyBottomY > 484 && inkyBottomY < 613) || 
-        // (inkyBottomX > 343 && inkyBottomX < 581 && inkyBottomY > 508 && inkyBottomY < 528) || (inkyBottomX > 343 && inkyBottomX < 360 && inkyBottomY > 402 && inkyBottomY < 528) || (inkyBottomX > 343 && inkyBottomX < 581 && inkyBottomY > 399 && inkyBottomY < 414) || (inkyBottomX > 564 && inkyBottomX < 581 && inkyBottomY > 402 && inkyBottomY < 528) ||
-        // (inkyBottomX > 715 && inkyBottomY > 309 && inkyBottomY < 438) || (inkyBottomX < 209 && inkyBottomY > 309 && inkyBottomY < 438) || (inkyBottomX > 255 && inkyBottomX < 294 && inkyBottomY > 484 && inkyBottomY < 613) || (inkyBottomX > 630 && inkyBottomX < 669 && inkyBottomY > 484 && inkyBottomY < 613) || 
-        // (inkyBottomX > 255 && inkyBottomX < 294 && inkyBottomY > 221 && inkyBottomY < 438) || (inkyBottomX > 630 && inkyBottomX < 669 && inkyBottomY > 221 && inkyBottomY < 438) || (inkyBottomX > 255 && inkyBottomX < 394 && inkyBottomY > 309 && inkyBottomY < 348) || (inkyBottomX > 530 && inkyBottomX < 669 && inkyBottomY > 309 && inkyBottomY < 348) || 
-        // (inkyBottomX > 440 && inkyBottomX < 484 && inkyBottomY > 221 && inkyBottomY < 348) || (inkyBottomX > 343 && inkyBottomX < 581 && inkyBottomY > 221 && inkyBottomY < 263) || (inkyBottomX > 90 && inkyBottomX < 202 && inkyBottomY > 221 && inkyBottomY < 263) || (inkyBottomX > 718 && inkyBottomX < 834 && inkyBottomY > 221 && inkyBottomY < 263) || 
+        // if ((inkyBottomX > 90 && inkyBottomX < 232 && inkyBottomY > 70 && inkyBottomY < 196) || (inkyBottomX > 232 && inkyBottomX < 420 && inkyBottomY < 196 && inkyBottomY > 70) || (inkyBottomX > 424 && inkyBottomX < 468 && inkyBottomY < 173) || (inkyBottomX > 512 && inkyBottomX < 673 && inkyBottomY < 173 && inkyBottomY > 70) || (inkyBottomX > 700 && inkyBottomX < 856 && inkyBottomY < 173 && inkyBottomY > 70) || 
+        // (inkyBottomX > 90 && inkyBottomX < 420 && inkyBottomY > 856 && inkyBottomY < 856) || (inkyBottomX > 512 && inkyBottomX < 834 && inkyBottomY > 856 && inkyBottomY < 874) || (inkyBottomX > 236 && inkyBottomX < 320 && inkyBottomY > 732 && inkyBottomY < 874) || (inkyBottomX > 612 && inkyBottomX < 696 && inkyBottomY > 749 && inkyBottomY < 874) || 
+        // (inkyBottomX > 424 && inkyBottomX < 484 && inkyBottomY > 749 && inkyBottomY < 874) || (inkyBottomX > 328 && inkyBottomX < 608 && inkyBottomY > 749 && inkyBottomY < 816) || (inkyBottomX < 109 && inkyBottomY > 749 && inkyBottomY < 816) || (inkyBottomX > 796 && inkyBottomY > 749 && inkyBottomY < 816) || 
+        // (inkyBottomX > 700 && inkyBottomX < 788 && inkyBottomY > 644 && inkyBottomY < 816) || (inkyBottomX > 148 && inkyBottomX < 232 && inkyBottomY > 644 && inkyBottomY < 816) || (inkyBottomX > 90 && inkyBottomX < 232 && inkyBottomY > 644 && inkyBottomY < 728) || (inkyBottomX > 715 && inkyBottomX < 788 && inkyBottomY > 644 && inkyBottomY < 728) || (inkyBottomX > 715 && inkyBottomX < 835 && inkyBottomY > 644 && inkyBottomY < 728) || 
+        // (inkyBottomX > 504 && inkyBottomX < 673 && inkyBottomY > 644 && inkyBottomY < 728) || (inkyBottomX > 232 && inkyBottomX < 420 && inkyBottomY > 644 && inkyBottomY < 728) || (inkyBottomX > 715 && inkyBottomY > 484 && inkyBottomY < 644) || (inkyBottomX < 232 && inkyBottomY > 484 && inkyBottomY < 644) || 
+        // (inkyBottomX > 424 && inkyBottomX < 484 && inkyBottomY > 572 && inkyBottomY < 728) || (inkyBottomX > 328 && inkyBottomX < 608 && inkyBottomY > 574 && inkyBottomY < 644) || (inkyBottomX > 612 && inkyBottomX < 696 && inkyBottomY > 484 && inkyBottomY < 644) || (inkyBottomX > 236 && inkyBottomX < 320 && inkyBottomY > 484 && inkyBottomY < 644) || 
+        // (inkyBottomX > 328 && inkyBottomX < 608 && inkyBottomY > 468 && inkyBottomY < 552) || (inkyBottomX > 328 && inkyBottomX < 360 && inkyBottomY > 380 && inkyBottomY < 552) || (inkyBottomX > 328 && inkyBottomX < 608 && inkyBottomY > 428 && inkyBottomY < 414) || (inkyBottomX > 564 && inkyBottomX < 608 && inkyBottomY > 402 && inkyBottomY < 552) ||
+        // (inkyBottomX > 715 && inkyBottomY > 292 && inkyBottomY < 464) || (inkyBottomX < 232 && inkyBottomY > 292 && inkyBottomY < 464) || (inkyBottomX > 236 && inkyBottomX < 320 && inkyBottomY > 484 && inkyBottomY < 644) || (inkyBottomX > 612 && inkyBottomX < 696 && inkyBottomY > 484 && inkyBottomY < 644) || 
+        // (inkyBottomX > 236 && inkyBottomX < 320 && inkyBottomY > 204 && inkyBottomY < 464) || (inkyBottomX > 612 && inkyBottomX < 648 && inkyBottomY > 204 && inkyBottomY < 464) || (inkyBottomX > 255 && inkyBottomX < 420 && inkyBottomY > 292 && inkyBottomY < 376) || (inkyBottomX > 504 && inkyBottomX < 648 && inkyBottomY > 292 && inkyBottomY < 376) || 
+        // (inkyBottomX > 424 && inkyBottomX < 484 && inkyBottomY > 204 && inkyBottomY < 376) || (inkyBottomX > 328 && inkyBottomX < 608 && inkyBottomY > 204 && inkyBottomY < 284) || (inkyBottomX > 90 && inkyBottomX < 232 && inkyBottomY > 221 && inkyBottomY < 284) || (inkyBottomX > 700 && inkyBottomX < 834 && inkyBottomY > 221 && inkyBottomY < 284) || 
         // (inkyBottomY > 924)) {
         //     inkyY -= 0;
         // } else {
@@ -1218,16 +1253,16 @@ function pacmanMove() {
         //         inkyDownFirstLoaded = true;
         //     }
         // } 
-        // if ((clydeBottomX > 90 && clydeBottomX < 202 && clydeBottomY > 89 && clydeBottomY < 173) || (clydeBottomX > 254 && clydeBottomX < 394 && clydeBottomY < 173 && clydeBottomY > 89) || (clydeBottomX > 440 && clydeBottomX < 484 && clydeBottomY < 173) || (clydeBottomX > 530 && clydeBottomX < 673 && clydeBottomY < 173 && clydeBottomY > 89) || (clydeBottomX > 718 && clydeBottomX < 834 && clydeBottomY < 173 && clydeBottomY > 89) || 
-        // (clydeBottomX > 90 && clydeBottomX < 394 && clydeBottomY > 839 && clydeBottomY < 874) || (clydeBottomX > 530 && clydeBottomX < 834 && clydeBottomY > 839 && clydeBottomY < 874) || (clydeBottomX > 255 && clydeBottomX < 294 && clydeBottomY > 749 && clydeBottomY < 874) || (clydeBottomX > 630 && clydeBottomX < 669 && clydeBottomY > 749 && clydeBottomY < 874) || 
-        // (clydeBottomX > 440 && clydeBottomX < 484 && clydeBottomY > 749 && clydeBottomY < 874) || (clydeBottomX > 343 && clydeBottomX < 581 && clydeBottomY > 749 && clydeBottomY < 800) || (clydeBottomX < 109 && clydeBottomY > 749 && clydeBottomY < 800) || (clydeBottomX > 815 && clydeBottomY > 749 && clydeBottomY < 800) || 
-        // (clydeBottomX > 715 && clydeBottomX < 764 && clydeBottomY > 662 && clydeBottomY < 800) || (clydeBottomX > 160 && clydeBottomX < 209 && clydeBottomY > 662 && clydeBottomY < 800) || (clydeBottomX > 90 && clydeBottomX < 209 && clydeBottomY > 662 && clydeBottomY < 703) || (clydeBottomX > 715 && clydeBottomX < 764 && clydeBottomY > 662 && clydeBottomY < 703) || (clydeBottomX > 715 && clydeBottomX < 835 && clydeBottomY > 662 && clydeBottomY < 703) || 
-        // (clydeBottomX > 530 && clydeBottomX < 673 && clydeBottomY > 662 && clydeBottomY < 703) || (clydeBottomX > 254 && clydeBottomX < 394 && clydeBottomY > 662 && clydeBottomY < 703) || (clydeBottomX > 715 && clydeBottomY > 484 && clydeBottomY < 613) || (clydeBottomX < 209 && clydeBottomY > 484 && clydeBottomY < 613) || 
-        // (clydeBottomX > 440 && clydeBottomX < 484 && clydeBottomY > 572 && clydeBottomY < 703) || (clydeBottomX > 343 && clydeBottomX < 581 && clydeBottomY > 574 && clydeBottomY < 613) || (clydeBottomX > 630 && clydeBottomX < 669 && clydeBottomY > 484 && clydeBottomY < 613) || (clydeBottomX > 255 && clydeBottomX < 294 && clydeBottomY > 484 && clydeBottomY < 613) || 
-        // (clydeBottomX > 343 && clydeBottomX < 581 && clydeBottomY > 508 && clydeBottomY < 528) || (clydeBottomX > 343 && clydeBottomX < 360 && clydeBottomY > 402 && clydeBottomY < 528) || (clydeBottomX > 343 && clydeBottomX < 581 && clydeBottomY > 399 && clydeBottomY < 414) || (clydeBottomX > 564 && clydeBottomX < 581 && clydeBottomY > 402 && clydeBottomY < 528) ||
-        // (clydeBottomX > 715 && clydeBottomY > 309 && clydeBottomY < 438) || (clydeBottomX < 209 && clydeBottomY > 309 && clydeBottomY < 438) || (clydeBottomX > 255 && clydeBottomX < 294 && clydeBottomY > 484 && clydeBottomY < 613) || (clydeBottomX > 630 && clydeBottomX < 669 && clydeBottomY > 484 && clydeBottomY < 613) || 
-        // (clydeBottomX > 255 && clydeBottomX < 294 && clydeBottomY > 221 && clydeBottomY < 438) || (clydeBottomX > 630 && clydeBottomX < 669 && clydeBottomY > 221 && clydeBottomY < 438) || (clydeBottomX > 255 && clydeBottomX < 394 && clydeBottomY > 309 && clydeBottomY < 348) || (clydeBottomX > 530 && clydeBottomX < 669 && clydeBottomY > 309 && clydeBottomY < 348) || 
-        // (clydeBottomX > 440 && clydeBottomX < 484 && clydeBottomY > 221 && clydeBottomY < 348) || (clydeBottomX > 343 && clydeBottomX < 581 && clydeBottomY > 221 && clydeBottomY < 263) || (clydeBottomX > 90 && clydeBottomX < 202 && clydeBottomY > 221 && clydeBottomY < 263) || (clydeBottomX > 718 && clydeBottomX < 834 && clydeBottomY > 221 && clydeBottomY < 263) || 
+        // if ((clydeBottomX > 90 && clydeBottomX < 232 && clydeBottomY > 70 && clydeBottomY < 173) || (clydeBottomX > 232 && clydeBottomX < 420 && clydeBottomY < 173 && clydeBottomY > 70) || (clydeBottomX > 424 && clydeBottomX < 484 && clydeBottomY < 173) || (clydeBottomX > 504 && clydeBottomX < 673 && clydeBottomY < 173 && clydeBottomY > 70) || (clydeBottomX > 700 && clydeBottomX < 834 && clydeBottomY < 173 && clydeBottomY > 70) || 
+        // (clydeBottomX > 90 && clydeBottomX < 420 && clydeBottomY > 856 && clydeBottomY < 874) || (clydeBottomX > 504 && clydeBottomX < 834 && clydeBottomY > 839 && clydeBottomY < 874) || (clydeBottomX > 255 && clydeBottomX < 320 && clydeBottomY > 749 && clydeBottomY < 874) || (clydeBottomX > 612 && clydeBottomX < 648 && clydeBottomY > 749 && clydeBottomY < 874) || 
+        // (clydeBottomX > 424 && clydeBottomX < 484 && clydeBottomY > 749 && clydeBottomY < 874) || (clydeBottomX > 328 && clydeBottomX < 608 && clydeBottomY > 749 && clydeBottomY < 816) || (clydeBottomX < 109 && clydeBottomY > 749 && clydeBottomY < 816) || (clydeBottomX > 796 && clydeBottomY > 749 && clydeBottomY < 816) || 
+        // (clydeBottomX > 715 && clydeBottomX < 788 && clydeBottomY > 640 && clydeBottomY < 816) || (clydeBottomX > 148 && clydeBottomX < 232 && clydeBottomY > 640 && clydeBottomY < 816) || (clydeBottomX > 90 && clydeBottomX < 232 && clydeBottomY > 640 && clydeBottomY < 728) || (clydeBottomX > 715 && clydeBottomX < 788 && clydeBottomY > 640 && clydeBottomY < 728) || (clydeBottomX > 715 && clydeBottomX < 835 && clydeBottomY > 640 && clydeBottomY < 728) || 
+        // (clydeBottomX > 504 && clydeBottomX < 673 && clydeBottomY > 640 && clydeBottomY < 728) || (clydeBottomX > 232 && clydeBottomX < 420 && clydeBottomY > 640 && clydeBottomY < 728) || (clydeBottomX > 715 && clydeBottomY > 484 && clydeBottomY < 613) || (clydeBottomX < 232 && clydeBottomY > 484 && clydeBottomY < 613) || 
+        // (clydeBottomX > 424 && clydeBottomX < 484 && clydeBottomY > 572 && clydeBottomY < 728) || (clydeBottomX > 328 && clydeBottomX < 608 && clydeBottomY > 574 && clydeBottomY < 613) || (clydeBottomX > 612 && clydeBottomX < 648 && clydeBottomY > 484 && clydeBottomY < 613) || (clydeBottomX > 255 && clydeBottomX < 320 && clydeBottomY > 484 && clydeBottomY < 613) || 
+        // (clydeBottomX > 328 && clydeBottomX < 608 && clydeBottomY > 468 && clydeBottomY < 552) || (clydeBottomX > 328 && clydeBottomX < 360 && clydeBottomY > 402 && clydeBottomY < 552) || (clydeBottomX > 328 && clydeBottomX < 608 && clydeBottomY > 428 && clydeBottomY < 414) || (clydeBottomX > 564 && clydeBottomX < 581 && clydeBottomY > 402 && clydeBottomY < 528) ||
+        // (clydeBottomX > 715 && clydeBottomY > 292 && clydeBottomY < 438) || (clydeBottomX < 232 && clydeBottomY > 292 && clydeBottomY < 438) || (clydeBottomX > 255 && clydeBottomX < 320 && clydeBottomY > 484 && clydeBottomY < 613) || (clydeBottomX > 612 && clydeBottomX < 648 && clydeBottomY > 484 && clydeBottomY < 613) || 
+        // (clydeBottomX > 255 && clydeBottomX < 320 && clydeBottomY > 221 && clydeBottomY < 438) || (clydeBottomX > 630 && clydeBottomX < 648 && clydeBottomY > 221 && clydeBottomY < 438) || (clydeBottomX > 255 && clydeBottomX < 420 && clydeBottomY > 309 && clydeBottomY < 348) || (clydeBottomX > 530 && clydeBottomX < 648 && clydeBottomY > 309 && clydeBottomY < 348) || 
+        // (clydeBottomX > 424 && clydeBottomX < 484 && clydeBottomY > 221 && clydeBottomY < 348) || (clydeBottomX > 328 && clydeBottomX < 581 && clydeBottomY > 221 && clydeBottomY < 284) || (clydeBottomX > 90 && clydeBottomX < 232 && clydeBottomY > 221 && clydeBottomY < 284) || (clydeBottomX > 700 && clydeBottomX < 834 && clydeBottomY > 221 && clydeBottomY < 284) || 
         // (clydeBottomY > 924)) {
         //     clydeY -= 0;
         // } else {
@@ -1257,17 +1292,16 @@ function pacmanMove() {
         // } 
     }
     if (blinkyHeldLeft) {
-        debugger;
-        if (((blinkyLeftX > 90 && blinkyLeftX < 202 && blinkyLeftY > 89 && blinkyLeftY < 173) || (blinkyLeftX > 254 && blinkyLeftX < 394 && blinkyLeftY < 173 && blinkyLeftY > 89) || (blinkyLeftX > 440 && blinkyLeftX < 484 && blinkyLeftY < 173) || (blinkyLeftX > 530 && blinkyLeftX < 673 && blinkyLeftY < 173 && blinkyLeftY > 89) || (blinkyLeftX > 718 && blinkyLeftX < 834 && blinkyLeftY < 173 && blinkyLeftY > 89) || 
-        (blinkyLeftX > 90 && blinkyLeftX < 394 && blinkyLeftY > 839 && blinkyLeftY < 874) || (blinkyLeftX > 530 && blinkyLeftX < 834 && blinkyLeftY > 839 && blinkyLeftY < 874) || (blinkyLeftX > 255 && blinkyLeftX < 300 && blinkyLeftY > 749 && blinkyLeftY < 874) || (blinkyLeftX > 630 && blinkyLeftX < 669 && blinkyLeftY > 749 && blinkyLeftY < 874) || 
-        (blinkyLeftX > 440 && blinkyLeftX < 484 && blinkyLeftY > 749 && blinkyLeftY < 874) || (blinkyLeftX > 343 && blinkyLeftX < 581 && blinkyLeftY > 749 && blinkyLeftY < 800) || (blinkyLeftX < 109 && blinkyLeftY > 749 && blinkyLeftY < 800) || (blinkyLeftX > 815 && blinkyLeftY > 749 && blinkyLeftY < 800) || 
-        (blinkyLeftX > 715 && blinkyLeftX < 764 && blinkyLeftY > 662 && blinkyLeftY < 800) || (blinkyLeftX > 160 && blinkyLeftX < 209 && blinkyLeftY > 662 && blinkyLeftY < 800) || (blinkyLeftX > 90 && blinkyLeftX < 209 && blinkyLeftY > 662 && blinkyLeftY < 703) || (blinkyLeftX > 715 && blinkyLeftX < 764 && blinkyLeftY > 662 && blinkyLeftY < 703) || (blinkyLeftX > 715 && blinkyLeftX < 835 && blinkyLeftY > 662 && blinkyLeftY < 703) || 
-        (blinkyLeftX > 530 && blinkyLeftX < 673 && blinkyLeftY > 662 && blinkyLeftY < 703) || (blinkyLeftX > 254 && blinkyLeftX < 394 && blinkyLeftY > 662 && blinkyLeftY < 703) || (blinkyLeftX > 715 && blinkyLeftY > 484 && blinkyLeftY < 613) || (blinkyLeftX < 209 && blinkyLeftY > 484 && blinkyLeftY < 613) || (blinkyLeftX > 630 && blinkyLeftX < 669 && blinkyLeftY > 484 && blinkyLeftY < 613) || (blinkyLeftX > 255 && blinkyLeftX < 300 && blinkyLeftY > 484 && blinkyLeftY < 613) || 
-        (blinkyLeftX > 440 && blinkyLeftX < 484 && blinkyLeftY > 572 && blinkyLeftY < 703) || (blinkyLeftX > 343 && blinkyLeftX < 581 && blinkyLeftY > 574 && blinkyLeftY < 613) || (blinkyLeftX > 630 && blinkyLeftX < 669 && blinkyLeftY > 484 && blinkyLeftY < 613) || 
-        (blinkyLeftX > 343 && blinkyLeftX < 581 && blinkyLeftY > 508 && blinkyLeftY < 528) || (blinkyLeftX > 343 && blinkyLeftX < 360 && blinkyLeftY > 402 && blinkyLeftY < 528) || (blinkyLeftX > 343 && blinkyLeftX < 581 && blinkyLeftY > 399 && blinkyLeftY < 414) || (blinkyLeftX > 564 && blinkyLeftX < 581 && blinkyLeftY > 402 && blinkyLeftY < 528) ||
+        if (((blinkyLeftX > 90 && blinkyLeftX < 202 && blinkyLeftY > 70 && blinkyLeftY < 173) || (blinkyLeftX > 232 && blinkyLeftX < 420 && blinkyLeftY < 173 && blinkyLeftY > 89) || (blinkyLeftX > 424 && blinkyLeftX < 484 && blinkyLeftY < 173) || (blinkyLeftX > 530 && blinkyLeftX < 673 && blinkyLeftY < 173 && blinkyLeftY > 89) || (blinkyLeftX > 700 && blinkyLeftX < 834 && blinkyLeftY < 173 && blinkyLeftY > 89) || 
+        (blinkyLeftX > 90 && blinkyLeftX < 420 && blinkyLeftY > 839 && blinkyLeftY < 874) || (blinkyLeftX > 530 && blinkyLeftX < 834 && blinkyLeftY > 839 && blinkyLeftY < 874) || (blinkyLeftX > 255 && blinkyLeftX < 300 && blinkyLeftY > 749 && blinkyLeftY < 874) || (blinkyLeftX > 630 && blinkyLeftX < 648 && blinkyLeftY > 749 && blinkyLeftY < 874) || 
+        (blinkyLeftX > 424 && blinkyLeftX < 484 && blinkyLeftY > 749 && blinkyLeftY < 874) || (blinkyLeftX > 343 && blinkyLeftX < 581 && blinkyLeftY > 749 && blinkyLeftY < 816) || (blinkyLeftX < 109 && blinkyLeftY > 749 && blinkyLeftY < 800) || (blinkyLeftX > 796 && blinkyLeftY > 749 && blinkyLeftY < 800) || 
+        (blinkyLeftX > 715 && blinkyLeftX < 788 && blinkyLeftY > 640 && blinkyLeftY < 800) || (blinkyLeftX > 148 && blinkyLeftX < 209 && blinkyLeftY > 662 && blinkyLeftY < 800) || (blinkyLeftX > 90 && blinkyLeftX < 209 && blinkyLeftY > 662 && blinkyLeftY < 703) || (blinkyLeftX > 715 && blinkyLeftX < 764 && blinkyLeftY > 662 && blinkyLeftY < 703) || (blinkyLeftX > 715 && blinkyLeftX < 835 && blinkyLeftY > 662 && blinkyLeftY < 703) || 
+        (blinkyLeftX > 530 && blinkyLeftX < 673 && blinkyLeftY > 662 && blinkyLeftY < 703) || (blinkyLeftX > 232 && blinkyLeftX < 420 && blinkyLeftY > 662 && blinkyLeftY < 703) || (blinkyLeftX > 715 && blinkyLeftY > 484 && blinkyLeftY < 613) || (blinkyLeftX < 209 && blinkyLeftY > 484 && blinkyLeftY < 613) || (blinkyLeftX > 630 && blinkyLeftX < 669 && blinkyLeftY > 484 && blinkyLeftY < 613) || (blinkyLeftX > 255 && blinkyLeftX < 300 && blinkyLeftY > 484 && blinkyLeftY < 613) || 
+        (blinkyLeftX > 440 && blinkyLeftX < 484 && blinkyLeftY > 576 && blinkyLeftY < 703) || (blinkyLeftX > 343 && blinkyLeftX < 581 && blinkyLeftY > 574 && blinkyLeftY < 613) || (blinkyLeftX > 630 && blinkyLeftX < 669 && blinkyLeftY > 484 && blinkyLeftY < 613) || 
+        (blinkyLeftX > 343 && blinkyLeftX < 581 && blinkyLeftY > 468 && blinkyLeftY < 528) || (blinkyLeftX > 343 && blinkyLeftX < 360 && blinkyLeftY > 402 && blinkyLeftY < 528) || (blinkyLeftX > 343 && blinkyLeftX < 581 && blinkyLeftY > 399 && blinkyLeftY < 414) || (blinkyLeftX > 564 && blinkyLeftX < 581 && blinkyLeftY > 402 && blinkyLeftY < 528) ||
         (blinkyLeftX > 715 && blinkyLeftY > 309 && blinkyLeftY < 438) || (blinkyLeftX < 209 && blinkyLeftY > 309 && blinkyLeftY < 438) || (blinkyLeftX > 255 && blinkyLeftX < 300 && blinkyLeftY > 484 && blinkyLeftY < 613) || (blinkyLeftX > 630 && blinkyLeftX < 669 && blinkyLeftY > 484 && blinkyLeftY < 613) || 
-        (blinkyLeftX > 255 && blinkyLeftX < 300 && blinkyLeftY > 221 && blinkyLeftY < 438) || (blinkyLeftX > 630 && blinkyLeftX < 669 && blinkyLeftY > 221 && blinkyLeftY < 438) || (blinkyLeftX > 255 && blinkyLeftX < 394 && blinkyLeftY > 309 && blinkyLeftY < 348) || (blinkyLeftX > 530 && blinkyLeftX < 669 && blinkyLeftY > 309 && blinkyLeftY < 348) || 
-        (blinkyLeftX > 440 && blinkyLeftX < 484 && blinkyLeftY > 221 && blinkyLeftY < 348) || (blinkyLeftX > 343 && blinkyLeftX < 581 && blinkyLeftY > 221 && blinkyLeftY < 263) || (blinkyLeftX > 90 && blinkyLeftX < 202 && blinkyLeftY > 221 && blinkyLeftY < 263) || (blinkyLeftX > 718 && blinkyLeftX < 834 && blinkyLeftY > 221 && blinkyLeftY < 263) || 
+        (blinkyLeftX > 255 && blinkyLeftX < 300 && blinkyLeftY > 221 && blinkyLeftY < 438) || (blinkyLeftX > 630 && blinkyLeftX < 669 && blinkyLeftY > 221 && blinkyLeftY < 438) || (blinkyLeftX > 255 && blinkyLeftX < 420 && blinkyLeftY > 309 && blinkyLeftY < 348) || (blinkyLeftX > 530 && blinkyLeftX < 669 && blinkyLeftY > 309 && blinkyLeftY < 348) || 
+        (blinkyLeftX > 440 && blinkyLeftX < 484 && blinkyLeftY > 221 && blinkyLeftY < 348) || (blinkyLeftX > 343 && blinkyLeftX < 581 && blinkyLeftY > 221 && blinkyLeftY < 284) || (blinkyLeftX > 90 && blinkyLeftX < 202 && blinkyLeftY > 221 && blinkyLeftY < 284) || (blinkyLeftX > 718 && blinkyLeftX < 834 && blinkyLeftY > 221 && blinkyLeftY < 284) || 
         (blinkyLeftX < 44)) != true) {
             if (blinkyLeftFirstLoaded) {
                 blinkyLeftFirstLoaded = false;
@@ -1295,7 +1329,6 @@ function pacmanMove() {
             for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
                 for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
                     if ((blinkyLeftX <= possibleMovesPosition[i + 12][j][0] && blinkyRightX >= possibleMovesPosition[i + 12][j][0]) && (blinkyTopY <= possibleMovesPosition[i + 12][j][1] && blinkyBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentBlinkyGhostPosition != possibleMovesPosition[i + 12][j])) {
-                        debugger;
                         currentBlinkyGhostPosition = possibleMovesPosition[i + 12][j];
                         console.log(possibleMoves[i + 12]);
                         let changedPositionX = possibleMovesPosition[i + 12][j][0] - blinkyX;
@@ -1346,17 +1379,16 @@ function pacmanMove() {
             }
         }
     } else if (blinkyHeldRight) {
-        console.log('right');
-        if (((blinkyRightX > 90 && blinkyRightX < 202 && blinkyRightY > 89 && blinkyRightY < 173) || (blinkyRightX > 254 && blinkyRightX < 394 && blinkyRightY < 173 && blinkyRightY > 89) || (blinkyRightX > 440 && blinkyRightX < 484 && blinkyRightY < 173) || (blinkyRightX > 530 && blinkyRightX < 673 && blinkyRightY < 173 && blinkyRightY > 89) || (blinkyRightX > 718 && blinkyRightX < 834 && blinkyRightY < 173 && blinkyRightY > 89) ||
-        (blinkyRightX > 90 && blinkyRightX < 394 && blinkyRightY > 839 && blinkyRightY < 874) || (blinkyRightX > 530 && blinkyRightX < 834 && blinkyRightY > 839 && blinkyRightY < 874) || (blinkyRightX > 255 && blinkyRightX < 300 && blinkyRightY > 749 && blinkyRightY < 874) || (blinkyRightX > 630 && blinkyRightX < 669 && blinkyRightY > 749 && blinkyRightY < 874) || 
-        (blinkyRightX > 440 && blinkyRightX < 484 && blinkyRightY > 749 && blinkyRightY < 874) || (blinkyRightX > 343 && blinkyRightX < 581 && blinkyRightY > 749 && blinkyRightY < 800) || (blinkyRightX < 109 && blinkyRightY > 749 && blinkyRightY < 800) || (blinkyRightX > 815 && blinkyRightY > 749 && blinkyRightY < 800) || 
+        if (((blinkyRightX > 90 && blinkyRightX < 202 && blinkyRightY > 89 && blinkyRightY < 173) || (blinkyRightX > 232 && blinkyRightX < 420 && blinkyRightY < 173 && blinkyRightY > 89) || (blinkyRightX > 440 && blinkyRightX < 484 && blinkyRightY < 173) || (blinkyRightX > 530 && blinkyRightX < 673 && blinkyRightY < 173 && blinkyRightY > 89) || (blinkyRightX > 718 && blinkyRightX < 834 && blinkyRightY < 173 && blinkyRightY > 89) ||
+        (blinkyRightX > 90 && blinkyRightX < 420 && blinkyRightY > 839 && blinkyRightY < 874) || (blinkyRightX > 530 && blinkyRightX < 834 && blinkyRightY > 839 && blinkyRightY < 874) || (blinkyRightX > 255 && blinkyRightX < 300 && blinkyRightY > 749 && blinkyRightY < 874) || (blinkyRightX > 630 && blinkyRightX < 669 && blinkyRightY > 749 && blinkyRightY < 874) || 
+        (blinkyRightX > 440 && blinkyRightX < 484 && blinkyRightY > 749 && blinkyRightY < 874) || (blinkyRightX > 343 && blinkyRightX < 581 && blinkyRightY > 749 && blinkyRightY < 800) || (blinkyRightX < 109 && blinkyRightY > 749 && blinkyRightY < 800) || (blinkyRightX > 796 && blinkyRightY > 749 && blinkyRightY < 800) || 
         (blinkyRightX > 715 && blinkyRightX < 764 && blinkyRightY > 662 && blinkyRightY < 800) || (blinkyRightX > 160 && blinkyRightX < 209 && blinkyRightY > 662 && blinkyRightY < 800) || (blinkyRightX > 90 && blinkyRightX < 209 && blinkyRightY > 662 && blinkyRightY < 703) || (blinkyRightX > 715 && blinkyRightX < 764 && blinkyRightY > 662 && blinkyRightY < 703) || (blinkyRightX > 715 && blinkyRightX < 835 && blinkyRightY > 662 && blinkyRightY < 703) || 
-        (blinkyRightX > 530 && blinkyRightX < 673 && blinkyRightY > 662 && blinkyRightY < 703) || (blinkyRightX > 254 && blinkyRightX < 394 && blinkyRightY > 662 && blinkyRightY < 703) || (blinkyRightX > 715 && blinkyRightY > 484 && blinkyRightY < 613) || (blinkyRightX < 209 && blinkyRightY > 484 && blinkyRightY < 613) || 
+        (blinkyRightX > 530 && blinkyRightX < 673 && blinkyRightY > 662 && blinkyRightY < 703) || (blinkyRightX > 232 && blinkyRightX < 420 && blinkyRightY > 662 && blinkyRightY < 703) || (blinkyRightX > 715 && blinkyRightY > 484 && blinkyRightY < 613) || (blinkyRightX < 209 && blinkyRightY > 484 && blinkyRightY < 613) || 
         (blinkyRightX > 440 && blinkyRightX < 484 && blinkyRightY > 572 && blinkyRightY < 703) || (blinkyRightX > 343 && blinkyRightX < 581 && blinkyRightY > 574 && blinkyRightY < 613) || (blinkyRightX > 630 && blinkyRightX < 669 && blinkyRightY > 484 && blinkyRightY < 613) || (blinkyRightX > 630 && blinkyRightX < 669 && blinkyRightY > 484 && blinkyRightY < 613) || (blinkyRightX > 255 && blinkyRightX < 300 && blinkyRightY > 484 && blinkyRightY < 613) || 
-        (blinkyRightX > 343 && blinkyRightX < 581 && blinkyRightY > 508 && blinkyRightY < 528) || (blinkyRightX > 343 && blinkyRightX < 360 && blinkyRightY > 402 && blinkyRightY < 528) || (blinkyRightX > 343 && blinkyRightX < 581 && blinkyRightY > 399 && blinkyRightY < 414) || (blinkyRightX > 564 && blinkyRightX < 581 && blinkyRightY > 402 && blinkyRightY < 528) ||
+        (blinkyRightX > 343 && blinkyRightX < 581 && blinkyRightY > 468 && blinkyRightY < 528) || (blinkyRightX > 343 && blinkyRightX < 360 && blinkyRightY > 402 && blinkyRightY < 528) || (blinkyRightX > 343 && blinkyRightX < 581 && blinkyRightY > 399 && blinkyRightY < 414) || (blinkyRightX > 564 && blinkyRightX < 581 && blinkyRightY > 402 && blinkyRightY < 528) ||
         (blinkyRightX > 715 && blinkyRightY > 309 && blinkyRightY < 438) || (blinkyRightX < 209 && blinkyRightY > 309 && blinkyRightY < 438) || (blinkyRightX > 255 && blinkyRightX < 300 && blinkyRightY > 484 && blinkyRightY < 613) || (blinkyRightX > 630 && blinkyRightX < 669 && blinkyRightY > 484 && blinkyRightY < 613) || 
-        (blinkyRightX > 255 && blinkyRightX < 294 && blinkyRightY > 221 && blinkyRightY < 438) || (blinkyRightX > 630 && blinkyRightX < 669 && blinkyRightY > 221 && blinkyRightY < 438) || (blinkyRightX > 255 && blinkyRightX < 394 && blinkyRightY > 309 && blinkyRightY < 348) || (blinkyRightX > 530 && blinkyRightX < 669 && blinkyRightY > 309 && blinkyRightY < 348) || 
-        (blinkyRightX > 440 && blinkyRightX < 484 && blinkyRightY > 221 && blinkyRightY < 348) || (blinkyRightX > 343 && blinkyRightX < 581 && blinkyRightY > 221 && blinkyRightY < 263) || (blinkyRightX > 90 && blinkyRightX < 202 && blinkyRightY > 221 && blinkyRightY < 263) || (blinkyRightX > 718 && blinkyRightX < 834 && blinkyRightY > 221 && blinkyRightY < 263) || 
+        (blinkyRightX > 255 && blinkyRightX < 294 && blinkyRightY > 221 && blinkyRightY < 438) || (blinkyRightX > 630 && blinkyRightX < 669 && blinkyRightY > 221 && blinkyRightY < 438) || (blinkyRightX > 255 && blinkyRightX < 420 && blinkyRightY > 309 && blinkyRightY < 348) || (blinkyRightX > 530 && blinkyRightX < 669 && blinkyRightY > 309 && blinkyRightY < 348) || 
+        (blinkyRightX > 440 && blinkyRightX < 484 && blinkyRightY > 221 && blinkyRightY < 348) || (blinkyRightX > 343 && blinkyRightX < 581 && blinkyRightY > 221 && blinkyRightY < 284) || (blinkyRightX > 90 && blinkyRightX < 202 && blinkyRightY > 221 && blinkyRightY < 284) || (blinkyRightX > 718 && blinkyRightX < 834 && blinkyRightY > 221 && blinkyRightY < 284) || 
         (blinkyRightX > 880)) != true) {
             if (blinkyRightFirstLoaded) {
                 console.log('here');
@@ -1383,11 +1415,9 @@ function pacmanMove() {
                 blinkyBottomX += blinkySpeed;
                 blinkyRightFirstLoaded = true;
             }
-            debugger;
             for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
                 for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
                     if ((blinkyLeftX <= possibleMovesPosition[i + 12][j][0] && blinkyRightX >= possibleMovesPosition[i + 12][j][0]) && (blinkyTopY <= possibleMovesPosition[i + 12][j][1] && blinkyBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentBlinkyGhostPosition != possibleMovesPosition[i + 12][j])) {
-                        debugger;
                         currentBlinkyGhostPosition = possibleMovesPosition[i + 12][j];
                         console.log(possibleMoves[i + 12]);
                         let changedPositionX = possibleMovesPosition[i + 12][j][0] - blinkyX;
@@ -1439,16 +1469,16 @@ function pacmanMove() {
         }
     } else if (blinkyHeldUp) {
         console.log('up');
-        if (((blinkyTopX > 90 && blinkyTopX < 202 && blinkyTopY > 89 && blinkyTopY < 173) || (blinkyTopX > 254 && blinkyTopX < 394 && blinkyTopY < 173 && blinkyTopY > 89) || (blinkyTopX > 440 && blinkyTopX < 484 && blinkyTopY < 173) || (blinkyTopX > 530 && blinkyTopX < 673 && blinkyTopY < 173 && blinkyTopY > 89) || (blinkyTopX > 718 && blinkyTopX < 834 && blinkyTopY < 173 && blinkyTopY > 89) || 
+        if (((blinkyTopX > 90 && blinkyTopX < 202 && blinkyTopY > 89 && blinkyTopY < 173) || (blinkyTopX > 232 && blinkyTopX < 394 && blinkyTopY < 173 && blinkyTopY > 89) || (blinkyTopX > 440 && blinkyTopX < 484 && blinkyTopY < 173) || (blinkyTopX > 530 && blinkyTopX < 673 && blinkyTopY < 173 && blinkyTopY > 89) || (blinkyTopX > 718 && blinkyTopX < 834 && blinkyTopY < 173 && blinkyTopY > 89) || 
         (blinkyTopX > 90 && blinkyTopX < 394 && blinkyTopY > 839 && blinkyTopY < 874) || (blinkyTopX > 530 && blinkyTopX < 834 && blinkyTopY > 839 && blinkyTopY < 874) || (blinkyTopX > 255 && blinkyTopX < 294 && blinkyTopY > 749 && blinkyTopY < 874) || (blinkyTopX > 630 && blinkyTopX < 669 && blinkyTopY > 749 && blinkyTopY < 874) || 
         (blinkyTopX > 440 && blinkyTopX < 484 && blinkyTopY > 749 && blinkyTopY < 874) || (blinkyTopX > 343 && blinkyTopX < 581 && blinkyTopY > 749 && blinkyTopY < 800) || (blinkyTopX < 109 && blinkyTopY > 749 && blinkyTopY < 800) || (blinkyTopX > 815 && blinkyTopY > 749 && blinkyTopY < 800) || 
         (blinkyTopX > 715 && blinkyTopX < 764 && blinkyTopY > 662 && blinkyTopY < 800) || (blinkyTopX > 160 && blinkyTopX < 209 && blinkyTopY > 662 && blinkyTopY < 800) || (blinkyTopX > 90 && blinkyTopX < 209 && blinkyTopY > 662 && blinkyTopY < 703) || (blinkyTopX > 715 && blinkyTopX < 764 && blinkyTopY > 662 && blinkyTopY < 703) || (blinkyTopX > 715 && blinkyTopX < 835 && blinkyTopY > 662 && blinkyTopY < 703) || 
-        (blinkyTopX > 530 && blinkyTopX < 673 && blinkyTopY > 662 && blinkyTopY < 703) || (blinkyTopX > 254 && blinkyTopX < 394 && blinkyTopY > 662 && blinkyTopY < 703) || (blinkyTopX > 715 && blinkyTopY > 484 && blinkyTopY < 613) || (blinkyTopX < 209 && blinkyTopY > 484 && blinkyTopY < 613) || 
+        (blinkyTopX > 530 && blinkyTopX < 673 && blinkyTopY > 662 && blinkyTopY < 703) || (blinkyTopX > 232 && blinkyTopX < 394 && blinkyTopY > 662 && blinkyTopY < 703) || (blinkyTopX > 715 && blinkyTopY > 484 && blinkyTopY < 613) || (blinkyTopX < 209 && blinkyTopY > 484 && blinkyTopY < 613) || 
         (blinkyTopX > 440 && blinkyTopX < 484 && blinkyTopY > 572 && blinkyTopY < 703) || (blinkyTopX > 343 && blinkyTopX < 581 && blinkyTopY > 574 && blinkyTopY < 613) || (blinkyTopX > 630 && blinkyTopX < 669 && blinkyTopY > 484 && blinkyTopY < 613) || (blinkyTopX > 630 && blinkyTopX < 669 && blinkyTopY > 484 && blinkyTopY < 613) || (blinkyTopX > 255 && blinkyTopX < 294 && blinkyTopY > 484 && blinkyTopY < 613) || 
-        (blinkyTopX > 343 && blinkyTopX < 581 && blinkyTopY > 508 && blinkyTopY < 528) || (blinkyTopX > 343 && blinkyTopX < 360 && blinkyTopY > 402 && blinkyTopY < 528) || (blinkyTopX > 343 && blinkyTopX < 581 && blinkyTopY > 399 && blinkyTopY < 414) || (blinkyTopX > 564 && blinkyTopX < 581 && blinkyTopY > 402 && blinkyTopY < 528) ||
+        (blinkyTopX > 343 && blinkyTopX < 581 && blinkyTopY > 468 && blinkyTopY < 528) || (blinkyTopX > 343 && blinkyTopX < 360 && blinkyTopY > 402 && blinkyTopY < 528) || (blinkyTopX > 343 && blinkyTopX < 581 && blinkyTopY > 399 && blinkyTopY < 414) || (blinkyTopX > 564 && blinkyTopX < 581 && blinkyTopY > 402 && blinkyTopY < 528) ||
         (blinkyTopX > 715 && blinkyTopY > 309 && blinkyTopY < 438) || (blinkyTopX < 209 && blinkyTopY > 309 && blinkyTopY < 438) || (blinkyTopX > 255 && blinkyTopX < 294 && blinkyTopY > 484 && blinkyTopY < 613) || (blinkyTopX > 630 && blinkyTopX < 669 && blinkyTopY > 484 && blinkyTopY < 613) || 
         (blinkyTopX > 255 && blinkyTopX < 294 && blinkyTopY > 221 && blinkyTopY < 438) || (blinkyTopX > 630 && blinkyTopX < 669 && blinkyTopY > 221 && blinkyTopY < 438) || (blinkyTopX > 255 && blinkyTopX < 394 && blinkyTopY > 309 && blinkyTopY < 348) || (blinkyTopX > 530 && blinkyTopX < 669 && blinkyTopY > 309 && blinkyTopY < 348) || 
-        (blinkyTopX > 440 && blinkyTopX < 484 && blinkyTopY > 221 && blinkyTopY < 348) || (blinkyTopX > 343 && blinkyTopX < 581 && blinkyTopY > 221 && blinkyTopY < 263) || (blinkyTopX > 90 && blinkyTopX < 202 && blinkyTopY > 221 && blinkyTopY < 263) || (blinkyTopX > 718 && blinkyTopX < 834 && blinkyTopY > 221 && blinkyTopY < 263) || 
+        (blinkyTopX > 440 && blinkyTopX < 484 && blinkyTopY > 221 && blinkyTopY < 348) || (blinkyTopX > 343 && blinkyTopX < 581 && blinkyTopY > 221 && blinkyTopY < 284) || (blinkyTopX > 90 && blinkyTopX < 202 && blinkyTopY > 221 && blinkyTopY < 284) || (blinkyTopX > 718 && blinkyTopX < 834 && blinkyTopY > 221 && blinkyTopY < 263) || 
         (blinkyTopY < 43)) != true) {
             if (blinkyUpFirstLoaded) {
                 console.log('here');
@@ -1475,11 +1505,9 @@ function pacmanMove() {
                 blinkyBottomY -= blinkySpeed;
                 blinkyUpFirstLoaded = true;
             }
-            debugger;
             for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
                 for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
                     if ((blinkyLeftX <= possibleMovesPosition[i + 12][j][0] && blinkyRightX >= possibleMovesPosition[i + 12][j][0]) && (blinkyTopY <= possibleMovesPosition[i + 12][j][1] && blinkyBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentBlinkyGhostPosition != possibleMovesPosition[i + 12][j])) {
-                        debugger;
                         currentBlinkyGhostPosition = possibleMovesPosition[i + 12][j];
                         console.log(possibleMoves[i + 12]);
                         let changedPositionX = possibleMovesPosition[i + 12][j][0] - blinkyX;
@@ -1531,11 +1559,11 @@ function pacmanMove() {
         }
     } else if (blinkyHeldDown) {
         console.log('down');
-        if ((blinkyBottomX > 90 && blinkyBottomX < 202 && blinkyBottomY > 89 && blinkyBottomY < 173) || (blinkyBottomX > 254 && blinkyBottomX < 394 && blinkyBottomY < 173 && blinkyBottomY > 89) || (blinkyBottomX > 440 && blinkyBottomX < 484 && blinkyBottomY < 173) || (blinkyBottomX > 530 && blinkyBottomX < 673 && blinkyBottomY < 173 && blinkyBottomY > 89) || (blinkyBottomX > 718 && blinkyBottomX < 834 && blinkyBottomY < 173 && blinkyBottomY > 89) || 
+        if ((blinkyBottomX > 90 && blinkyBottomX < 202 && blinkyBottomY > 89 && blinkyBottomY < 173) || (blinkyBottomX > 232 && blinkyBottomX < 394 && blinkyBottomY < 173 && blinkyBottomY > 89) || (blinkyBottomX > 440 && blinkyBottomX < 484 && blinkyBottomY < 173) || (blinkyBottomX > 530 && blinkyBottomX < 673 && blinkyBottomY < 173 && blinkyBottomY > 89) || (blinkyBottomX > 718 && blinkyBottomX < 834 && blinkyBottomY < 173 && blinkyBottomY > 89) || 
         (blinkyBottomX > 90 && blinkyBottomX < 394 && blinkyBottomY > 839 && blinkyBottomY < 874) || (blinkyBottomX > 530 && blinkyBottomX < 834 && blinkyBottomY > 839 && blinkyBottomY < 874) || (blinkyBottomX > 255 && blinkyBottomX < 294 && blinkyBottomY > 749 && blinkyBottomY < 874) || (blinkyBottomX > 630 && blinkyBottomX < 669 && blinkyBottomY > 749 && blinkyBottomY < 874) || 
         (blinkyBottomX > 440 && blinkyBottomX < 484 && blinkyBottomY > 749 && blinkyBottomY < 874) || (blinkyBottomX > 343 && blinkyBottomX < 581 && blinkyBottomY > 749 && blinkyBottomY < 800) || (blinkyBottomX < 109 && blinkyBottomY > 749 && blinkyBottomY < 800) || (blinkyBottomX > 815 && blinkyBottomY > 749 && blinkyBottomY < 800) || 
         (blinkyBottomX > 715 && blinkyBottomX < 764 && blinkyBottomY > 662 && blinkyBottomY < 800) || (blinkyBottomX > 160 && blinkyBottomX < 209 && blinkyBottomY > 662 && blinkyBottomY < 800) || (blinkyBottomX > 90 && blinkyBottomX < 209 && blinkyBottomY > 662 && blinkyBottomY < 703) || (blinkyBottomX > 715 && blinkyBottomX < 764 && blinkyBottomY > 662 && blinkyBottomY < 703) || (blinkyBottomX > 715 && blinkyBottomX < 835 && blinkyBottomY > 662 && blinkyBottomY < 703) || 
-        (blinkyBottomX > 530 && blinkyBottomX < 673 && blinkyBottomY > 662 && blinkyBottomY < 703) || (blinkyBottomX > 254 && blinkyBottomX < 394 && blinkyBottomY > 662 && blinkyBottomY < 703) || (blinkyBottomX > 715 && blinkyBottomY > 484 && blinkyBottomY < 613) || (blinkyBottomX < 209 && blinkyBottomY > 484 && blinkyBottomY < 613) || 
+        (blinkyBottomX > 530 && blinkyBottomX < 673 && blinkyBottomY > 662 && blinkyBottomY < 703) || (blinkyBottomX > 232 && blinkyBottomX < 394 && blinkyBottomY > 662 && blinkyBottomY < 703) || (blinkyBottomX > 715 && blinkyBottomY > 484 && blinkyBottomY < 613) || (blinkyBottomX < 209 && blinkyBottomY > 484 && blinkyBottomY < 613) || 
         (blinkyBottomX > 440 && blinkyBottomX < 484 && blinkyBottomY > 572 && blinkyBottomY < 703) || (blinkyBottomX > 343 && blinkyBottomX < 581 && blinkyBottomY > 574 && blinkyBottomY < 613) || (blinkyBottomX > 630 && blinkyBottomX < 669 && blinkyBottomY > 484 && blinkyBottomY < 613) || (blinkyBottomX > 255 && blinkyBottomX < 294 && blinkyBottomY > 484 && blinkyBottomY < 613) || 
         (blinkyBottomX > 343 && blinkyBottomX < 581 && blinkyBottomY > 508 && blinkyBottomY < 528) || (blinkyBottomX > 343 && blinkyBottomX < 360 && blinkyBottomY > 402 && blinkyBottomY < 528) || (blinkyBottomX > 343 && blinkyBottomX < 581 && blinkyBottomY > 399 && blinkyBottomY < 414) || (blinkyBottomX > 564 && blinkyBottomX < 581 && blinkyBottomY > 402 && blinkyBottomY < 528) ||
         (blinkyBottomX > 715 && blinkyBottomY > 309 && blinkyBottomY < 438) || (blinkyBottomX < 209 && blinkyBottomY > 309 && blinkyBottomY < 438) || (blinkyBottomX > 255 && blinkyBottomX < 294 && blinkyBottomY > 484 && blinkyBottomY < 613) || (blinkyBottomX > 630 && blinkyBottomX < 669 && blinkyBottomY > 484 && blinkyBottomY < 613) || 
@@ -1567,11 +1595,9 @@ function pacmanMove() {
                 blinkyBottomY += blinkySpeed;
                 blinkyDownFirstLoaded = true;
             }
-            debugger;
             for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
                 for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
                     if ((blinkyLeftX <= possibleMovesPosition[i + 12][j][0] && blinkyRightX >= possibleMovesPosition[i + 12][j][0]) && (blinkyTopY <= possibleMovesPosition[i + 12][j][1] && blinkyBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentBlinkyGhostPosition != possibleMovesPosition[i + 12][j])) {
-                        debugger;
                         currentBlinkyGhostPosition = possibleMovesPosition[i + 12][j];
                         console.log(possibleMoves[i + 12]);
                         let changedPositionX = possibleMovesPosition[i + 12][j][0] - blinkyX;
@@ -1624,7 +1650,7 @@ function pacmanMove() {
     }
     
     if (pinkyHeldLeft) {
-        if ((pinkyLeftX > 90 && pinkyLeftX < 202 && pinkyLeftY > 89 && pinkyLeftY < 173) || (pinkyLeftX > 254 && pinkyLeftX < 394 && pinkyLeftY < 173 && pinkyLeftY > 89) || (pinkyLeftX > 440 && pinkyLeftX < 484 && pinkyLeftY < 173) || (pinkyLeftX > 530 && pinkyLeftX < 673 && pinkyLeftY < 173 && pinkyLeftY > 89) || (pinkyLeftX > 718 && pinkyLeftX < 834 && pinkyLeftY < 173 && pinkyLeftY > 89) || 
+        if ((pinkyLeftX > 90 && pinkyLeftX < 202 && pinkyLeftY > 89 && pinkyLeftY < 173) || (pinkyLeftX > 232 && pinkyLeftX < 394 && pinkyLeftY < 173 && pinkyLeftY > 89) || (pinkyLeftX > 440 && pinkyLeftX < 484 && pinkyLeftY < 173) || (pinkyLeftX > 530 && pinkyLeftX < 673 && pinkyLeftY < 173 && pinkyLeftY > 89) || (pinkyLeftX > 718 && pinkyLeftX < 834 && pinkyLeftY < 173 && pinkyLeftY > 89) || 
         (pinkyLeftX > 90 && pinkyLeftX < 394 && pinkyLeftY > 839 && pinkyLeftY < 874) || (pinkyLeftX > 530 && pinkyLeftX < 834 && pinkyLeftY > 839 && pinkyLeftY < 874) || (pinkyLeftX > 255 && pinkyLeftX < 294 && pinkyLeftY > 749 && pinkyLeftY < 874) || (pinkyLeftX > 630 && pinkyLeftX < 669 && pinkyLeftY > 749 && pinkyLeftY < 874) || 
         (pinkyLeftX > 440 && pinkyLeftX < 484 && pinkyLeftY > 749 && pinkyLeftY < 874) || (pinkyLeftX > 343 && pinkyLeftX < 581 && pinkyLeftY > 749 && pinkyLeftY < 800) || (pinkyLeftX < 109 && pinkyLeftY > 749 && pinkyLeftY < 800) || (pinkyLeftX > 815 && pinkyLeftY > 749 && pinkyLeftY < 800) || 
         (pinkyLeftX > 715 && pinkyLeftX < 764 && pinkyLeftY > 662 && pinkyLeftY < 800) || (pinkyLeftX > 160 && pinkyLeftX < 209 && pinkyLeftY > 662 && pinkyLeftY < 800) || (pinkyLeftX > 90 && pinkyLeftX < 209 && pinkyLeftY > 662 && pinkyLeftY < 703) || (pinkyLeftX > 715 && pinkyLeftX < 764 && pinkyLeftY > 662 && pinkyLeftY < 703) || (pinkyLeftX > 715 && pinkyLeftX < 835 && pinkyLeftY > 662 && pinkyLeftY < 703) || 
@@ -1873,48 +1899,48 @@ function moveAll() {
     
 }
 
-// function ballTrackHandling() {
-//     var ballPacmanWallCol = Math.floor(pacmanX / WALL_W);
-//     var ballPacmanWallRow = Math.floor(pacmanY / WALL_H);
-//     var ballBlinkyWallCol = Math.floor(blinkyX / WALL_W);
-//     var ballBlinkyWallRow = Math.floor(blinkyY / WALL_H);
-//     var ballPinkyWallCol = Math.floor(pinkyX / WALL_W);
-//     var ballPinkyWallRow = Math.floor(pinkyY / WALL_H);
-//     var ballInkyWallCol = Math.floor(inkyX / WALL_W);
-//     var ballInkyWallRow = Math.floor(inkyY / WALL_H);
-//     var ballClydeWallCol = Math.floor(clydeX / WALL_W);
-//     var ballClydeWallRow = Math.floor(clydeY / WALL_H);
-//     var trackIndexUnderBall = rowColToArrayIndex(ballPacmanWallCol, ballPacmanWallRow);
-//     var trackIndexUnderBall = rowColToArrayIndex(ballBlinkyWallCol, ballBlinkyWallRow);
-//     var trackIndexUnderBall = rowColToArrayIndex(ballPinkyWallCol, ballPinkyWallRow);
-//     var trackIndexUnderBall = rowColToArrayIndex(ballInkyWallCol, ballInkyWallRow);
-//     var trackIndexUnderBall = rowColToArrayIndex(ballClydeWallCol, ballClydeWallRow);
-//     if (ballPacmanWallCol >= 0 && ballPacmanWallCol < WALL_COLS && ballPacmanWallRow >= 0 && ballPacmanWallRow < WALL_ROWS) {
-//         if (isWallAtColRow(ballPacmanWallCol, ballPacmanWallRow)) {
-//             pacmanSpeed *= -1;
-//         }
-//     }
-//     if (ballBlinkyWallCol >= 0 && ballBlinkyWallCol < WALL_COLS && ballBlinkyWallRow >= 0 && ballBlinkyWallRow < WALL_ROWS) {
-//         if (isWallAtColRow(ballBlinkyWallCol, ballBlinkyWallRow)) {
-//             blinkySpeed *= -1;
-//         }
-//     }
-//     if (ballInkyWallCol >= 0 && ballInkyWallCol < WALL_COLS && ballInkyWallRow >= 0 && ballInkyWallRow < WALL_ROWS) {
-//         if (isWallAtColRow(ballInkyWallCol, ballInkyWallRow)) {
-//             inkySpeed *= -1;
-//         }
-//     }
-//     if (ballPinkyWallCol >= 0 && ballPinkyWallCol < WALL_COLS && ballPinkyWallRow >= 0 && ballPinkyWallRow < WALL_ROWS) {
-//         if (isWallAtColRow(ballPinkyWallCol, ballPinkyWallRow)) {
-//             pinkySpeed *= -1;
-//         }
-//     }
-//     if (ballClydeWallCol >= 0 && ballClydeWallCol < WALL_COLS && ballClydeWallRow >= 0 && ballClydeWallRow < WALL_ROWS) {
-//         if (isWallAtColRow(ballClydeWallCol, ballClydeWallRow)) {
-//             clydeSpeed *= -1;
-//         }
-//     }
-// }
+function ballTrackHandling() {
+    var ballPacmanWallCol = Math.floor(pacmanX / WALL_W);
+    var ballPacmanWallRow = Math.floor(pacmanY / WALL_H);
+    var ballBlinkyWallCol = Math.floor(blinkyX / WALL_W);
+    var ballBlinkyWallRow = Math.floor(blinkyY / WALL_H);
+    var ballPinkyWallCol = Math.floor(pinkyX / WALL_W);
+    var ballPinkyWallRow = Math.floor(pinkyY / WALL_H);
+    var ballInkyWallCol = Math.floor(inkyX / WALL_W);
+    var ballInkyWallRow = Math.floor(inkyY / WALL_H);
+    var ballClydeWallCol = Math.floor(clydeX / WALL_W);
+    var ballClydeWallRow = Math.floor(clydeY / WALL_H);
+    var trackIndexUnderBall = rowColToArrayIndex(ballPacmanWallCol, ballPacmanWallRow);
+    var trackIndexUnderBall = rowColToArrayIndex(ballBlinkyWallCol, ballBlinkyWallRow);
+    var trackIndexUnderBall = rowColToArrayIndex(ballPinkyWallCol, ballPinkyWallRow);
+    var trackIndexUnderBall = rowColToArrayIndex(ballInkyWallCol, ballInkyWallRow);
+    var trackIndexUnderBall = rowColToArrayIndex(ballClydeWallCol, ballClydeWallRow);
+    if (ballPacmanWallCol >= 0 && ballPacmanWallCol < WALL_COLS && ballPacmanWallRow >= 0 && ballPacmanWallRow < WALL_ROWS) {
+        if (isWallAtColRow(ballPacmanWallCol, ballPacmanWallRow)) {
+            pacmanSpeed *= -1;
+        }
+    }
+    if (ballBlinkyWallCol >= 0 && ballBlinkyWallCol < WALL_COLS && ballBlinkyWallRow >= 0 && ballBlinkyWallRow < WALL_ROWS) {
+        if (isWallAtColRow(ballBlinkyWallCol, ballBlinkyWallRow)) {
+            blinkySpeed *= -1;
+        }
+    }
+    if (ballInkyWallCol >= 0 && ballInkyWallCol < WALL_COLS && ballInkyWallRow >= 0 && ballInkyWallRow < WALL_ROWS) {
+        if (isWallAtColRow(ballInkyWallCol, ballInkyWallRow)) {
+            inkySpeed *= -1;
+        }
+    }
+    if (ballPinkyWallCol >= 0 && ballPinkyWallCol < WALL_COLS && ballPinkyWallRow >= 0 && ballPinkyWallRow < WALL_ROWS) {
+        if (isWallAtColRow(ballPinkyWallCol, ballPinkyWallRow)) {
+            pinkySpeed *= -1;
+        }
+    }
+    if (ballClydeWallCol >= 0 && ballClydeWallCol < WALL_COLS && ballClydeWallRow >= 0 && ballClydeWallRow < WALL_ROWS) {
+        if (isWallAtColRow(ballClydeWallCol, ballClydeWallRow)) {
+            clydeSpeed *= -1;
+        }
+    }
+}
 
 function isWallAtColRow(col, row) {
     if (col >= 0 && col < WALL_COLS && row >= 0 && row < WALL_ROWS) {
@@ -2103,6 +2129,12 @@ window.onload = function() {
     bonusPointBallHidden.onload = function() {
         bonusPointBallHiddenLoaded = true;
     }
+    hurtGhostFirst.onload = function() {
+        hurtGhostFirstLoaded = true;
+    }
+    hurtGhostSecond.onload = function() {
+        hurtGhostSecondLoaded = true;
+    }
 
     pacmanLeftImage.src = '/assets/images/pacman-left.png'
     pacmanRightImage.src = '/assets/images/pacman-right.png'
@@ -2149,6 +2181,8 @@ window.onload = function() {
     playerOne.src = '/assets/images/player-one.png'
     bonusPointBall.src = '/assets/images/point-ball.png'
     bonusPointBallHidden.src = '/assets/images/point-ball-hidden.png'
+    hurtGhostFirst.src = '/assets/images/hurt-ghost-first.png'
+    hurtGhostSecond.src = '/assets/images/hurt-ghost-second.png'
     
     bonusPointBallReset();
     playerOneReset();
@@ -2257,6 +2291,10 @@ function drawBlinky() {
         drawBitmapWithDirection(blinkyDownFirst, blinkyX, blinkyY, blinkyAng);
     } else if (blinkyDownSecondLoaded) {
         drawBitmapWithDirection(blinkyDownSecond, blinkyX, blinkyY, blinkyAng);
+    } else if (hurtGhostFirstLoaded) {
+        drawBitmapWithDirection(hurtGhostFirst, blinkyX, blinkyY, blinkyAng);
+    } else if (hurtGhostSecondLoaded) {
+        drawBitmapWithDirection(hurtGhostSecond, blinkyX, blinkyY, blinkyAng);
     }
 }
 
@@ -2277,6 +2315,10 @@ function drawPinky() {
         drawBitmapWithDirection(pinkyDownFirst, pinkyX, pinkyY, pinkyAng);
     } else if (pinkyDownSecondLoaded) {
         drawBitmapWithDirection(pinkyDownSecond, pinkyX, pinkyY, pinkyAng);
+    } else if (hurtGhostFirstLoaded) {
+        drawBitmapWithDirection(hurtGhostFirst, blinkyX, blinkyY, blinkyAng);
+    } else if (hurtGhostSecondLoaded) {
+        drawBitmapWithDirection(hurtGhostSecond, blinkyX, blinkyY, blinkyAng);
     }
 }
 
@@ -2297,6 +2339,10 @@ function drawInky() {
         drawBitmapWithDirection(inkyDownFirst, inkyX, inkyY, inkyAng);
     } else if (inkyDownSecondLoaded) {
         drawBitmapWithDirection(inkyDownSecond, inkyX, inkyY, inkyAng);
+    } else if (hurtGhostFirstLoaded) {
+        drawBitmapWithDirection(hurtGhostFirst, blinkyX, blinkyY, blinkyAng);
+    } else if (hurtGhostSecondLoaded) {
+        drawBitmapWithDirection(hurtGhostSecond, blinkyX, blinkyY, blinkyAng);
     }
 }
 
@@ -2317,6 +2363,10 @@ function drawClyde() {
         drawBitmapWithDirection(clydeDownFirst, clydeX, clydeY, clydeAng);
     } else if (clydeDownSecondLoaded) {
         drawBitmapWithDirection(clydeDownSecond, clydeX, clydeY, clydeAng);
+    } else if (hurtGhostFirstLoaded) {
+        drawBitmapWithDirection(hurtGhostFirst, blinkyX, blinkyY, blinkyAng);
+    } else if (hurtGhostSecondLoaded) {
+        drawBitmapWithDirection(hurtGhostSecond, blinkyX, blinkyY, blinkyAng);
     }
 }
                     
