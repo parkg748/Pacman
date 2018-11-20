@@ -197,6 +197,14 @@ var pinkyHeldLeft = false;
 var pinkyHeldRight = false;
 var pinkyHeldUp = true;
 var pinkyHeldDown = false;
+var inkyHeldLeft = false;
+var inkyHeldRight = true;
+var inkyHeldUp = false;
+var inkyHeldDown = false;
+var clydeHeldLeft = true;
+var clydeHeldRight = false;
+var clydeHeldUp = false;
+var clydeHeldDown = false;
 
 
 var direction = ['left', 'right', 'up', 'down'];
@@ -213,6 +221,10 @@ var munch = new Howl({
     src: ['/assets/audio/munch-1.mp3'],
     volume: 1.0
 });
+window.munch = munch;
+munch.once('load', function() {
+    console.log('ready');
+});
 var introStage = true;
 var munchStage = false;
 var pointLocation = [];
@@ -220,6 +232,7 @@ var pointPosition = [];
 var bonusPointLocation = [];
 var bonusPointPosition = [];
 var blinkingBonusPoint = false;
+var ghostBlue = false;
 var collisionBox = [{xMax: 44}, {xMax: 209, yMin: 309, yMax: 438}, {xMin: 715, yMin: 309, yMax: 438}, {xMax: 209, yMin: 484, yMax: 613}, {xMin: 715, yMin: 484, yMax: 613}, {xMin: 440, xMax: 484, yMax: 173}, {xMax: 109, yMin: 749, yMax: 800}, {xMin: 815, yMin: 749, yMax: 800}, {xMin: 90, xMax: 202, yMin: 89, yMax: 173}, {xMin: 254, xMax: 394, yMin: 89, yMax: 173}, {xMin: 530, xMax: 673, yMin: 89, yMax: 173}, {xMin: 718, xMax: 834, yMin: 89, yMax: 173}, {xMin: 90, xMax: 394, yMin: 839, yMax: 874}, {xMin: 530, xMax: 834, yMin: 839, yMax: 874}, {xMin: 255, xMax: 294, yMin: 749, yMax: 874}, {xMin: 630, xMax: 669, yMin: 749, yMax: 874},
 {xMin: 440, xMax: 484, yMin: 749, yMax: 874}, {xMin: 343, xMax: 581, yMin: 749, yMax: 800}, {xMin: 715, xMax: 764, yMin: 662, yMax: 800}, {xMin: 160, xMax: 209, yMin: 662, yMax: 800}, {xMin: 90, xMax: 209, yMin: 662, yMax: 703}, {xMin: 715, xMax: 764, yMin: 662, yMax: 703}, {xMin: 715, xMax: 835, yMin: 662, yMax: 703}, {xMin: 503, xMax: 673, yMin: 662, yMax: 703},
 {xMin: 254, xMax: 394, yMin: 662, yMax: 703}, {xMin: 630, xMax: 669, yMin: 484, yMax: 613}, {xMin: 255, xMax: 294, yMin: 484, yMax: 613}, {xMin: 440, xMax: 484, yMin: 572, yMax: 703}, {xMin: 343, xMax: 581, yMin: 574, yMax: 613}, {xMin: 630, xMax: 669, yMin: 484, yMax: 613}, {xMin: 343, xMax: 581, yMin: 508, yMax: 528}, {xMin: 343, xMax: 360, yMin: 402, yMax: 528},
@@ -238,25 +251,29 @@ var possibleMoves = {
     21: ['up'],
     22: ['right'],
     23: ['left'],
+    24: ['left', 'right']
 }
 var possibleMovesPosition = {
-    12: [[66, 66], [506, 66], [506, 282], [318, 370], [66, 634], [506, 634], [782, 722], [66, 810], [506, 810]],
-    13: [[230, 66], [694, 66], [318, 194], [606, 194], [318, 722], [606, 722]],
-    14: [[418, 66], [858, 66], [418, 282], [606, 370], [418, 634], [858, 634], [142, 722], [418, 810], [858, 810]],
-    15: [[66, 194], [694, 282], [606, 458], [318, 546], [230, 722]],
-    16: [[230, 194], [694, 194], [230, 458], [694, 458], [230, 634], [694, 634]],
-    17: [[418, 194], [506, 194], [418, 370], [506, 370], [318, 634], [606, 634], [418, 722], [506, 722], [142, 810], [782, 810], [418, 898], [506, 898]],
-    18: [[858, 194], [230, 282], [318, 458], [606, 546], [694, 722]],
-    19: [[66, 282], [318, 282], [66, 722], [318, 810], [694, 810], [66, 898]],
-    20: [[606, 282], [858, 722], [230, 810], [606, 810], [858, 898]], 
-    21: [[462, 458]],
-    22: [[394, 458]],
-    23: [[530, 458]]
+    12: [[66, 70], [506, 70], [506, 286], [321, 374], [66, 638], [506, 638], [785, 726], [66, 814], [506, 814]],
+    13: [[232, 70], [694, 70], [321, 198], [606, 198], [321, 726], [606, 726]],
+    14: [[418, 70], [858, 70], [418, 286], [606, 374], [418, 638], [858, 638], [142, 726], [418, 814], [858, 814]],
+    15: [[66, 198], [694, 286], [606, 462], [321, 550], [232, 726]],
+    16: [[232, 198], [694, 198], [230, 462], [694, 462], [232, 638], [694, 638]],
+    17: [[418, 198], [506, 198], [418, 374], [506, 374], [321, 638], [606, 638], [418, 726], [506, 726], [142, 814], [782, 814], [418, 902], [506, 902]],
+    18: [[858, 198], [232, 286], [321, 462], [606, 550], [694, 726]],
+    19: [[66, 286], [321, 286], [66, 726], [321, 814], [694, 814], [66, 902]],
+    20: [[606, 286], [858, 726], [232, 814], [606, 814], [858, 902], [858, 282]], 
+    21: [[462, 462]],
+    22: [[394, 462]],
+    23: [[530, 462]],
+    24: [[470, 372]]
 }
-var tx = [0, 1, -1, 0, 0];
-var ty = [0, 0, 0, -1, 1];
+
+var pointsPositionPosition = [];
 var currentBlinkyGhostPosition = [];
 var currentPinkyGhostPosition = [];
+var currentInkyGhostPosition = [];
+var currentClydeGhostPosition = [];
 var ghostHouse = [];
 
 var wallGrid = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -345,7 +362,7 @@ var wallGrid = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -515,6 +532,8 @@ function drawWalls() {
                 pointPosition.push([col * WALL_W + WALL_W/2, row * WALL_H + WALL_H/2]);
             } else if (wallGrid[arrayIndex] === 8) {
                 colorRect(WALL_W * col, WALL_H * row, WALL_W, WALL_H, '#f4bcfb');
+            } else if (wallGrid[arrayIndex] >= 12 && wallGrid[arrayIndex] <= 23) {
+                pointsPositionPosition.push([col * WALL_W + WALL_W/2, row * WALL_H + WALL_H/2]);
             }
         }
     }
@@ -594,14 +613,14 @@ function blinkyReset() {
                 wallGrid[arrayIndex] = 0;
                 blinkyX = col * WALL_W + WALL_W/2;
                 blinkyY = row * WALL_H + WALL_H/2;
-                blinkyTopX = col * WALL_W + WALL_W/2;
-                blinkyTopY = (row - 6) * WALL_H + WALL_H/2;
-                blinkyBottomX = col * WALL_W + WALL_W/2;
-                blinkyBottomY = (row + 6) * WALL_H + WALL_H/2;
-                blinkyLeftX = (col - 6) * WALL_W + WALL_W/2;
-                blinkyLeftY = row * WALL_H + WALL_H/2;
-                blinkyRightX = (col + 6) * WALL_W + WALL_W/2;
-                blinkyRightY = row * WALL_H + WALL_H/2;
+                blinkyTopX = col * WALL_W + CHARACTER_W/2;
+                blinkyTopY = row * WALL_H;
+                blinkyBottomX = col * WALL_W + CHARACTER_W/2;
+                blinkyBottomY = row * WALL_H + CHARACTER_H;
+                blinkyLeftX = col * WALL_W;
+                blinkyLeftY = row * WALL_H + CHARACTER_H/2;
+                blinkyRightX = col * WALL_W + CHARACTER_W;
+                blinkyRightY = row * WALL_H + CHARACTER_H/2;
             }
         }
     }
@@ -618,30 +637,19 @@ function pinkyReset() {
                 wallGrid[arrayIndex] = 0;
                 pinkyX = col * WALL_W + WALL_W/2;
                 pinkyY = row * WALL_H + WALL_H/2;
-                pinkyTopX = col * WALL_W + WALL_W/2;
-                pinkyTopY = (row - 6) * WALL_H + WALL_H/2;
-                pinkyBottomX = col * WALL_W + WALL_W/2;
-                pinkyBottomY = (row + 6) * WALL_H + WALL_H/2;
-                pinkyLeftX = (col - 6) * WALL_W + WALL_W/2;
-                pinkyLeftY = row * WALL_H + WALL_H/2;
-                pinkyRightX = (col + 6) * WALL_W + WALL_W/2;
-                pinkyRightY = row * WALL_H + WALL_H/2;
-                ghostHouse.push([row, col]);
+                pinkyTopX = col * WALL_W + CHARACTER_W/2;
+                pinkyTopY = row * WALL_H;
+                pinkyBottomX = col * WALL_W + CHARACTER_W/2;
+                pinkyBottomY = row * WALL_H + CHARACTER_H;
+                pinkyLeftX = col * WALL_W;
+                pinkyLeftY = row * WALL_H + CHARACTER_H/2;
+                pinkyRightX = col * WALL_W + CHARACTER_W;
+                pinkyRightY = row * WALL_H + CHARACTER_H/2;
             }
         }
     }
     if (pinkyLeftSecondLoaded === false && pinkyLeftFirstLoaded === false && pinkyDownSecondLoaded === false && pinkyRightFirstLoaded === false && pinkyRightSecondLoaded === false && pinkyUpFirstLoaded === false && pinkyUpSecondLoaded === false) {
         pinkyDownFirstLoaded = true;
-    }
-    let directionPinkyStart = direction[Math.floor(Math.random() * 4)];
-    if (directionPinkyStart === 'left') {
-        pinkyHeldLeft = true;
-    } else if (directionPinkyStart === 'right') {
-        pinkyHeldRight = true;
-    } else if (directionPinkyStart === 'up') {
-        pinkyHeldUp = true;
-    } else if (directionPinkyStart === 'down') {
-        pinkyHeldDown = true;
     }
 }
 
@@ -653,15 +661,14 @@ function inkyReset() {
                 wallGrid[arrayIndex] = 0;
                 inkyX = col * WALL_W + WALL_W/2;
                 inkyY = row * WALL_H + WALL_H/2;
-                inkyTopX = col * WALL_W + WALL_W/2;
-                inkyTopY = (row - 6) * WALL_H + WALL_H/2;
-                inkyBottomX = col * WALL_W + WALL_W/2;
-                inkyBottomY = (row + 6) * WALL_H + WALL_H/2;
-                inkyLeftX = (col - 6) * WALL_W + WALL_W/2;
-                inkyLeftY = row * WALL_H + WALL_H/2;
-                inkyRightX = (col + 6) * WALL_W + WALL_W/2;
-                inkyRightY = row * WALL_H + WALL_H/2;
-                ghostHouse.push([row, col]);
+                inkyTopX = col * WALL_W + CHARACTER_W/2;
+                inkyTopY = row * WALL_H;
+                inkyBottomX = col * WALL_W + CHARACTER_W/2;
+                inkyBottomY = row * WALL_H + CHARACTER_H;
+                inkyLeftX = col * WALL_W;
+                inkyLeftY = row * WALL_H + CHARACTER_H/2;
+                inkyRightX = col * WALL_W + CHARACTER_W;
+                inkyRightY = row * WALL_H + CHARACTER_H/2;
             }
         }
     }
@@ -678,21 +685,58 @@ function clydeReset() {
                 wallGrid[arrayIndex] = 0;
                 clydeX = col * WALL_W + WALL_W/2;
                 clydeY = row * WALL_H + WALL_H/2;
-                clydeTopX = col * WALL_W + WALL_W/2;
-                clydeTopY = (row - 6) * WALL_H + WALL_H/2;
-                clydeBottomX = col * WALL_W + WALL_W/2;
-                clydeBottomY = (row + 6) * WALL_H + WALL_H/2;
-                clydeLeftX = (col - 6) * WALL_W + WALL_W/2;
-                clydeLeftY = row * WALL_H + WALL_H/2;
-                clydeRightX = (col + 6) * WALL_W + WALL_W/2;
-                clydeRightY = row * WALL_H + WALL_H/2;
-                ghostHouse.push([row, col]);
+                clydeTopX = col * WALL_W + CHARACTER_W/2;
+                clydeTopY = row * WALL_H;
+                clydeBottomX = col * WALL_W + CHARACTER_W/2;
+                clydeBottomY = row * WALL_H + CHARACTER_H;
+                clydeLeftX = col * WALL_W;
+                clydeLeftY = row * WALL_H + CHARACTER_H/2;
+                clydeRightX = col * WALL_W + CHARACTER_W;
+                clydeRightY = row * WALL_H + CHARACTER_H/2;
             }
         }
     }
     if (clydeLeftSecondLoaded === false && clydeLeftFirstLoaded === false && clydeDownSecondLoaded === false && clydeRightFirstLoaded === false && clydeRightSecondLoaded === false && clydeDownFirstLoaded === false && clydeUpSecondLoaded === false) {
         clydeUpFirstLoaded = true;
     }
+}
+
+function normalMode() {
+    // // console.log("normal");
+    hurtGhostFirstLoaded = true;
+    hurtGhostSecondLoaded = true;
+    blinkyDownFirstLoaded = false;
+    blinkyDownSecondLoaded = false;
+    blinkyLeftFirstLoaded = false;
+    blinkyLeftSecondLoaded = false;
+    blinkyRightFirstLoaded = false;
+    blinkyRightFirstLoaded = false;
+    blinkyUpFirstLoaded = false;
+    blinkyUpSecondLoaded = false;
+    pinkyDownFirstLoaded = false;
+    pinkyDownSecondLoaded = false;
+    pinkyLeftFirstLoaded = false;
+    pinkyLeftSecondLoaded = false;
+    pinkyRightFirstLoaded = false;
+    pinkyRightSecondLoaded = false;
+    pinkyUpFirstLoaded = false;
+    pinkyUpSecondLoaded = false;
+    inkyDownFirstLoaded = false;
+    inkyDownSecondLoaded = false;
+    inkyLeftFirstLoaded = false;
+    inkyLeftSecondLoaded = false;
+    inkyRightFirstLoaded = false;
+    inkyRightSecondLoaded = false;
+    inkyUpFirstLoaded = false;
+    inkyUpSecondLoaded = false;
+    clydeDownFirstLoaded = false;
+    clydeDownSecondLoaded = false;
+    clydeLeftFirstLoaded = false;
+    clydeLeftSecondLoaded = false;
+    clydeRightFirstLoaded = false;
+    clydeRightSecondLoaded = false;
+    clydeUpFirstLoaded = false;
+    clydeUpSecondLoaded = false;
 }
 
 function pointsEaten() {
@@ -704,40 +748,9 @@ function pointsEaten() {
     bonusPointPosition.forEach(pos => {
         if ((pacmanLeftX <= pos[0] && pacmanRightX >= pos[0]) && (pacmanTopY <= pos[1] && pacmanBottomY >= pos[1])) {
             wallGrid[pos[2]] = 0;
-            hurtGhostFirstLoaded = true;
-            hurtGhostSecondLoaded = true;
-            blinkyDownFirstLoaded = false;
-            blinkyDownSecondLoaded = false;
-            blinkyLeftFirstLoaded = false;
-            blinkyLeftSecondLoaded = false;
-            blinkyRightFirstLoaded = false;
-            blinkyRightFirstLoaded = false;
-            blinkyUpFirstLoaded = false;
-            blinkyUpSecondLoaded = false;
-            pinkyDownFirstLoaded = false;
-            pinkyDownSecondLoaded = false;
-            pinkyLeftFirstLoaded = false;
-            pinkyLeftSecondLoaded = false;
-            pinkyRightFirstLoaded = false;
-            pinkyRightSecondLoaded = false;
-            pinkyUpFirstLoaded = false;
-            pinkyUpSecondLoaded = false;
-            inkyDownFirstLoaded = false;
-            inkyDownSecondLoaded = false;
-            inkyLeftFirstLoaded = false;
-            inkyLeftSecondLoaded = false;
-            inkyRightFirstLoaded = false;
-            inkyRightSecondLoaded = false;
-            inkyUpFirstLoaded = false;
-            inkyUpSecondLoaded = false;
-            clydeDownFirstLoaded = false;
-            clydeDownSecondLoaded = false;
-            clydeLeftFirstLoaded = false;
-            clydeLeftSecondLoaded = false;
-            clydeRightFirstLoaded = false;
-            clydeRightSecondLoaded = false;
-            clydeUpFirstLoaded = false;
-            clydeUpSecondLoaded = false;
+            // console.log('im here');
+            ghostBlue = true;
+            setTimeout(() => ghostBlue = false, 5000);
             let array = [];
             bonusPointLocation.forEach(loc => {
                 if (pos[2] != loc[3]) {
@@ -831,20 +844,74 @@ function drawBitmapWithDirection(useBitmap, atX, atY, withAng) {
 
 function pacmanMove() {
     if (keyHeldLeft) {
-        console.log(pacmanLeftX);
-        if ((pacmanLeftX < 68) || (pacmanLeftX > 70 && pacmanLeftX < 232 && pacmanLeftY > 70 && pacmanLeftY < 196) || (pacmanLeftX > 232 && pacmanLeftX < 420 && pacmanLeftY < 196 && pacmanLeftY > 70) || (pacmanLeftX > 424 && pacmanLeftX < 508 && pacmanLeftY < 196) || (pacmanLeftX > 512 && pacmanLeftX < 673 && pacmanLeftY < 196 && pacmanLeftY > 70) || (pacmanLeftX > 700 && pacmanLeftX < 856 && pacmanLeftY < 196 && pacmanLeftY > 70) || 
-        (pacmanLeftX > 70 && pacmanLeftX < 420 && pacmanLeftY > 816 && pacmanLeftY < 856) || (pacmanLeftX > 512 && pacmanLeftX < 856 && pacmanLeftY > 816 && pacmanLeftY < 856) || (pacmanLeftX > 236 && pacmanLeftX < 320 && pacmanLeftY > 732 && pacmanLeftY < 856) || (pacmanLeftX > 612 && pacmanLeftX < 696 && pacmanLeftY > 732 && pacmanLeftY < 856) || 
-        (pacmanLeftX > 424 && pacmanLeftX < 508 && pacmanLeftY > 732 && pacmanLeftY < 856) || (pacmanLeftX > 328 && pacmanLeftX < 608 && pacmanLeftY > 732 && pacmanLeftY < 816) || (pacmanLeftX < 109 && pacmanLeftY > 732 && pacmanLeftY < 816) || (pacmanLeftX > 796 && pacmanLeftY > 732 && pacmanLeftY < 816) || 
-        (pacmanLeftX > 700 && pacmanLeftX < 788 && pacmanLeftY > 644 && pacmanLeftY < 816) || (pacmanLeftX > 148 && pacmanLeftX < 232 && pacmanLeftY > 644 && pacmanLeftY < 816) || (pacmanLeftX > 70 && pacmanLeftX < 232 && pacmanLeftY > 644 && pacmanLeftY < 728) || (pacmanLeftX > 700 && pacmanLeftX < 788 && pacmanLeftY > 644 && pacmanLeftY < 728) || (pacmanLeftX > 700 && pacmanLeftX < 835 && pacmanLeftY > 644 && pacmanLeftY < 728) || 
-        (pacmanLeftX > 512 && pacmanLeftX < 673 && pacmanLeftY > 644 && pacmanLeftY < 728) || (pacmanLeftX > 232 && pacmanLeftX < 420 && pacmanLeftY > 644 && pacmanLeftY < 728) || (pacmanLeftX > 700 && pacmanLeftY > 468 && pacmanLeftY < 644) || (pacmanLeftX < 232 && pacmanLeftY > 468 && pacmanLeftY < 644) || (pacmanLeftX > 612 && pacmanLeftX < 696 && pacmanLeftY > 468 && pacmanLeftY < 644) || (pacmanLeftX > 236 && pacmanLeftX < 320 && pacmanLeftY > 468 && pacmanLeftY < 644) || 
-        (pacmanLeftX > 424 && pacmanLeftX < 508 && pacmanLeftY > 576 && pacmanLeftY < 728) || (pacmanLeftX > 328 && pacmanLeftX < 608 && pacmanLeftY > 574 && pacmanLeftY < 644) || (pacmanLeftX > 612 && pacmanLeftX < 696 && pacmanLeftY > 468 && pacmanLeftY < 644) || 
-        (pacmanLeftX > 328 && pacmanLeftX < 608 && pacmanLeftY > 468 && pacmanLeftY < 552) || (pacmanLeftX > 328 && pacmanLeftX < 360 && pacmanLeftY > 380 && pacmanLeftY < 552) || (pacmanLeftX > 328 && pacmanLeftX < 608 && pacmanLeftY > 428 && pacmanLeftY < 414) || (pacmanLeftX > 564 && pacmanLeftX < 608 && pacmanLeftY > 380 && pacmanLeftY < 552) ||
-        (pacmanLeftX > 700 && pacmanLeftY > 292 && pacmanLeftY < 464) || (pacmanLeftX < 232 && pacmanLeftY > 292 && pacmanLeftY < 464) || (pacmanLeftX > 236 && pacmanLeftX < 320 && pacmanLeftY > 468 && pacmanLeftY < 644) || (pacmanLeftX > 612 && pacmanLeftX < 696 && pacmanLeftY > 468 && pacmanLeftY < 644) || 
-        (pacmanLeftX > 236 && pacmanLeftX < 320 && pacmanLeftY > 204 && pacmanLeftY < 464) || (pacmanLeftX > 612 && pacmanLeftX < 696 && pacmanLeftY > 204 && pacmanLeftY < 464) || (pacmanLeftX > 236 && pacmanLeftX < 420 && pacmanLeftY > 292 && pacmanLeftY < 376) || (pacmanLeftX > 512 && pacmanLeftX < 696 && pacmanLeftY > 292 && pacmanLeftY < 376) || 
-        (pacmanLeftX > 424 && pacmanLeftX < 508 && pacmanLeftY > 204 && pacmanLeftY < 376) || (pacmanLeftX > 328 && pacmanLeftX < 608 && pacmanLeftY > 204 && pacmanLeftY < 284) || (pacmanLeftX > 70 && pacmanLeftX < 232 && pacmanLeftY > 204 && pacmanLeftY < 284) || (pacmanLeftX > 700 && pacmanLeftX < 856 && pacmanLeftY > 204 && pacmanLeftY < 284)
+        if ((pacmanLeftX > 0 && pacmanLeftX < 68 && pacmanLeftY > 68 && pacmanLeftY < 292) || 
+        (pacmanLeftX > 0 && pacmanLeftX < 68 && pacmanLeftY > 640 && pacmanLeftY < 864) || 
+        (pacmanLeftX > 70 && pacmanLeftX < 232 && pacmanLeftY > 70 && pacmanLeftY < 196) || 
+        (pacmanLeftX > 240 && pacmanLeftX < 420 && pacmanLeftY < 196 && pacmanLeftY > 70) || 
+        (pacmanLeftX > 424 && pacmanLeftX < 508 && pacmanLeftY < 196) || 
+        (pacmanLeftX > 512 && pacmanLeftX < 692 && pacmanLeftY < 196 && pacmanLeftY > 70) || 
+        (pacmanLeftX > 700 && pacmanLeftX < 856 && pacmanLeftY < 196 && pacmanLeftY > 70) || 
+        (pacmanLeftX > 70 && pacmanLeftX < 232 && pacmanLeftY > 204 && pacmanLeftY < 284) || 
+        (pacmanLeftX > 240 && pacmanLeftX < 320 && pacmanLeftY > 204 && pacmanLeftY < 464) || 
+        (pacmanLeftX > 328 && pacmanLeftX < 608 && pacmanLeftY > 204 && pacmanLeftY < 284) || 
+        (pacmanLeftX > 612 && pacmanLeftX < 696 && pacmanLeftY > 204 && pacmanLeftY < 464) || 
+        (pacmanLeftX > 700 && pacmanLeftX < 856 && pacmanLeftY > 204 && pacmanLeftY < 284) || 
+        (pacmanLeftX > 424 && pacmanLeftX < 508 && pacmanLeftY > 204 && pacmanLeftY < 376) || 
+        (pacmanLeftX > 240 && pacmanLeftX < 420 && pacmanLeftY > 292 && pacmanLeftY < 376) || 
+        (pacmanLeftX > 512 && pacmanLeftX < 696 && pacmanLeftY > 292 && pacmanLeftY < 376) || 
+        (pacmanLeftX > 700 && pacmanLeftY > 292 && pacmanLeftY < 464) || 
+        (pacmanLeftX < 232 && pacmanLeftY > 292 && pacmanLeftY < 464) || 
+        (pacmanLeftX > 328 && pacmanLeftX < 392 && pacmanLeftY > 380 && pacmanLeftY < 552) || 
+        (pacmanLeftX > 540 && pacmanLeftX < 608 && pacmanLeftY > 380 && pacmanLeftY < 552) || 
+        (pacmanLeftX > 328 && pacmanLeftX < 460 && pacmanLeftY > 380 && pacmanLeftY < 448) || 
+        (pacmanLeftX > 472 && pacmanLeftX < 608 && pacmanLeftY > 380 && pacmanLeftY < 448) || 
+        (pacmanLeftX > 328 && pacmanLeftX < 608 && pacmanLeftY > 484 && pacmanLeftY < 552) || 
+        (pacmanLeftX < 232 && pacmanLeftY > 468 && pacmanLeftY < 640) || 
+        (pacmanLeftX > 700 && pacmanLeftY > 468 && pacmanLeftY < 640) || 
+        (pacmanLeftX > 240 && pacmanLeftX < 320 && pacmanLeftY > 468 && pacmanLeftY < 640) || 
+        (pacmanLeftX > 612 && pacmanLeftX < 696 && pacmanLeftY > 468 && pacmanLeftY < 640) || 
+        (pacmanLeftX > 328 && pacmanLeftX < 608 && pacmanLeftY > 556 && pacmanLeftY < 640) || 
+        (pacmanLeftX > 70 && pacmanLeftX < 232 && pacmanLeftY > 644 && pacmanLeftY < 728) || 
+        (pacmanLeftX > 240 && pacmanLeftX < 420 && pacmanLeftY > 644 && pacmanLeftY < 728) || 
+        (pacmanLeftX > 512 && pacmanLeftX < 692 && pacmanLeftY > 644 && pacmanLeftY < 728) || 
+        (pacmanLeftX > 700 && pacmanLeftX < 856 && pacmanLeftY > 644 && pacmanLeftY < 728) || 
+        (pacmanLeftX > 424 && pacmanLeftX < 508 && pacmanLeftY > 556 && pacmanLeftY < 728) || 
+        (pacmanLeftX > 148 && pacmanLeftX < 232 && pacmanLeftY > 644 && pacmanLeftY < 816) || 
+        (pacmanLeftX > 700 && pacmanLeftX < 788 && pacmanLeftY > 644 && pacmanLeftY < 816) || 
+        (pacmanLeftX < 132 && pacmanLeftY > 732 && pacmanLeftY < 816) || 
+        (pacmanLeftX > 796 && pacmanLeftY > 732 && pacmanLeftY < 816) || 
+        (pacmanLeftX > 328 && pacmanLeftX < 608 && pacmanLeftY > 732 && pacmanLeftY < 816) || 
+        (pacmanLeftX > 240 && pacmanLeftX < 320 && pacmanLeftY > 732 && pacmanLeftY < 900) || 
+        (pacmanLeftX > 612 && pacmanLeftX < 696 && pacmanLeftY > 732 && pacmanLeftY < 900) || 
+        (pacmanLeftX > 424 && pacmanLeftX < 508 && pacmanLeftY > 732 && pacmanLeftY < 900) || 
+        (pacmanLeftX > 70 && pacmanLeftX < 420 && pacmanLeftY > 820 && pacmanLeftY < 900) || 
+        (pacmanLeftX > 512 && pacmanLeftX < 856 && pacmanLeftY > 820 && pacmanLeftY < 900)
         ) {
             pacmanX += 0;
+        } else if (pacmanLeftX < -27) {
+            pacmanX = 954;
+            pacmanY = 462;
+            pacmanLeftX = 952;
+            pacmanLeftY = 466;
+            pacmanRightX = 964;
+            pacmanRightY = 466;
+            pacmanTopX = 958;
+            pacmanTopY = 460;
+            pacmanBottomX = 958;
+            pacmanBottomY = 472;
         } else {
+            if (pacmanRightX > 964) {
+                pacmanX = -26;
+                pacmanY = 462;
+                pacmanLeftX = -28;
+                pacmanLeftY = 466;
+                pacmanRightX = -16;
+                pacmanRightY = 466;
+                pacmanTopX = -22;
+                pacmanTopY = 460;
+                pacmanBottomX = -22;
+                pacmanBottomY = 472;
+            }
             if (pacmanLeftLoaded) {
                 pacmanLeftLoaded = false;
                 pacmanRightLoaded = false;
@@ -869,96 +936,79 @@ function pacmanMove() {
                 pacmanLeftLoaded = true;
             }
         }
-        // if ((inkyLeftX > 70 && inkyLeftX < 232 && inkyLeftY > 70 && inkyLeftY < 196) || (inkyLeftX > 232 && inkyLeftX < 420 && inkyLeftY < 196 && inkyLeftY > 70) || (inkyLeftX > 424 && inkyLeftX < 508 && inkyLeftY < 196) || (inkyLeftX > 512 && inkyLeftX < 673 && inkyLeftY < 196 && inkyLeftY > 70) || (inkyLeftX > 700 && inkyLeftX < 856 && inkyLeftY < 196 && inkyLeftY > 70) || 
-        // (inkyLeftX > 70 && inkyLeftX < 420 && inkyLeftY > 856 && inkyLeftY < 856) || (inkyLeftX > 512 && inkyLeftX < 856 && inkyLeftY > 856 && inkyLeftY < 856) || (inkyLeftX > 236 && inkyLeftX < 320 && inkyLeftY > 732 && inkyLeftY < 856) || (inkyLeftX > 612 && inkyLeftX < 696 && inkyLeftY > 732 && inkyLeftY < 856) || 
-        // (inkyLeftX > 424 && inkyLeftX < 508 && inkyLeftY > 732 && inkyLeftY < 856) || (inkyLeftX > 328 && inkyLeftX < 608 && inkyLeftY > 732 && inkyLeftY < 816) || (inkyLeftX < 109 && inkyLeftY > 732 && inkyLeftY < 816) || (inkyLeftX > 796 && inkyLeftY > 732 && inkyLeftY < 816) || 
-        // (inkyLeftX > 700 && inkyLeftX < 788 && inkyLeftY > 644 && inkyLeftY < 816) || (inkyLeftX > 148 && inkyLeftX < 232 && inkyLeftY > 644 && inkyLeftY < 816) || (inkyLeftX > 70 && inkyLeftX < 232 && inkyLeftY > 644 && inkyLeftY < 728) || (inkyLeftX > 700 && inkyLeftX < 788 && inkyLeftY > 644 && inkyLeftY < 728) || (inkyLeftX > 700 && inkyLeftX < 835 && inkyLeftY > 644 && inkyLeftY < 728) || 
-        // (inkyLeftX > 512 && inkyLeftX < 673 && inkyLeftY > 644 && inkyLeftY < 728) || (inkyLeftX > 232 && inkyLeftX < 420 && inkyLeftY > 644 && inkyLeftY < 728) || (inkyLeftX > 700 && inkyLeftY > 468 && inkyLeftY < 644) || (inkyLeftX < 232 && inkyLeftY > 468 && inkyLeftY < 644) || (inkyLeftX > 612 && inkyLeftX < 696 && inkyLeftY > 468 && inkyLeftY < 644) || (inkyLeftX > 236 && inkyLeftX < 320 && inkyLeftY > 468 && inkyLeftY < 644) || 
-        // (inkyLeftX > 424 && inkyLeftX < 508 && inkyLeftY > 572 && inkyLeftY < 728) || (inkyLeftX > 328 && inkyLeftX < 608 && inkyLeftY > 574 && inkyLeftY < 644) || (inkyLeftX > 612 && inkyLeftX < 696 && inkyLeftY > 468 && inkyLeftY < 644) || 
-        // (inkyLeftX > 328 && inkyLeftX < 608 && inkyLeftY > 468 && inkyLeftY < 552) || (inkyLeftX > 328 && inkyLeftX < 360 && inkyLeftY > 380 && inkyLeftY < 552) || (inkyLeftX > 328 && inkyLeftX < 608 && inkyLeftY > 428 && inkyLeftY < 414) || (inkyLeftX > 564 && inkyLeftX < 608 && inkyLeftY > 380 && inkyLeftY < 552) ||
-        // (inkyLeftX > 700 && inkyLeftY > 292 && inkyLeftY < 464) || (inkyLeftX < 232 && inkyLeftY > 292 && inkyLeftY < 464) || (inkyLeftX > 236 && inkyLeftX < 320 && inkyLeftY > 468 && inkyLeftY < 644) || (inkyLeftX > 612 && inkyLeftX < 696 && inkyLeftY > 468 && inkyLeftY < 644) || 
-        // (inkyLeftX > 236 && inkyLeftX < 320 && inkyLeftY > 204 && inkyLeftY < 464) || (inkyLeftX > 612 && inkyLeftX < 696 && inkyLeftY > 204 && inkyLeftY < 464) || (inkyLeftX > 236 && inkyLeftX < 420 && inkyLeftY > 292 && inkyLeftY < 376) || (inkyLeftX > 512 && inkyLeftX < 696 && inkyLeftY > 292 && inkyLeftY < 376) || 
-        // (inkyLeftX > 424 && inkyLeftX < 508 && inkyLeftY > 204 && inkyLeftY < 376) || (inkyLeftX > 328 && inkyLeftX < 608 && inkyLeftY > 204 && inkyLeftY < 284) || (inkyLeftX > 70 && inkyLeftX < 232 && inkyLeftY > 204 && inkyLeftY < 284) || (inkyLeftX > 700 && inkyLeftX < 856 && inkyLeftY > 204 && inkyLeftY < 284) || 
-        // (inkyLeftX < 44)) {
-        //     inkyX -= 0;
-        // } else {
-        //     if (inkyLeftFirstLoaded) {
-        //         inkyLeftFirstLoaded = false;
-        //         inkyDownFirstLoaded = false;
-        //         inkyDownSecondLoaded = false;
-        //         inkyRightFirstLoaded = false;
-        //         inkyRightSecondLoaded = false;
-        //         inkyUpFirstLoaded = false;
-        //         inkyUpSecondLoaded = false;
-        //         inkyX -= inkySpeed;
-        //         inkyLeftX -= inkySpeed;
-        //         inkyRightX -= inkySpeed;
-        //         inkyTopX -= inkySpeed;
-        //         inkyBottomX -= inkySpeed;
-        //         inkyLeftSecondLoaded = true;
-        //     } else {
-        //         inkyLeftSecondLoaded = false;
-        //         inkyX -= inkySpeed;
-        //         inkyLeftX -= inkySpeed;
-        //         inkyRightX -= inkySpeed;
-        //         inkyTopX -= inkySpeed;
-        //         inkyBottomX -= inkySpeed;
-        //         inkyLeftFirstLoaded = true;
-        //     }
-        // }
-        // if ((clydeLeftX > 70 && clydeLeftX < 232 && clydeLeftY > 70 && clydeLeftY < 196) || (clydeLeftX > 232 && clydeLeftX < 420 && clydeLeftY < 196 && clydeLeftY > 70) || (clydeLeftX > 424 && clydeLeftX < 508 && clydeLeftY < 196) || (clydeLeftX > 512 && clydeLeftX < 673 && clydeLeftY < 196 && clydeLeftY > 70) || (clydeLeftX > 700 && clydeLeftX < 856 && clydeLeftY < 196 && clydeLeftY > 70) || 
-        // (clydeLeftX > 70 && clydeLeftX < 420 && clydeLeftY > 856 && clydeLeftY < 856) || (clydeLeftX > 512 && clydeLeftX < 856 && clydeLeftY > 856 && clydeLeftY < 856) || (clydeLeftX > 236 && clydeLeftX < 320 && clydeLeftY > 732 && clydeLeftY < 856) || (clydeLeftX > 612 && clydeLeftX < 696 && clydeLeftY > 732 && clydeLeftY < 856) || 
-        // (clydeLeftX > 424 && clydeLeftX < 508 && clydeLeftY > 732 && clydeLeftY < 856) || (clydeLeftX > 328 && clydeLeftX < 608 && clydeLeftY > 732 && clydeLeftY < 816) || (clydeLeftX < 109 && clydeLeftY > 732 && clydeLeftY < 816) || (clydeLeftX > 796 && clydeLeftY > 732 && clydeLeftY < 816) || 
-        // (clydeLeftX > 700 && clydeLeftX < 788 && clydeLeftY > 644 && clydeLeftY < 816) || (clydeLeftX > 148 && clydeLeftX < 232 && clydeLeftY > 644 && clydeLeftY < 816) || (clydeLeftX > 70 && clydeLeftX < 232 && clydeLeftY > 644 && clydeLeftY < 728) || (clydeLeftX > 700 && clydeLeftX < 788 && clydeLeftY > 644 && clydeLeftY < 728) || (clydeLeftX > 700 && clydeLeftX < 835 && clydeLeftY > 644 && clydeLeftY < 728) || 
-        // (clydeLeftX > 512 && clydeLeftX < 673 && clydeLeftY > 644 && clydeLeftY < 728) || (clydeLeftX > 232 && clydeLeftX < 420 && clydeLeftY > 644 && clydeLeftY < 728) || (clydeLeftX > 700 && clydeLeftY > 468 && clydeLeftY < 644) || (clydeLeftX < 232 && clydeLeftY > 468 && clydeLeftY < 644) || (clydeLeftX > 612 && clydeLeftX < 696 && clydeLeftY > 468 && clydeLeftY < 644) || (clydeLeftX > 236 && clydeLeftX < 320 && clydeLeftY > 468 && clydeLeftY < 644) || 
-        // (clydeLeftX > 424 && clydeLeftX < 508 && clydeLeftY > 572 && clydeLeftY < 728) || (clydeLeftX > 328 && clydeLeftX < 608 && clydeLeftY > 574 && clydeLeftY < 644) || (clydeLeftX > 612 && clydeLeftX < 696 && clydeLeftY > 468 && clydeLeftY < 644) || 
-        // (clydeLeftX > 328 && clydeLeftX < 608 && clydeLeftY > 468 && clydeLeftY < 552) || (clydeLeftX > 328 && clydeLeftX < 360 && clydeLeftY > 380 && clydeLeftY < 552) || (clydeLeftX > 328 && clydeLeftX < 608 && clydeLeftY > 428 && clydeLeftY < 414) || (clydeLeftX > 564 && clydeLeftX < 608 && clydeLeftY > 380 && clydeLeftY < 552) ||
-        // (clydeLeftX > 700 && clydeLeftY > 292 && clydeLeftY < 464) || (clydeLeftX < 232 && clydeLeftY > 292 && clydeLeftY < 464) || (clydeLeftX > 236 && clydeLeftX < 320 && clydeLeftY > 468 && clydeLeftY < 644) || (clydeLeftX > 612 && clydeLeftX < 696 && clydeLeftY > 468 && clydeLeftY < 644) || 
-        // (clydeLeftX > 236 && clydeLeftX < 320 && clydeLeftY > 204 && clydeLeftY < 464) || (clydeLeftX > 612 && clydeLeftX < 696 && clydeLeftY > 204 && clydeLeftY < 464) || (clydeLeftX > 236 && clydeLeftX < 420 && clydeLeftY > 292 && clydeLeftY < 376) || (clydeLeftX > 512 && clydeLeftX < 696 && clydeLeftY > 292 && clydeLeftY < 376) || 
-        // (clydeLeftX > 424 && clydeLeftX < 508 && clydeLeftY > 204 && clydeLeftY < 376) || (clydeLeftX > 328 && clydeLeftX < 608 && clydeLeftY > 204 && clydeLeftY < 284) || (clydeLeftX > 70 && clydeLeftX < 232 && clydeLeftY > 204 && clydeLeftY < 284) || (clydeLeftX > 700 && clydeLeftX < 856 && clydeLeftY > 204 && clydeLeftY < 284) || 
-        // (clydeLeftX < 44)) {
-        //     clydeX -= 0;
-        // } else {
-        //     if (clydeLeftFirstLoaded) {
-        //         clydeLeftFirstLoaded = false;
-        //         clydeDownFirstLoaded = false;
-        //         clydeDownSecondLoaded = false;
-        //         clydeRightFirstLoaded = false;
-        //         clydeRightSecondLoaded = false;
-        //         clydeUpFirstLoaded = false;
-        //         clydeUpSecondLoaded = false;
-        //         clydeX -= clydeSpeed;
-        //         clydeLeftX -= clydeSpeed;
-        //         clydeRightX -= clydeSpeed;
-        //         clydeTopX -= clydeSpeed;
-        //         clydeBottomX -= clydeSpeed;
-        //         clydeLeftSecondLoaded = true;
-        //     } else {
-        //         clydeLeftSecondLoaded = false;
-        //         clydeX -= clydeSpeed;
-        //         clydeLeftX -= clydeSpeed;
-        //         clydeRightX -= clydeSpeed;
-        //         clydeTopX -= clydeSpeed;
-        //         clydeBottomX -= clydeSpeed;
-        //         clydeLeftFirstLoaded = true;
-        //     }
-        // }
     }
     if (keyHeldRight) {
-        console.log(pacmanRightX);
-        if ((pacmanRightX > 74 && pacmanRightX < 232 && pacmanRightY > 70 && pacmanRightY < 196) || (pacmanRightX > 232 && pacmanRightX < 420 && pacmanRightY < 196 && pacmanRightY > 70) || (pacmanRightX > 424 && pacmanRightX < 508 && pacmanRightY < 196) || (pacmanRightX > 512 && pacmanRightX < 673 && pacmanRightY < 196 && pacmanRightY > 70) || (pacmanRightX > 700 && pacmanRightX < 856 && pacmanRightY < 196 && pacmanRightY > 70) ||
-        (pacmanRightX > 70 && pacmanRightX < 420 && pacmanRightY > 816 && pacmanRightY < 856) || (pacmanRightX > 512 && pacmanRightX < 816 && pacmanRightY > 816 && pacmanRightY < 856) || (pacmanRightX > 236 && pacmanRightX < 320 && pacmanRightY > 732 && pacmanRightY < 856) || (pacmanRightX > 612 && pacmanRightX < 696 && pacmanRightY > 732 && pacmanRightY < 856) || 
-        (pacmanRightX > 424 && pacmanRightX < 508 && pacmanRightY > 732 && pacmanRightY < 856) || (pacmanRightX > 328 && pacmanRightX < 608 && pacmanRightY > 732 && pacmanRightY < 816) || (pacmanRightX < 109 && pacmanRightY > 732 && pacmanRightY < 816) || (pacmanRightX > 796 && pacmanRightY > 732 && pacmanRightY < 816) || 
-        (pacmanRightX > 700 && pacmanRightX < 788 && pacmanRightY > 644 && pacmanRightY < 816) || (pacmanRightX > 148 && pacmanRightX < 232 && pacmanRightY > 644 && pacmanRightY < 816) || (pacmanRightX > 70 && pacmanRightX < 232 && pacmanRightY > 644 && pacmanRightY < 728) || (pacmanRightX > 700 && pacmanRightX < 788 && pacmanRightY > 644 && pacmanRightY < 728) || (pacmanRightX > 700 && pacmanRightX < 835 && pacmanRightY > 644 && pacmanRightY < 728) || 
-        (pacmanRightX > 512 && pacmanRightX < 673 && pacmanRightY > 644 && pacmanRightY < 728) || (pacmanRightX > 232 && pacmanRightX < 420 && pacmanRightY > 644 && pacmanRightY < 728) || (pacmanRightX > 700 && pacmanRightY > 468 && pacmanRightY < 644) || (pacmanRightX < 232 && pacmanRightY > 468 && pacmanRightY < 644) || 
-        (pacmanRightX > 424 && pacmanRightX < 508 && pacmanRightY > 572 && pacmanRightY < 728) || (pacmanRightX > 328 && pacmanRightX < 608 && pacmanRightY > 574 && pacmanRightY < 644) || (pacmanRightX > 612 && pacmanRightX < 696 && pacmanRightY > 468 && pacmanRightY < 644) || (pacmanRightX > 612 && pacmanRightX < 696 && pacmanRightY > 468 && pacmanRightY < 644) || (pacmanRightX > 236 && pacmanRightX < 320 && pacmanRightY > 468 && pacmanRightY < 644) || 
-        (pacmanRightX > 328 && pacmanRightX < 608 && pacmanRightY > 468 && pacmanRightY < 552) || (pacmanRightX > 328 && pacmanRightX < 360 && pacmanRightY > 380 && pacmanRightY < 552) || (pacmanRightX > 328 && pacmanRightX < 608 && pacmanRightY > 428 && pacmanRightY < 414) || (pacmanRightX > 564 && pacmanRightX < 608 && pacmanRightY > 380 && pacmanRightY < 552) ||
-        (pacmanRightX > 700 && pacmanRightY > 292 && pacmanRightY < 464) || (pacmanRightX < 232 && pacmanRightY > 292 && pacmanRightY < 464) || (pacmanRightX > 236 && pacmanRightX < 320 && pacmanRightY > 468 && pacmanRightY < 644) || (pacmanRightX > 612 && pacmanRightX < 696 && pacmanRightY > 468 && pacmanRightY < 644) || 
-        (pacmanRightX > 236 && pacmanRightX < 320 && pacmanRightY > 204 && pacmanRightY < 464) || (pacmanRightX > 612 && pacmanRightX < 696 && pacmanRightY > 204 && pacmanRightY < 464) || (pacmanRightX > 236 && pacmanRightX < 420 && pacmanRightY > 292 && pacmanRightY < 376) || (pacmanRightX > 512 && pacmanRightX < 696 && pacmanRightY > 292 && pacmanRightY < 376) || 
-        (pacmanRightX > 424 && pacmanRightX < 508 && pacmanRightY > 204 && pacmanRightY < 376) || (pacmanRightX > 328 && pacmanRightX < 608 && pacmanRightY > 204 && pacmanRightY < 284) || (pacmanRightX > 70 && pacmanRightX < 232 && pacmanRightY > 204 && pacmanRightY < 284) || (pacmanRightX > 700 && pacmanRightX < 856 && pacmanRightY > 204 && pacmanRightY < 284) || 
-        (pacmanRightX > 864)) {
+        console.log(`pacman left x is ${pacmanLeftX}`);
+        console.log(`pacman right x is ${pacmanRightX}`);
+        console.log(`pacman top y is ${pacmanTopY}`);
+        console.log(`pacman bottom y is ${pacmanBottomY}`);
+        if ((pacmanRightX > 70 && pacmanRightX < 232 && pacmanRightY > 70 && pacmanRightY < 196) || 
+        (pacmanRightX > 240 && pacmanRightX < 420 && pacmanRightY < 196 && pacmanRightY > 70) || 
+        (pacmanRightX > 424 && pacmanRightX < 508 && pacmanRightY < 196) || 
+        (pacmanRightX > 512 && pacmanRightX < 692 && pacmanRightY < 196 && pacmanRightY > 70) || 
+        (pacmanRightX > 700 && pacmanRightX < 856 && pacmanRightY < 196 && pacmanRightY > 70) ||
+        (pacmanRightX > 70 && pacmanRightX < 232 && pacmanRightY > 204 && pacmanRightY < 284) || 
+        (pacmanRightX > 240 && pacmanRightX < 320 && pacmanRightY > 204 && pacmanRightY < 464) || 
+        (pacmanRightX > 328 && pacmanRightX < 608 && pacmanRightY > 204 && pacmanRightY < 284) || 
+        (pacmanRightX > 612 && pacmanRightX < 696 && pacmanRightY > 204 && pacmanRightY < 464) || 
+        (pacmanRightX > 700 && pacmanRightX < 856 && pacmanRightY > 204 && pacmanRightY < 284) || 
+        (pacmanRightX > 424 && pacmanRightX < 508 && pacmanRightY > 204 && pacmanRightY < 376) || 
+        (pacmanRightX > 240 && pacmanRightX < 420 && pacmanRightY > 292 && pacmanRightY < 376) || 
+        (pacmanRightX > 512 && pacmanRightX < 696 && pacmanRightY > 292 && pacmanRightY < 376) || 
+        (pacmanRightX > 700 && pacmanRightY > 292 && pacmanRightY < 464) || 
+        (pacmanRightX < 232 && pacmanRightY > 292 && pacmanRightY < 464) || 
+        (pacmanRightX > 328 && pacmanRightX < 392 && pacmanRightY > 380 && pacmanRightY < 552) || 
+        (pacmanRightX > 540 && pacmanRightX < 608 && pacmanRightY > 380 && pacmanRightY < 552) || 
+        (pacmanRightX > 328 && pacmanRightX < 460 && pacmanRightY > 380 && pacmanRightY < 448) || 
+        (pacmanRightX > 472 && pacmanRightX < 608 && pacmanRightY > 380 && pacmanRightY < 448) || 
+        (pacmanRightX > 328 && pacmanRightX < 608 && pacmanRightY > 484 && pacmanRightY < 552) || 
+        (pacmanRightX < 232 && pacmanRightY > 468 && pacmanRightY < 640) || 
+        (pacmanRightX > 700 && pacmanRightY > 468 && pacmanRightY < 640) || 
+        (pacmanRightX > 240 && pacmanRightX < 320 && pacmanRightY > 468 && pacmanRightY < 640) || 
+        (pacmanRightX > 612 && pacmanRightX < 696 && pacmanRightY > 468 && pacmanRightY < 640) || 
+        (pacmanRightX > 328 && pacmanRightX < 608 && pacmanRightY > 556 && pacmanRightY < 640) || 
+        (pacmanRightX > 70 && pacmanRightX < 232 && pacmanRightY > 644 && pacmanRightY < 728) || 
+        (pacmanRightX > 240 && pacmanRightX < 420 && pacmanRightY > 644 && pacmanRightY < 728) || 
+        (pacmanRightX > 512 && pacmanRightX < 692 && pacmanRightY > 644 && pacmanRightY < 728) || 
+        (pacmanRightX > 700 && pacmanRightX < 856 && pacmanRightY > 644 && pacmanRightY < 728) || 
+        (pacmanRightX > 424 && pacmanRightX < 508 && pacmanRightY > 556 && pacmanRightY < 728) || 
+        (pacmanRightX > 148 && pacmanRightX < 232 && pacmanRightY > 644 && pacmanRightY < 816) || 
+        (pacmanRightX > 700 && pacmanRightX < 788 && pacmanRightY > 644 && pacmanRightY < 816) || 
+        (pacmanRightX < 132 && pacmanRightY > 732 && pacmanRightY < 816) || 
+        (pacmanRightX > 796 && pacmanRightY > 732 && pacmanRightY < 816) || 
+        (pacmanRightX > 328 && pacmanRightX < 608 && pacmanRightY > 732 && pacmanRightY < 816) || 
+        (pacmanRightX > 240 && pacmanRightX < 320 && pacmanRightY > 732 && pacmanRightY < 900) || 
+        (pacmanRightX > 612 && pacmanRightX < 696 && pacmanRightY > 732 && pacmanRightY < 900) || 
+        (pacmanRightX > 424 && pacmanRightX < 508 && pacmanRightY > 732 && pacmanRightY < 900) || 
+        (pacmanRightX > 70 && pacmanRightX < 420 && pacmanRightY > 820 && pacmanRightY < 900) || 
+        (pacmanRightX > 512 && pacmanRightX < 856 && pacmanRightY > 820 && pacmanRightY < 900) || 
+        (pacmanRightX > 864 && pacmanRightX < 904 && pacmanRightY > 65 && pacmanRightY < 292) || 
+        (pacmanRightX > 864 && pacmanRightX < 904 && pacmanRightY > 640 && pacmanRightY < 864)) {
             pacmanX -= 0;
+        } else if (pacmanLeftX < -27) {
+            pacmanX = 954;
+            pacmanY = 462;
+            pacmanLeftX = 952;
+            pacmanLeftY = 466;
+            pacmanRightX = 964;
+            pacmanRightY = 466;
+            pacmanTopX = 958;
+            pacmanTopY = 460;
+            pacmanBottomX = 958;
+            pacmanBottomY = 472;
         } else {
+            if (pacmanRightX > 964) {
+                pacmanX = -26;
+                pacmanY = 462;
+                pacmanLeftX = -28;
+                pacmanLeftY = 466;
+                pacmanRightX = -16;
+                pacmanRightY = 466;
+                pacmanTopX = -22;
+                pacmanTopY = 460;
+                pacmanBottomX = -22;
+                pacmanBottomY = 472;
+            }
             if (pacmanRightLoaded) {
                 pacmanRightLoaded = false;
                 pacmanLeftLoaded = false;
@@ -983,98 +1033,76 @@ function pacmanMove() {
                 pacmanRightLoaded = true;
             }
         }
-        
-        
-        // if ((inkyRightX > 70 && inkyRightX < 232 && inkyRightY > 70 && inkyRightY < 196) || (inkyRightX > 232 && inkyRightX < 420 && inkyRightY < 196 && inkyRightY > 70) || (inkyRightX > 424 && inkyRightX < 508 && inkyRightY < 196) || (inkyRightX > 512 && inkyRightX < 673 && inkyRightY < 196 && inkyRightY > 70) || (inkyRightX > 700 && inkyRightX < 856 && inkyRightY < 196 && inkyRightY > 70) ||
-        // (inkyRightX > 70 && inkyRightX < 420 && inkyRightY > 856 && inkyRightY < 856) || (inkyRightX > 512 && inkyRightX < 856 && inkyRightY > 856 && inkyRightY < 856) || (inkyRightX > 236 && inkyRightX < 320 && inkyRightY > 732 && inkyRightY < 856) || (inkyRightX > 612 && inkyRightX < 696 && inkyRightY > 732 && inkyRightY < 856) || 
-        // (inkyRightX > 424 && inkyRightX < 508 && inkyRightY > 732 && inkyRightY < 856) || (inkyRightX > 328 && inkyRightX < 608 && inkyRightY > 732 && inkyRightY < 816) || (inkyRightX < 109 && inkyRightY > 732 && inkyRightY < 816) || (inkyRightX > 796 && inkyRightY > 732 && inkyRightY < 816) || 
-        // (inkyRightX > 700 && inkyRightX < 788 && inkyRightY > 644 && inkyRightY < 816) || (inkyRightX > 148 && inkyRightX < 232 && inkyRightY > 644 && inkyRightY < 816) || (inkyRightX > 70 && inkyRightX < 232 && inkyRightY > 644 && inkyRightY < 728) || (inkyRightX > 700 && inkyRightX < 788 && inkyRightY > 644 && inkyRightY < 728) || (inkyRightX > 700 && inkyRightX < 835 && inkyRightY > 644 && inkyRightY < 728) || 
-        // (inkyRightX > 512 && inkyRightX < 673 && inkyRightY > 644 && inkyRightY < 728) || (inkyRightX > 232 && inkyRightX < 420 && inkyRightY > 644 && inkyRightY < 728) || (inkyRightX > 700 && inkyRightY > 468 && inkyRightY < 644) || (inkyRightX < 232 && inkyRightY > 468 && inkyRightY < 644) || 
-        // (inkyRightX > 424 && inkyRightX < 508 && inkyRightY > 572 && inkyRightY < 728) || (inkyRightX > 328 && inkyRightX < 608 && inkyRightY > 574 && inkyRightY < 644) || (inkyRightX > 612 && inkyRightX < 696 && inkyRightY > 468 && inkyRightY < 644) || (inkyRightX > 612 && inkyRightX < 696 && inkyRightY > 468 && inkyRightY < 644) || (inkyRightX > 236 && inkyRightX < 320 && inkyRightY > 468 && inkyRightY < 644) || 
-        // (inkyRightX > 328 && inkyRightX < 608 && inkyRightY > 468 && inkyRightY < 552) || (inkyRightX > 328 && inkyRightX < 360 && inkyRightY > 380 && inkyRightY < 552) || (inkyRightX > 328 && inkyRightX < 608 && inkyRightY > 428 && inkyRightY < 414) || (inkyRightX > 564 && inkyRightX < 608 && inkyRightY > 380 && inkyRightY < 552) ||
-        // (inkyRightX > 700 && inkyRightY > 292 && inkyRightY < 464) || (inkyRightX < 232 && inkyRightY > 292 && inkyRightY < 464) || (inkyRightX > 236 && inkyRightX < 320 && inkyRightY > 468 && inkyRightY < 644) || (inkyRightX > 612 && inkyRightX < 696 && inkyRightY > 468 && inkyRightY < 644) || 
-        // (inkyRightX > 236 && inkyRightX < 320 && inkyRightY > 204 && inkyRightY < 464) || (inkyRightX > 612 && inkyRightX < 696 && inkyRightY > 204 && inkyRightY < 464) || (inkyRightX > 236 && inkyRightX < 420 && inkyRightY > 292 && inkyRightY < 376) || (inkyRightX > 512 && inkyRightX < 696 && inkyRightY > 292 && inkyRightY < 376) || 
-        // (inkyRightX > 424 && inkyRightX < 508 && inkyRightY > 204 && inkyRightY < 376) || (inkyRightX > 328 && inkyRightX < 608 && inkyRightY > 204 && inkyRightY < 284) || (inkyRightX > 70 && inkyRightX < 232 && inkyRightY > 204 && inkyRightY < 284) || (inkyRightX > 700 && inkyRightX < 856 && inkyRightY > 204 && inkyRightY < 284) || 
-        // (inkyRightX > 880)) {
-        //     inkyX -= 0;
-        // } else {
-        //     if (inkyRightFirstLoaded) {
-        //         inkyRightFirstLoaded = false;
-        //         inkyDownFirstLoaded = false;
-        //         inkyDownSecondLoaded = false;
-        //         inkyLeftFirstLoaded = false;
-        //         inkyLeftSecondLoaded = false;
-        //         inkyUpFirstLoaded = false;
-        //         inkyUpSecondLoaded = false;
-        //         inkyX += inkySpeed;
-        //         inkyLeftX += inkySpeed;
-        //         inkyRightX += inkySpeed;
-        //         inkyTopX += inkySpeed;
-        //         inkyBottomX += inkySpeed;
-        //         inkyRightSecondLoaded = true;
-        //     } else {
-        //         inkyRightSecondLoaded = false;
-        //         inkyX += inkySpeed;
-        //         inkyLeftX += inkySpeed;
-        //         inkyRightX += inkySpeed;
-        //         inkyTopX += inkySpeed;
-        //         inkyBottomX += inkySpeed;
-        //         inkyRightFirstLoaded = true;
-        //     }
-        // }
-        // if ((clydeRightX > 70 && clydeRightX < 232 && clydeRightY > 70 && clydeRightY < 196) || (clydeRightX > 232 && clydeRightX < 420 && clydeRightY < 196 && clydeRightY > 70) || (clydeRightX > 424 && clydeRightX < 508 && clydeRightY < 196) || (clydeRightX > 512 && clydeRightX < 673 && clydeRightY < 196 && clydeRightY > 70) || (clydeRightX > 700 && clydeRightX < 856 && clydeRightY < 196 && clydeRightY > 70) ||
-        // (clydeRightX > 70 && clydeRightX < 420 && clydeRightY > 856 && clydeRightY < 856) || (clydeRightX > 512 && clydeRightX < 856 && clydeRightY > 856 && clydeRightY < 856) || (clydeRightX > 236 && clydeRightX < 320 && clydeRightY > 732 && clydeRightY < 856) || (clydeRightX > 612 && clydeRightX < 696 && clydeRightY > 732 && clydeRightY < 856) || 
-        // (clydeRightX > 424 && clydeRightX < 508 && clydeRightY > 732 && clydeRightY < 856) || (clydeRightX > 328 && clydeRightX < 608 && clydeRightY > 732 && clydeRightY < 816) || (clydeRightX < 109 && clydeRightY > 732 && clydeRightY < 816) || (clydeRightX > 796 && clydeRightY > 732 && clydeRightY < 816) || 
-        // (clydeRightX > 700 && clydeRightX < 788 && clydeRightY > 644 && clydeRightY < 816) || (clydeRightX > 148 && clydeRightX < 232 && clydeRightY > 644 && clydeRightY < 816) || (clydeRightX > 70 && clydeRightX < 232 && clydeRightY > 644 && clydeRightY < 728) || (clydeRightX > 700 && clydeRightX < 788 && clydeRightY > 644 && clydeRightY < 728) || (clydeRightX > 700 && clydeRightX < 835 && clydeRightY > 644 && clydeRightY < 728) || 
-        // (clydeRightX > 512 && clydeRightX < 673 && clydeRightY > 644 && clydeRightY < 728) || (clydeRightX > 232 && clydeRightX < 420 && clydeRightY > 644 && clydeRightY < 728) || (clydeRightX > 700 && clydeRightY > 468 && clydeRightY < 644) || (clydeRightX < 232 && clydeRightY > 468 && clydeRightY < 644) || 
-        // (clydeRightX > 424 && clydeRightX < 508 && clydeRightY > 572 && clydeRightY < 728) || (clydeRightX > 328 && clydeRightX < 608 && clydeRightY > 574 && clydeRightY < 644) || (clydeRightX > 612 && clydeRightX < 696 && clydeRightY > 468 && clydeRightY < 644) || (clydeRightX > 612 && clydeRightX < 696 && clydeRightY > 468 && clydeRightY < 644) || (clydeRightX > 236 && clydeRightX < 320 && clydeRightY > 468 && clydeRightY < 644) || 
-        // (clydeRightX > 328 && clydeRightX < 608 && clydeRightY > 468 && clydeRightY < 552) || (clydeRightX > 328 && clydeRightX < 360 && clydeRightY > 380 && clydeRightY < 552) || (clydeRightX > 328 && clydeRightX < 608 && clydeRightY > 428 && clydeRightY < 414) || (clydeRightX > 564 && clydeRightX < 608 && clydeRightY > 380 && clydeRightY < 552) ||
-        // (clydeRightX > 700 && clydeRightY > 292 && clydeRightY < 464) || (clydeRightX < 232 && clydeRightY > 292 && clydeRightY < 464) || (clydeRightX > 236 && clydeRightX < 320 && clydeRightY > 468 && clydeRightY < 644) || (clydeRightX > 612 && clydeRightX < 696 && clydeRightY > 468 && clydeRightY < 644) || 
-        // (clydeRightX > 236 && clydeRightX < 320 && clydeRightY > 204 && clydeRightY < 464) || (clydeRightX > 612 && clydeRightX < 696 && clydeRightY > 204 && clydeRightY < 464) || (clydeRightX > 236 && clydeRightX < 420 && clydeRightY > 292 && clydeRightY < 376) || (clydeRightX > 512 && clydeRightX < 696 && clydeRightY > 292 && clydeRightY < 376) || 
-        // (clydeRightX > 424 && clydeRightX < 508 && clydeRightY > 204 && clydeRightY < 376) || (clydeRightX > 328 && clydeRightX < 608 && clydeRightY > 204 && clydeRightY < 284) || (clydeRightX > 70 && clydeRightX < 232 && clydeRightY > 204 && clydeRightY < 284) || (clydeRightX > 700 && clydeRightX < 856 && clydeRightY > 204 && clydeRightY < 284) || 
-        // (clydeRightX > 880)) {
-        //     clydeX -= 0;
-        // } else {
-        //     if (clydeRightFirstLoaded) {
-        //         clydeRightFirstLoaded = false;
-        //         clydeDownFirstLoaded = false;
-        //         clydeDownSecondLoaded = false;
-        //         clydeLeftFirstLoaded = false;
-        //         clydeLeftSecondLoaded = false;
-        //         clydeUpFirstLoaded = false;
-        //         clydeUpSecondLoaded = false;
-        //         clydeX += clydeSpeed;
-        //         clydeLeftX += clydeSpeed;
-        //         clydeRightX += clydeSpeed;
-        //         clydeTopX += clydeSpeed;
-        //         clydeBottomX += clydeSpeed;
-        //         clydeRightSecondLoaded = true;
-        //     } else {
-        //         clydeRightSecondLoaded = false;
-        //         clydeX += clydeSpeed;
-        //         clydeLeftX += clydeSpeed;
-        //         clydeRightX += clydeSpeed;
-        //         clydeTopX += clydeSpeed;
-        //         clydeBottomX += clydeSpeed;
-        //         clydeRightFirstLoaded = true;
-        //     }
-        // }
     }
     if (keyHeldUp) {
-        console.log(pacmanTopY);
-        if ((pacmanTopX > 70 && pacmanTopX < 232 && pacmanTopY > 70 && pacmanTopY < 196) || (pacmanTopX > 232 && pacmanTopX < 420 && pacmanTopY < 196 && pacmanTopY > 70) || (pacmanTopX > 424 && pacmanTopX < 508 && pacmanTopY < 196) || (pacmanTopX > 512 && pacmanTopX < 673 && pacmanTopY < 196 && pacmanTopY > 70) || (pacmanTopX > 700 && pacmanTopX < 856 && pacmanTopY < 196 && pacmanTopY > 70) || 
-        (pacmanTopX > 70 && pacmanTopX < 420 && pacmanTopY > 816 && pacmanTopY < 856) || (pacmanTopX > 512 && pacmanTopX < 856 && pacmanTopY > 816 && pacmanTopY < 856) || (pacmanTopX > 236 && pacmanTopX < 320 && pacmanTopY > 732 && pacmanTopY < 856) || (pacmanTopX > 612 && pacmanTopX < 696 && pacmanTopY > 732 && pacmanTopY < 856) || 
-        (pacmanTopX > 424 && pacmanTopX < 508 && pacmanTopY > 732 && pacmanTopY < 856) || (pacmanTopX > 328 && pacmanTopX < 608 && pacmanTopY > 732 && pacmanTopY < 816) || (pacmanTopX < 109 && pacmanTopY > 732 && pacmanTopY < 816) || (pacmanTopX > 796 && pacmanTopY > 732 && pacmanTopY < 816) || 
-        (pacmanTopX > 700 && pacmanTopX < 788 && pacmanTopY > 644 && pacmanTopY < 816) || (pacmanTopX > 148 && pacmanTopX < 232 && pacmanTopY > 644 && pacmanTopY < 816) || (pacmanTopX > 70 && pacmanTopX < 232 && pacmanTopY > 644 && pacmanTopY < 728) || (pacmanTopX > 700 && pacmanTopX < 788 && pacmanTopY > 644 && pacmanTopY < 728) || (pacmanTopX > 700 && pacmanTopX < 835 && pacmanTopY > 644 && pacmanTopY < 728) || 
-        (pacmanTopX > 512 && pacmanTopX < 673 && pacmanTopY > 644 && pacmanTopY < 728) || (pacmanTopX > 232 && pacmanTopX < 420 && pacmanTopY > 644 && pacmanTopY < 728) || (pacmanTopX > 700 && pacmanTopY > 468 && pacmanTopY < 644) || (pacmanTopX < 232 && pacmanTopY > 468 && pacmanTopY < 644) || 
-        (pacmanTopX > 424 && pacmanTopX < 508 && pacmanTopY > 572 && pacmanTopY < 728) || (pacmanTopX > 328 && pacmanTopX < 608 && pacmanTopY > 574 && pacmanTopY < 644) || (pacmanTopX > 612 && pacmanTopX < 696 && pacmanTopY > 468 && pacmanTopY < 644) || (pacmanTopX > 612 && pacmanTopX < 696 && pacmanTopY > 468 && pacmanTopY < 644) || (pacmanTopX > 236 && pacmanTopX < 320 && pacmanTopY > 468 && pacmanTopY < 644) || 
-        (pacmanTopX > 328 && pacmanTopX < 608 && pacmanTopY > 468 && pacmanTopY < 552) || (pacmanTopX > 328 && pacmanTopX < 360 && pacmanTopY > 380 && pacmanTopY < 552) || (pacmanTopX > 328 && pacmanTopX < 608 && pacmanTopY > 428 && pacmanTopY < 414) || (pacmanTopX > 564 && pacmanTopX < 608 && pacmanTopY > 380 && pacmanTopY < 552) ||
-        (pacmanTopX > 700 && pacmanTopY > 292 && pacmanTopY < 464) || (pacmanTopX < 232 && pacmanTopY > 292 && pacmanTopY < 464) || (pacmanTopX > 236 && pacmanTopX < 320 && pacmanTopY > 468 && pacmanTopY < 644) || (pacmanTopX > 612 && pacmanTopX < 696 && pacmanTopY > 468 && pacmanTopY < 644) || 
-        (pacmanTopX > 236 && pacmanTopX < 320 && pacmanTopY > 204 && pacmanTopY < 464) || (pacmanTopX > 612 && pacmanTopX < 696 && pacmanTopY > 204 && pacmanTopY < 464) || (pacmanTopX > 236 && pacmanTopX < 420 && pacmanTopY > 292 && pacmanTopY < 376) || (pacmanTopX > 512 && pacmanTopX < 696 && pacmanTopY > 292 && pacmanTopY < 376) || 
-        (pacmanTopX > 424 && pacmanTopX < 508 && pacmanTopY > 204 && pacmanTopY < 376) || (pacmanTopX > 328 && pacmanTopX < 608 && pacmanTopY > 204 && pacmanTopY < 284) || (pacmanTopX > 70 && pacmanTopX < 232 && pacmanTopY > 204 && pacmanTopY < 284) || (pacmanTopX > 700 && pacmanTopX < 856 && pacmanTopY > 204 && pacmanTopY < 284) || 
-        (pacmanTopY < 68)) {
+        // console.log(pacmanTopY);
+        if ((pacmanTopY < 64) || (pacmanTopX > 70 && pacmanTopX < 232 && pacmanTopY > 70 && pacmanTopY < 196) || 
+        (pacmanTopX > 240 && pacmanTopX < 420 && pacmanTopY < 196 && pacmanTopY > 70) || 
+        (pacmanTopX > 424 && pacmanTopX < 508 && pacmanTopY < 196) || 
+        (pacmanTopX > 512 && pacmanTopX < 692 && pacmanTopY < 196 && pacmanTopY > 70) || 
+        (pacmanTopX > 700 && pacmanTopX < 856 && pacmanTopY < 196 && pacmanTopY > 70) || 
+        (pacmanTopX > 70 && pacmanTopX < 232 && pacmanTopY > 204 && pacmanTopY < 284) || 
+        (pacmanTopX > 240 && pacmanTopX < 320 && pacmanTopY > 204 && pacmanTopY < 464) || 
+        (pacmanTopX > 328 && pacmanTopX < 608 && pacmanTopY > 204 && pacmanTopY < 284) || 
+        (pacmanTopX > 612 && pacmanTopX < 696 && pacmanTopY > 204 && pacmanTopY < 464) || 
+        (pacmanTopX > 700 && pacmanTopX < 856 && pacmanTopY > 204 && pacmanTopY < 284) || 
+        (pacmanTopX > 424 && pacmanTopX < 508 && pacmanTopY > 204 && pacmanTopY < 376) || 
+        (pacmanTopX > 240 && pacmanTopX < 420 && pacmanTopY > 292 && pacmanTopY < 376) || 
+        (pacmanTopX > 512 && pacmanTopX < 696 && pacmanTopY > 292 && pacmanTopY < 376) || 
+        (pacmanTopX > 700 && pacmanTopY > 292 && pacmanTopY < 464) || 
+        (pacmanTopX < 232 && pacmanTopY > 292 && pacmanTopY < 464) || 
+        (pacmanTopX > 328 && pacmanTopX < 392 && pacmanTopY > 380 && pacmanTopY < 552) || 
+        (pacmanTopX > 540 && pacmanTopX < 608 && pacmanTopY > 380 && pacmanTopY < 552) || 
+        (pacmanTopX > 328 && pacmanTopX < 460 && pacmanTopY > 380 && pacmanTopY < 448) || 
+        (pacmanTopX > 472 && pacmanTopX < 608 && pacmanTopY > 380 && pacmanTopY < 448) || 
+        (pacmanTopX > 328 && pacmanTopX < 608 && pacmanTopY > 484 && pacmanTopY < 552) || 
+        (pacmanTopX < 232 && pacmanTopY > 468 && pacmanTopY < 640) || 
+        (pacmanTopX > 700 && pacmanTopY > 468 && pacmanTopY < 640) || 
+        (pacmanTopX > 240 && pacmanTopX < 320 && pacmanTopY > 468 && pacmanTopY < 640) || 
+        (pacmanTopX > 612 && pacmanTopX < 696 && pacmanTopY > 468 && pacmanTopY < 640) || 
+        (pacmanTopX > 328 && pacmanTopX < 608 && pacmanTopY > 556 && pacmanTopY < 640) || 
+        (pacmanTopX > 70 && pacmanTopX < 232 && pacmanTopY > 644 && pacmanTopY < 728) || 
+        (pacmanTopX > 240 && pacmanTopX < 420 && pacmanTopY > 644 && pacmanTopY < 728) || 
+        (pacmanTopX > 512 && pacmanTopX < 692 && pacmanTopY > 644 && pacmanTopY < 728) || 
+        (pacmanTopX > 700 && pacmanTopX < 856 && pacmanTopY > 644 && pacmanTopY < 728) || 
+        (pacmanTopX > 424 && pacmanTopX < 508 && pacmanTopY > 556 && pacmanTopY < 728) || 
+        (pacmanTopX > 148 && pacmanTopX < 232 && pacmanTopY > 644 && pacmanTopY < 816) || 
+        (pacmanTopX > 700 && pacmanTopX < 788 && pacmanTopY > 644 && pacmanTopY < 816) || 
+        (pacmanTopX < 132 && pacmanTopY > 732 && pacmanTopY < 816) || 
+        (pacmanTopX > 796 && pacmanTopY > 732 && pacmanTopY < 816) || 
+        (pacmanTopX > 328 && pacmanTopX < 608 && pacmanTopY > 732 && pacmanTopY < 816) || 
+        (pacmanTopX > 240 && pacmanTopX < 320 && pacmanTopY > 732 && pacmanTopY < 900) || 
+        (pacmanTopX > 612 && pacmanTopX < 696 && pacmanTopY > 732 && pacmanTopY < 900) || 
+        (pacmanTopX > 424 && pacmanTopX < 508 && pacmanTopY > 732 && pacmanTopY < 900) || 
+        (pacmanTopX > 70 && pacmanTopX < 420 && pacmanTopY > 820 && pacmanTopY < 900) || 
+        (pacmanTopX > 512 && pacmanTopX < 856 && pacmanTopY > 820 && pacmanTopY < 900) || 
+        (pacmanTopX > 0 && pacmanTopX < 68 && pacmanTopY > 68 && pacmanTopY < 292) || 
+        (pacmanTopX > 0 && pacmanTopX < 68 && pacmanTopY > 640 && pacmanTopY < 864)) {
             pacmanY -= 0;
+        } else if (pacmanLeftX < -27) {
+            pacmanX = 954;
+            pacmanY = 462;
+            pacmanLeftX = 952;
+            pacmanLeftY = 466;
+            pacmanRightX = 964;
+            pacmanRightY = 466;
+            pacmanTopX = 958;
+            pacmanTopY = 460;
+            pacmanBottomX = 958;
+            pacmanBottomY = 472;
         } else {
+            if (pacmanRightX > 964) {
+                pacmanX = -26;
+                pacmanY = 462;
+                pacmanLeftX = -28;
+                pacmanLeftY = 466;
+                pacmanRightX = -16;
+                pacmanRightY = 466;
+                pacmanTopX = -22;
+                pacmanTopY = 460;
+                pacmanBottomX = -22;
+                pacmanBottomY = 472;
+            } 
             if (pacmanUpLoaded) {
                 pacmanRightLoaded = false;
                 pacmanLeftLoaded = false;
@@ -1099,98 +1127,74 @@ function pacmanMove() {
                 pacmanUpLoaded = true;
             }
         }
-        
-        
-        // if ((inkyTopX > 70 && inkyTopX < 232 && inkyTopY > 70 && inkyTopY < 196) || (inkyTopX > 232 && inkyTopX < 420 && inkyTopY < 196 && inkyTopY > 70) || (inkyTopX > 424 && inkyTopX < 508 && inkyTopY < 196) || (inkyTopX > 512 && inkyTopX < 673 && inkyTopY < 196 && inkyTopY > 70) || (inkyTopX > 700 && inkyTopX < 856 && inkyTopY < 196 && inkyTopY > 70) || 
-        // (inkyTopX > 70 && inkyTopX < 420 && inkyTopY > 856 && inkyTopY < 856) || (inkyTopX > 512 && inkyTopX < 856 && inkyTopY > 856 && inkyTopY < 856) || (inkyTopX > 236 && inkyTopX < 320 && inkyTopY > 732 && inkyTopY < 856) || (inkyTopX > 612 && inkyTopX < 696 && inkyTopY > 732 && inkyTopY < 856) || 
-        // (inkyTopX > 424 && inkyTopX < 508 && inkyTopY > 732 && inkyTopY < 856) || (inkyTopX > 328 && inkyTopX < 608 && inkyTopY > 732 && inkyTopY < 816) || (inkyTopX < 109 && inkyTopY > 732 && inkyTopY < 816) || (inkyTopX > 796 && inkyTopY > 732 && inkyTopY < 816) || 
-        // (inkyTopX > 700 && inkyTopX < 788 && inkyTopY > 644 && inkyTopY < 816) || (inkyTopX > 148 && inkyTopX < 232 && inkyTopY > 644 && inkyTopY < 816) || (inkyTopX > 70 && inkyTopX < 232 && inkyTopY > 644 && inkyTopY < 728) || (inkyTopX > 700 && inkyTopX < 788 && inkyTopY > 644 && inkyTopY < 728) || (inkyTopX > 700 && inkyTopX < 835 && inkyTopY > 644 && inkyTopY < 728) || 
-        // (inkyTopX > 512 && inkyTopX < 673 && inkyTopY > 644 && inkyTopY < 728) || (inkyTopX > 232 && inkyTopX < 420 && inkyTopY > 644 && inkyTopY < 728) || (inkyTopX > 700 && inkyTopY > 468 && inkyTopY < 644) || (inkyTopX < 232 && inkyTopY > 468 && inkyTopY < 644) || 
-        // (inkyTopX > 424 && inkyTopX < 508 && inkyTopY > 572 && inkyTopY < 728) || (inkyTopX > 328 && inkyTopX < 608 && inkyTopY > 574 && inkyTopY < 644) || (inkyTopX > 612 && inkyTopX < 696 && inkyTopY > 468 && inkyTopY < 644) || (inkyTopX > 612 && inkyTopX < 696 && inkyTopY > 468 && inkyTopY < 644) || (inkyTopX > 236 && inkyTopX < 320 && inkyTopY > 468 && inkyTopY < 644) || 
-        // (inkyTopX > 328 && inkyTopX < 608 && inkyTopY > 468 && inkyTopY < 552) || (inkyTopX > 328 && inkyTopX < 360 && inkyTopY > 380 && inkyTopY < 552) || (inkyTopX > 328 && inkyTopX < 608 && inkyTopY > 428 && inkyTopY < 414) || (inkyTopX > 564 && inkyTopX < 608 && inkyTopY > 380 && inkyTopY < 552) ||
-        // (inkyTopX > 700 && inkyTopY > 292 && inkyTopY < 464) || (inkyTopX < 232 && inkyTopY > 292 && inkyTopY < 464) || (inkyTopX > 236 && inkyTopX < 320 && inkyTopY > 468 && inkyTopY < 644) || (inkyTopX > 612 && inkyTopX < 696 && inkyTopY > 468 && inkyTopY < 644) || 
-        // (inkyTopX > 236 && inkyTopX < 320 && inkyTopY > 204 && inkyTopY < 464) || (inkyTopX > 612 && inkyTopX < 696 && inkyTopY > 204 && inkyTopY < 464) || (inkyTopX > 236 && inkyTopX < 420 && inkyTopY > 292 && inkyTopY < 376) || (inkyTopX > 512 && inkyTopX < 696 && inkyTopY > 292 && inkyTopY < 376) || 
-        // (inkyTopX > 424 && inkyTopX < 508 && inkyTopY > 204 && inkyTopY < 376) || (inkyTopX > 328 && inkyTopX < 608 && inkyTopY > 204 && inkyTopY < 284) || (inkyTopX > 70 && inkyTopX < 232 && inkyTopY > 204 && inkyTopY < 284) || (inkyTopX > 700 && inkyTopX < 856 && inkyTopY > 204 && inkyTopY < 284) || 
-        // (inkyTopY < 43)) {
-        //     inkyY -= 0;
-        // } else {
-        //     if (inkyUpFirstLoaded) {
-        //         inkyUpFirstLoaded = false;
-        //         inkyDownFirstLoaded = false;
-        //         inkyDownSecondLoaded = false;
-        //         inkyLeftFirstLoaded = false;
-        //         inkyLeftSecondLoaded = false;
-        //         inkyRightFirstLoaded = false;
-        //         inkyRightSecondLoaded = false;
-        //         inkyY -= inkySpeed;
-        //         inkyLeftY -= inkySpeed;
-        //         inkyRightY -= inkySpeed;
-        //         inkyTopY -= inkySpeed;
-        //         inkyBottomY -= inkySpeed;
-        //         inkyUpSecondLoaded = true;
-        //     } else {
-        //         inkyUpSecondLoaded = false;
-        //         inkyY -= inkySpeed;
-        //         inkyLeftY -= inkySpeed;
-        //         inkyRightY -= inkySpeed;
-        //         inkyTopY -= inkySpeed;
-        //         inkyBottomY -= inkySpeed;
-        //         inkyUpFirstLoaded = true;
-        //     }
-        // }
-        // if ((clydeTopX > 70 && clydeTopX < 232 && clydeTopY > 70 && clydeTopY < 196) || (clydeTopX > 232 && clydeTopX < 420 && clydeTopY < 196 && clydeTopY > 70) || (clydeTopX > 424 && clydeTopX < 508 && clydeTopY < 196) || (clydeTopX > 512 && clydeTopX < 673 && clydeTopY < 196 && clydeTopY > 70) || (clydeTopX > 700 && clydeTopX < 856 && clydeTopY < 196 && clydeTopY > 70) || 
-        // (clydeTopX > 70 && clydeTopX < 420 && clydeTopY > 856 && clydeTopY < 856) || (clydeTopX > 512 && clydeTopX < 856 && clydeTopY > 856 && clydeTopY < 856) || (clydeTopX > 236 && clydeTopX < 320 && clydeTopY > 732 && clydeTopY < 856) || (clydeTopX > 612 && clydeTopX < 696 && clydeTopY > 732 && clydeTopY < 856) || 
-        // (clydeTopX > 424 && clydeTopX < 508 && clydeTopY > 732 && clydeTopY < 856) || (clydeTopX > 328 && clydeTopX < 608 && clydeTopY > 732 && clydeTopY < 816) || (clydeTopX < 109 && clydeTopY > 732 && clydeTopY < 816) || (clydeTopX > 796 && clydeTopY > 732 && clydeTopY < 816) || 
-        // (clydeTopX > 700 && clydeTopX < 788 && clydeTopY > 644 && clydeTopY < 816) || (clydeTopX > 148 && clydeTopX < 232 && clydeTopY > 644 && clydeTopY < 816) || (clydeTopX > 70 && clydeTopX < 232 && clydeTopY > 644 && clydeTopY < 728) || (clydeTopX > 700 && clydeTopX < 788 && clydeTopY > 644 && clydeTopY < 728) || (clydeTopX > 700 && clydeTopX < 835 && clydeTopY > 644 && clydeTopY < 728) || 
-        // (clydeTopX > 512 && clydeTopX < 673 && clydeTopY > 644 && clydeTopY < 728) || (clydeTopX > 232 && clydeTopX < 420 && clydeTopY > 644 && clydeTopY < 728) || (clydeTopX > 700 && clydeTopY > 468 && clydeTopY < 644) || (clydeTopX < 232 && clydeTopY > 468 && clydeTopY < 644) || 
-        // (clydeTopX > 424 && clydeTopX < 508 && clydeTopY > 572 && clydeTopY < 728) || (clydeTopX > 328 && clydeTopX < 608 && clydeTopY > 574 && clydeTopY < 644) || (clydeTopX > 612 && clydeTopX < 696 && clydeTopY > 468 && clydeTopY < 644) || (clydeTopX > 612 && clydeTopX < 696 && clydeTopY > 468 && clydeTopY < 644) || (clydeTopX > 236 && clydeTopX < 320 && clydeTopY > 468 && clydeTopY < 644) || 
-        // (clydeTopX > 328 && clydeTopX < 608 && clydeTopY > 468 && clydeTopY < 552) || (clydeTopX > 328 && clydeTopX < 360 && clydeTopY > 380 && clydeTopY < 552) || (clydeTopX > 328 && clydeTopX < 608 && clydeTopY > 428 && clydeTopY < 414) || (clydeTopX > 564 && clydeTopX < 608 && clydeTopY > 380 && clydeTopY < 552) ||
-        // (clydeTopX > 700 && clydeTopY > 292 && clydeTopY < 464) || (clydeTopX < 232 && clydeTopY > 292 && clydeTopY < 464) || (clydeTopX > 236 && clydeTopX < 320 && clydeTopY > 468 && clydeTopY < 644) || (clydeTopX > 612 && clydeTopX < 696 && clydeTopY > 468 && clydeTopY < 644) || 
-        // (clydeTopX > 236 && clydeTopX < 320 && clydeTopY > 204 && clydeTopY < 464) || (clydeTopX > 612 && clydeTopX < 696 && clydeTopY > 204 && clydeTopY < 464) || (clydeTopX > 236 && clydeTopX < 420 && clydeTopY > 292 && clydeTopY < 376) || (clydeTopX > 512 && clydeTopX < 696 && clydeTopY > 292 && clydeTopY < 376) || 
-        // (clydeTopX > 424 && clydeTopX < 508 && clydeTopY > 204 && clydeTopY < 376) || (clydeTopX > 328 && clydeTopX < 608 && clydeTopY > 204 && clydeTopY < 284) || (clydeTopX > 70 && clydeTopX < 232 && clydeTopY > 204 && clydeTopY < 284) || (clydeTopX > 700 && clydeTopX < 856 && clydeTopY > 204 && clydeTopY < 284) || 
-        // (clydeTopY < 43)) {
-        //     clydeY -= 0;
-        // } else {
-        //     if (clydeUpFirstLoaded) {
-        //         clydeUpFirstLoaded = false;
-        //         clydeDownFirstLoaded = false;
-        //         clydeDownSecondLoaded = false;
-        //         clydeLeftFirstLoaded = false;
-        //         clydeLeftSecondLoaded = false;
-        //         clydeRightFirstLoaded = false;
-        //         clydeRightSecondLoaded = false;
-        //         clydeY -= clydeSpeed;
-        //         clydeLeftY -= clydeSpeed;
-        //         clydeRightY -= clydeSpeed;
-        //         clydeTopY -= clydeSpeed;
-        //         clydeBottomY -= clydeSpeed;
-        //         clydeUpSecondLoaded = true;
-        //     } else {
-        //         clydeUpSecondLoaded = false;
-        //         clydeY -= clydeSpeed;
-        //         clydeLeftY -= clydeSpeed;
-        //         clydeRightY -= clydeSpeed;
-        //         clydeTopY -= clydeSpeed;
-        //         clydeBottomY -= clydeSpeed;
-        //         clydeUpFirstLoaded = true;
-        //     }
-        // }
     }
     if (keyHeldDown) {
-        console.log(pacmanBottomY);
-        if ((pacmanBottomX > 70 && pacmanBottomX < 232 && pacmanBottomY > 70 && pacmanBottomY < 196) || (pacmanBottomX > 232 && pacmanBottomX < 420 && pacmanBottomY < 196 && pacmanBottomY > 70) || (pacmanBottomX > 424 && pacmanBottomX < 508 && pacmanBottomY < 196) || (pacmanBottomX > 512 && pacmanBottomX < 673 && pacmanBottomY < 196 && pacmanBottomY > 70) || (pacmanBottomX > 700 && pacmanBottomX < 856 && pacmanBottomY < 196 && pacmanBottomY > 70) || 
-        (pacmanBottomX > 70 && pacmanBottomX < 420 && pacmanBottomY > 816 && pacmanBottomY < 856) || (pacmanBottomX > 512 && pacmanBottomX < 816 && pacmanBottomY > 816 && pacmanBottomY < 856) || (pacmanBottomX > 236 && pacmanBottomX < 320 && pacmanBottomY > 732 && pacmanBottomY < 856) || (pacmanBottomX > 612 && pacmanBottomX < 696 && pacmanBottomY > 732 && pacmanBottomY < 856) || 
-        (pacmanBottomX > 424 && pacmanBottomX < 508 && pacmanBottomY > 732 && pacmanBottomY < 856) || (pacmanBottomX > 328 && pacmanBottomX < 608 && pacmanBottomY > 732 && pacmanBottomY < 816) || (pacmanBottomX < 109 && pacmanBottomY > 732 && pacmanBottomY < 816) || (pacmanBottomX > 796 && pacmanBottomY > 732 && pacmanBottomY < 816) || 
-        (pacmanBottomX > 700 && pacmanBottomX < 788 && pacmanBottomY > 644 && pacmanBottomY < 816) || (pacmanBottomX > 148 && pacmanBottomX < 232 && pacmanBottomY > 644 && pacmanBottomY < 816) || (pacmanBottomX > 70 && pacmanBottomX < 232 && pacmanBottomY > 644 && pacmanBottomY < 728) || (pacmanBottomX > 700 && pacmanBottomX < 788 && pacmanBottomY > 644 && pacmanBottomY < 728) || (pacmanBottomX > 700 && pacmanBottomX < 835 && pacmanBottomY > 644 && pacmanBottomY < 728) || 
-        (pacmanBottomX > 512 && pacmanBottomX < 673 && pacmanBottomY > 644 && pacmanBottomY < 728) || (pacmanBottomX > 232 && pacmanBottomX < 420 && pacmanBottomY > 644 && pacmanBottomY < 728) || (pacmanBottomX > 700 && pacmanBottomY > 468 && pacmanBottomY < 644) || (pacmanBottomX < 232 && pacmanBottomY > 468 && pacmanBottomY < 644) || 
-        (pacmanBottomX > 424 && pacmanBottomX < 508 && pacmanBottomY > 572 && pacmanBottomY < 728) || (pacmanBottomX > 328 && pacmanBottomX < 608 && pacmanBottomY > 574 && pacmanBottomY < 644) || (pacmanBottomX > 612 && pacmanBottomX < 696 && pacmanBottomY > 468 && pacmanBottomY < 644) || (pacmanBottomX > 236 && pacmanBottomX < 320 && pacmanBottomY > 468 && pacmanBottomY < 644) || 
-        (pacmanBottomX > 328 && pacmanBottomX < 608 && pacmanBottomY > 468 && pacmanBottomY < 552) || (pacmanBottomX > 328 && pacmanBottomX < 360 && pacmanBottomY > 380 && pacmanBottomY < 552) || (pacmanBottomX > 328 && pacmanBottomX < 608 && pacmanBottomY > 428 && pacmanBottomY < 414) || (pacmanBottomX > 564 && pacmanBottomX < 608 && pacmanBottomY > 380 && pacmanBottomY < 552) ||
-        (pacmanBottomX > 700 && pacmanBottomY > 292 && pacmanBottomY < 464) || (pacmanBottomX < 232 && pacmanBottomY > 292 && pacmanBottomY < 464) || (pacmanBottomX > 236 && pacmanBottomX < 320 && pacmanBottomY > 468 && pacmanBottomY < 644) || (pacmanBottomX > 612 && pacmanBottomX < 696 && pacmanBottomY > 468 && pacmanBottomY < 644) || 
-        (pacmanBottomX > 236 && pacmanBottomX < 320 && pacmanBottomY > 204 && pacmanBottomY < 464) || (pacmanBottomX > 612 && pacmanBottomX < 696 && pacmanBottomY > 204 && pacmanBottomY < 464) || (pacmanBottomX > 236 && pacmanBottomX < 420 && pacmanBottomY > 292 && pacmanBottomY < 376) || (pacmanBottomX > 512 && pacmanBottomX < 696 && pacmanBottomY > 292 && pacmanBottomY < 376) || 
-        (pacmanBottomX > 424 && pacmanBottomX < 508 && pacmanBottomY > 204 && pacmanBottomY < 376) || (pacmanBottomX > 328 && pacmanBottomX < 608 && pacmanBottomY > 204 && pacmanBottomY < 284) || (pacmanBottomX > 70 && pacmanBottomX < 232 && pacmanBottomY > 204 && pacmanBottomY < 284) || (pacmanBottomX > 700 && pacmanBottomX < 856 && pacmanBottomY > 204 && pacmanBottomY < 284) || 
+        // console.log(pacmanBottomY);
+        if ((pacmanBottomX > 70 && pacmanBottomX < 232 && pacmanBottomY > 70 && pacmanBottomY < 196) || 
+        (pacmanBottomX > 240 && pacmanBottomX < 420 && pacmanBottomY < 196 && pacmanBottomY > 70) || 
+        (pacmanBottomX > 424 && pacmanBottomX < 508 && pacmanBottomY < 196) || 
+        (pacmanBottomX > 512 && pacmanBottomX < 692 && pacmanBottomY < 196 && pacmanBottomY > 70) || 
+        (pacmanBottomX > 700 && pacmanBottomX < 856 && pacmanBottomY < 196 && pacmanBottomY > 70) || 
+        (pacmanBottomX > 70 && pacmanBottomX < 232 && pacmanBottomY > 204 && pacmanBottomY < 284) || 
+        (pacmanBottomX > 240 && pacmanBottomX < 320 && pacmanBottomY > 204 && pacmanBottomY < 464) || 
+        (pacmanBottomX > 328 && pacmanBottomX < 608 && pacmanBottomY > 204 && pacmanBottomY < 284) || 
+        (pacmanBottomX > 612 && pacmanBottomX < 696 && pacmanBottomY > 204 && pacmanBottomY < 464) || 
+        (pacmanBottomX > 700 && pacmanBottomX < 856 && pacmanBottomY > 204 && pacmanBottomY < 284) || 
+        (pacmanBottomX > 424 && pacmanBottomX < 508 && pacmanBottomY > 204 && pacmanBottomY < 376) || 
+        (pacmanBottomX > 240 && pacmanBottomX < 420 && pacmanBottomY > 292 && pacmanBottomY < 376) || 
+        (pacmanBottomX > 512 && pacmanBottomX < 696 && pacmanBottomY > 292 && pacmanBottomY < 376) || 
+        (pacmanBottomX > 700 && pacmanBottomY > 292 && pacmanBottomY < 464) || 
+        (pacmanBottomX < 232 && pacmanBottomY > 292 && pacmanBottomY < 464) || 
+        (pacmanBottomX > 328 && pacmanBottomX < 392 && pacmanBottomY > 380 && pacmanBottomY < 552) || 
+        (pacmanBottomX > 540 && pacmanBottomX < 608 && pacmanBottomY > 380 && pacmanBottomY < 552) || 
+        (pacmanBottomX > 328 && pacmanBottomX < 460 && pacmanBottomY > 380 && pacmanBottomY < 448) || 
+        (pacmanBottomX > 472 && pacmanBottomX < 608 && pacmanBottomY > 380 && pacmanBottomY < 448) || 
+        (pacmanBottomX > 328 && pacmanBottomX < 608 && pacmanBottomY > 484 && pacmanBottomY < 552) || 
+        (pacmanBottomX < 232 && pacmanBottomY > 468 && pacmanBottomY < 640) || 
+        (pacmanBottomX > 700 && pacmanBottomY > 468 && pacmanBottomY < 640) || 
+        (pacmanBottomX > 612 && pacmanBottomX < 696 && pacmanBottomY > 468 && pacmanBottomY < 640) || 
+        (pacmanBottomX > 328 && pacmanBottomX < 608 && pacmanBottomY > 556 && pacmanBottomY < 640) || 
+        (pacmanBottomX > 70 && pacmanBottomX < 232 && pacmanBottomY > 644 && pacmanBottomY < 728) || 
+        (pacmanBottomX > 240 && pacmanBottomX < 420 && pacmanBottomY > 644 && pacmanBottomY < 728) || 
+        (pacmanBottomX > 512 && pacmanBottomX < 692 && pacmanBottomY > 644 && pacmanBottomY < 728) || 
+        (pacmanBottomX > 700 && pacmanBottomX < 856 && pacmanBottomY > 644 && pacmanBottomY < 728) || 
+        (pacmanBottomX > 424 && pacmanBottomX < 508 && pacmanBottomY > 556 && pacmanBottomY < 728) || 
+        (pacmanBottomX > 148 && pacmanBottomX < 232 && pacmanBottomY > 644 && pacmanBottomY < 816) || 
+        (pacmanBottomX > 700 && pacmanBottomX < 788 && pacmanBottomY > 644 && pacmanBottomY < 816) || 
+        (pacmanBottomX < 132 && pacmanBottomY > 732 && pacmanBottomY < 816) || 
+        (pacmanBottomX > 796 && pacmanBottomY > 732 && pacmanBottomY < 816) || 
+        (pacmanBottomX > 328 && pacmanBottomX < 608 && pacmanBottomY > 732 && pacmanBottomY < 816) || 
+        (pacmanBottomX > 240 && pacmanBottomX < 320 && pacmanBottomY > 732 && pacmanBottomY < 900) || 
+        (pacmanBottomX > 612 && pacmanBottomX < 696 && pacmanBottomY > 732 && pacmanBottomY < 900) || 
+        (pacmanBottomX > 424 && pacmanBottomX < 508 && pacmanBottomY > 732 && pacmanBottomY < 900) || 
+        (pacmanBottomX > 70 && pacmanBottomX < 420 && pacmanBottomY > 820 && pacmanBottomY < 900) || 
+        (pacmanBottomX > 512 && pacmanBottomX < 856 && pacmanBottomY > 820 && pacmanBottomY < 900) || 
         (pacmanBottomY > 908)) {
             pacmanY -= 0;
+        } else if (pacmanLeftX < -27) {
+            pacmanX = 954;
+            pacmanY = 462;
+            pacmanLeftX = 952;
+            pacmanLeftY = 466;
+            pacmanRightX = 964;
+            pacmanRightY = 466;
+            pacmanTopX = 958;
+            pacmanTopY = 460;
+            pacmanBottomX = 958;
+            pacmanBottomY = 472;
         } else {
+            if (pacmanRightX > 964) {
+                pacmanX = -26;
+                pacmanY = 462;
+                pacmanLeftX = -28;
+                pacmanLeftY = 466;
+                pacmanRightX = -16;
+                pacmanRightY = 466;
+                pacmanTopX = -22;
+                pacmanTopY = 460;
+                pacmanBottomX = -22;
+                pacmanBottomY = 472;
+            } 
             if (pacmanDownLoaded) {
                 pacmanDownLoaded = false;
                 pacmanLeftLoaded = false;
@@ -1215,94 +1219,111 @@ function pacmanMove() {
                 pacmanDownLoaded = true;
             }
         }
-        
-        // if ((inkyBottomX > 90 && inkyBottomX < 232 && inkyBottomY > 70 && inkyBottomY < 196) || (inkyBottomX > 232 && inkyBottomX < 420 && inkyBottomY < 196 && inkyBottomY > 70) || (inkyBottomX > 424 && inkyBottomX < 468 && inkyBottomY < 173) || (inkyBottomX > 512 && inkyBottomX < 673 && inkyBottomY < 173 && inkyBottomY > 70) || (inkyBottomX > 700 && inkyBottomX < 856 && inkyBottomY < 173 && inkyBottomY > 70) || 
-        // (inkyBottomX > 90 && inkyBottomX < 420 && inkyBottomY > 856 && inkyBottomY < 856) || (inkyBottomX > 512 && inkyBottomX < 834 && inkyBottomY > 856 && inkyBottomY < 874) || (inkyBottomX > 236 && inkyBottomX < 320 && inkyBottomY > 732 && inkyBottomY < 874) || (inkyBottomX > 612 && inkyBottomX < 696 && inkyBottomY > 749 && inkyBottomY < 874) || 
-        // (inkyBottomX > 424 && inkyBottomX < 484 && inkyBottomY > 749 && inkyBottomY < 874) || (inkyBottomX > 328 && inkyBottomX < 608 && inkyBottomY > 749 && inkyBottomY < 816) || (inkyBottomX < 109 && inkyBottomY > 749 && inkyBottomY < 816) || (inkyBottomX > 796 && inkyBottomY > 749 && inkyBottomY < 816) || 
-        // (inkyBottomX > 700 && inkyBottomX < 788 && inkyBottomY > 644 && inkyBottomY < 816) || (inkyBottomX > 148 && inkyBottomX < 232 && inkyBottomY > 644 && inkyBottomY < 816) || (inkyBottomX > 90 && inkyBottomX < 232 && inkyBottomY > 644 && inkyBottomY < 728) || (inkyBottomX > 715 && inkyBottomX < 788 && inkyBottomY > 644 && inkyBottomY < 728) || (inkyBottomX > 715 && inkyBottomX < 835 && inkyBottomY > 644 && inkyBottomY < 728) || 
-        // (inkyBottomX > 504 && inkyBottomX < 673 && inkyBottomY > 644 && inkyBottomY < 728) || (inkyBottomX > 232 && inkyBottomX < 420 && inkyBottomY > 644 && inkyBottomY < 728) || (inkyBottomX > 715 && inkyBottomY > 484 && inkyBottomY < 644) || (inkyBottomX < 232 && inkyBottomY > 484 && inkyBottomY < 644) || 
-        // (inkyBottomX > 424 && inkyBottomX < 484 && inkyBottomY > 572 && inkyBottomY < 728) || (inkyBottomX > 328 && inkyBottomX < 608 && inkyBottomY > 574 && inkyBottomY < 644) || (inkyBottomX > 612 && inkyBottomX < 696 && inkyBottomY > 484 && inkyBottomY < 644) || (inkyBottomX > 236 && inkyBottomX < 320 && inkyBottomY > 484 && inkyBottomY < 644) || 
-        // (inkyBottomX > 328 && inkyBottomX < 608 && inkyBottomY > 468 && inkyBottomY < 552) || (inkyBottomX > 328 && inkyBottomX < 360 && inkyBottomY > 380 && inkyBottomY < 552) || (inkyBottomX > 328 && inkyBottomX < 608 && inkyBottomY > 428 && inkyBottomY < 414) || (inkyBottomX > 564 && inkyBottomX < 608 && inkyBottomY > 402 && inkyBottomY < 552) ||
-        // (inkyBottomX > 715 && inkyBottomY > 292 && inkyBottomY < 464) || (inkyBottomX < 232 && inkyBottomY > 292 && inkyBottomY < 464) || (inkyBottomX > 236 && inkyBottomX < 320 && inkyBottomY > 484 && inkyBottomY < 644) || (inkyBottomX > 612 && inkyBottomX < 696 && inkyBottomY > 484 && inkyBottomY < 644) || 
-        // (inkyBottomX > 236 && inkyBottomX < 320 && inkyBottomY > 204 && inkyBottomY < 464) || (inkyBottomX > 612 && inkyBottomX < 648 && inkyBottomY > 204 && inkyBottomY < 464) || (inkyBottomX > 255 && inkyBottomX < 420 && inkyBottomY > 292 && inkyBottomY < 376) || (inkyBottomX > 504 && inkyBottomX < 648 && inkyBottomY > 292 && inkyBottomY < 376) || 
-        // (inkyBottomX > 424 && inkyBottomX < 484 && inkyBottomY > 204 && inkyBottomY < 376) || (inkyBottomX > 328 && inkyBottomX < 608 && inkyBottomY > 204 && inkyBottomY < 284) || (inkyBottomX > 90 && inkyBottomX < 232 && inkyBottomY > 221 && inkyBottomY < 284) || (inkyBottomX > 700 && inkyBottomX < 834 && inkyBottomY > 221 && inkyBottomY < 284) || 
-        // (inkyBottomY > 924)) {
-        //     inkyY -= 0;
-        // } else {
-        //     if (inkyDownFirstLoaded) {
-        //         inkyDownFirstLoaded = false;
-        //         inkyRightFirstLoaded = false;
-        //         inkyRightSecondLoaded = false;
-        //         inkyLeftFirstLoaded = false;
-        //         inkyLeftSecondLoaded = false;
-        //         inkyUpFirstLoaded = false;
-        //         inkyUpSecondLoaded = false;
-        //         inkyY += inkySpeed;
-        //         inkyLeftY += inkySpeed;
-        //         inkyRightY += inkySpeed;
-        //         inkyTopY += inkySpeed;
-        //         inkyBottomY += inkySpeed;
-        //         inkyDownSecondLoaded = true;
-        //     } else {
-        //         inkyDownSecondLoaded = false;
-        //         inkyY += inkySpeed;
-        //         inkyLeftY += inkySpeed;
-        //         inkyRightY += inkySpeed;
-        //         inkyTopY += inkySpeed;
-        //         inkyBottomY += inkySpeed;
-        //         inkyDownFirstLoaded = true;
-        //     }
-        // } 
-        // if ((clydeBottomX > 90 && clydeBottomX < 232 && clydeBottomY > 70 && clydeBottomY < 173) || (clydeBottomX > 232 && clydeBottomX < 420 && clydeBottomY < 173 && clydeBottomY > 70) || (clydeBottomX > 424 && clydeBottomX < 484 && clydeBottomY < 173) || (clydeBottomX > 504 && clydeBottomX < 673 && clydeBottomY < 173 && clydeBottomY > 70) || (clydeBottomX > 700 && clydeBottomX < 834 && clydeBottomY < 173 && clydeBottomY > 70) || 
-        // (clydeBottomX > 90 && clydeBottomX < 420 && clydeBottomY > 856 && clydeBottomY < 874) || (clydeBottomX > 504 && clydeBottomX < 834 && clydeBottomY > 839 && clydeBottomY < 874) || (clydeBottomX > 255 && clydeBottomX < 320 && clydeBottomY > 749 && clydeBottomY < 874) || (clydeBottomX > 612 && clydeBottomX < 648 && clydeBottomY > 749 && clydeBottomY < 874) || 
-        // (clydeBottomX > 424 && clydeBottomX < 484 && clydeBottomY > 749 && clydeBottomY < 874) || (clydeBottomX > 328 && clydeBottomX < 608 && clydeBottomY > 749 && clydeBottomY < 816) || (clydeBottomX < 109 && clydeBottomY > 749 && clydeBottomY < 816) || (clydeBottomX > 796 && clydeBottomY > 749 && clydeBottomY < 816) || 
-        // (clydeBottomX > 715 && clydeBottomX < 788 && clydeBottomY > 640 && clydeBottomY < 816) || (clydeBottomX > 148 && clydeBottomX < 232 && clydeBottomY > 640 && clydeBottomY < 816) || (clydeBottomX > 90 && clydeBottomX < 232 && clydeBottomY > 640 && clydeBottomY < 728) || (clydeBottomX > 715 && clydeBottomX < 788 && clydeBottomY > 640 && clydeBottomY < 728) || (clydeBottomX > 715 && clydeBottomX < 835 && clydeBottomY > 640 && clydeBottomY < 728) || 
-        // (clydeBottomX > 504 && clydeBottomX < 673 && clydeBottomY > 640 && clydeBottomY < 728) || (clydeBottomX > 232 && clydeBottomX < 420 && clydeBottomY > 640 && clydeBottomY < 728) || (clydeBottomX > 715 && clydeBottomY > 484 && clydeBottomY < 613) || (clydeBottomX < 232 && clydeBottomY > 484 && clydeBottomY < 613) || 
-        // (clydeBottomX > 424 && clydeBottomX < 484 && clydeBottomY > 572 && clydeBottomY < 728) || (clydeBottomX > 328 && clydeBottomX < 608 && clydeBottomY > 574 && clydeBottomY < 613) || (clydeBottomX > 612 && clydeBottomX < 648 && clydeBottomY > 484 && clydeBottomY < 613) || (clydeBottomX > 255 && clydeBottomX < 320 && clydeBottomY > 484 && clydeBottomY < 613) || 
-        // (clydeBottomX > 328 && clydeBottomX < 608 && clydeBottomY > 468 && clydeBottomY < 552) || (clydeBottomX > 328 && clydeBottomX < 360 && clydeBottomY > 402 && clydeBottomY < 552) || (clydeBottomX > 328 && clydeBottomX < 608 && clydeBottomY > 428 && clydeBottomY < 414) || (clydeBottomX > 564 && clydeBottomX < 581 && clydeBottomY > 402 && clydeBottomY < 528) ||
-        // (clydeBottomX > 715 && clydeBottomY > 292 && clydeBottomY < 438) || (clydeBottomX < 232 && clydeBottomY > 292 && clydeBottomY < 438) || (clydeBottomX > 255 && clydeBottomX < 320 && clydeBottomY > 484 && clydeBottomY < 613) || (clydeBottomX > 612 && clydeBottomX < 648 && clydeBottomY > 484 && clydeBottomY < 613) || 
-        // (clydeBottomX > 255 && clydeBottomX < 320 && clydeBottomY > 221 && clydeBottomY < 438) || (clydeBottomX > 630 && clydeBottomX < 648 && clydeBottomY > 221 && clydeBottomY < 438) || (clydeBottomX > 255 && clydeBottomX < 420 && clydeBottomY > 309 && clydeBottomY < 348) || (clydeBottomX > 530 && clydeBottomX < 648 && clydeBottomY > 309 && clydeBottomY < 348) || 
-        // (clydeBottomX > 424 && clydeBottomX < 484 && clydeBottomY > 221 && clydeBottomY < 348) || (clydeBottomX > 328 && clydeBottomX < 581 && clydeBottomY > 221 && clydeBottomY < 284) || (clydeBottomX > 90 && clydeBottomX < 232 && clydeBottomY > 221 && clydeBottomY < 284) || (clydeBottomX > 700 && clydeBottomX < 834 && clydeBottomY > 221 && clydeBottomY < 284) || 
-        // (clydeBottomY > 924)) {
-        //     clydeY -= 0;
-        // } else {
-        //     if (clydeDownFirstLoaded) {
-        //         clydeDownFirstLoaded = false;
-        //         clydeRightFirstLoaded = false;
-        //         clydeRightSecondLoaded = false;
-        //         clydeLeftFirstLoaded = false;
-        //         clydeLeftSecondLoaded = false;
-        //         clydeUpFirstLoaded = false;
-        //         clydeUpSecondLoaded = false;
-        //         clydeY += clydeSpeed;
-        //         clydeLeftY += clydeSpeed;
-        //         clydeRightY += clydeSpeed;
-        //         clydeTopY += clydeSpeed;
-        //         clydeBottomY += clydeSpeed;
-        //         clydeDownSecondLoaded = true;
-        //     } else {
-        //         clydeDownSecondLoaded = false;
-        //         clydeY += clydeSpeed;
-        //         clydeLeftY += clydeSpeed;
-        //         clydeRightY += clydeSpeed;
-        //         clydeTopY += clydeSpeed;
-        //         clydeBottomY += clydeSpeed;
-        //         clydeDownFirstLoaded = true;
-        //     }
-        // } 
     }
     if (blinkyHeldLeft) {
-        if (((blinkyLeftX > 90 && blinkyLeftX < 202 && blinkyLeftY > 70 && blinkyLeftY < 173) || (blinkyLeftX > 232 && blinkyLeftX < 420 && blinkyLeftY < 173 && blinkyLeftY > 89) || (blinkyLeftX > 424 && blinkyLeftX < 484 && blinkyLeftY < 173) || (blinkyLeftX > 530 && blinkyLeftX < 673 && blinkyLeftY < 173 && blinkyLeftY > 89) || (blinkyLeftX > 700 && blinkyLeftX < 834 && blinkyLeftY < 173 && blinkyLeftY > 89) || 
-        (blinkyLeftX > 90 && blinkyLeftX < 420 && blinkyLeftY > 839 && blinkyLeftY < 874) || (blinkyLeftX > 530 && blinkyLeftX < 834 && blinkyLeftY > 839 && blinkyLeftY < 874) || (blinkyLeftX > 255 && blinkyLeftX < 300 && blinkyLeftY > 749 && blinkyLeftY < 874) || (blinkyLeftX > 630 && blinkyLeftX < 648 && blinkyLeftY > 749 && blinkyLeftY < 874) || 
-        (blinkyLeftX > 424 && blinkyLeftX < 484 && blinkyLeftY > 749 && blinkyLeftY < 874) || (blinkyLeftX > 343 && blinkyLeftX < 581 && blinkyLeftY > 749 && blinkyLeftY < 816) || (blinkyLeftX < 109 && blinkyLeftY > 749 && blinkyLeftY < 800) || (blinkyLeftX > 796 && blinkyLeftY > 749 && blinkyLeftY < 800) || 
-        (blinkyLeftX > 715 && blinkyLeftX < 788 && blinkyLeftY > 640 && blinkyLeftY < 800) || (blinkyLeftX > 148 && blinkyLeftX < 209 && blinkyLeftY > 662 && blinkyLeftY < 800) || (blinkyLeftX > 90 && blinkyLeftX < 209 && blinkyLeftY > 662 && blinkyLeftY < 703) || (blinkyLeftX > 715 && blinkyLeftX < 764 && blinkyLeftY > 662 && blinkyLeftY < 703) || (blinkyLeftX > 715 && blinkyLeftX < 835 && blinkyLeftY > 662 && blinkyLeftY < 703) || 
-        (blinkyLeftX > 530 && blinkyLeftX < 673 && blinkyLeftY > 662 && blinkyLeftY < 703) || (blinkyLeftX > 232 && blinkyLeftX < 420 && blinkyLeftY > 662 && blinkyLeftY < 703) || (blinkyLeftX > 715 && blinkyLeftY > 484 && blinkyLeftY < 613) || (blinkyLeftX < 209 && blinkyLeftY > 484 && blinkyLeftY < 613) || (blinkyLeftX > 630 && blinkyLeftX < 669 && blinkyLeftY > 484 && blinkyLeftY < 613) || (blinkyLeftX > 255 && blinkyLeftX < 300 && blinkyLeftY > 484 && blinkyLeftY < 613) || 
-        (blinkyLeftX > 440 && blinkyLeftX < 484 && blinkyLeftY > 576 && blinkyLeftY < 703) || (blinkyLeftX > 343 && blinkyLeftX < 581 && blinkyLeftY > 574 && blinkyLeftY < 613) || (blinkyLeftX > 630 && blinkyLeftX < 669 && blinkyLeftY > 484 && blinkyLeftY < 613) || 
-        (blinkyLeftX > 343 && blinkyLeftX < 581 && blinkyLeftY > 468 && blinkyLeftY < 528) || (blinkyLeftX > 343 && blinkyLeftX < 360 && blinkyLeftY > 402 && blinkyLeftY < 528) || (blinkyLeftX > 343 && blinkyLeftX < 581 && blinkyLeftY > 399 && blinkyLeftY < 414) || (blinkyLeftX > 564 && blinkyLeftX < 581 && blinkyLeftY > 402 && blinkyLeftY < 528) ||
-        (blinkyLeftX > 715 && blinkyLeftY > 309 && blinkyLeftY < 438) || (blinkyLeftX < 209 && blinkyLeftY > 309 && blinkyLeftY < 438) || (blinkyLeftX > 255 && blinkyLeftX < 300 && blinkyLeftY > 484 && blinkyLeftY < 613) || (blinkyLeftX > 630 && blinkyLeftX < 669 && blinkyLeftY > 484 && blinkyLeftY < 613) || 
-        (blinkyLeftX > 255 && blinkyLeftX < 300 && blinkyLeftY > 221 && blinkyLeftY < 438) || (blinkyLeftX > 630 && blinkyLeftX < 669 && blinkyLeftY > 221 && blinkyLeftY < 438) || (blinkyLeftX > 255 && blinkyLeftX < 420 && blinkyLeftY > 309 && blinkyLeftY < 348) || (blinkyLeftX > 530 && blinkyLeftX < 669 && blinkyLeftY > 309 && blinkyLeftY < 348) || 
-        (blinkyLeftX > 440 && blinkyLeftX < 484 && blinkyLeftY > 221 && blinkyLeftY < 348) || (blinkyLeftX > 343 && blinkyLeftX < 581 && blinkyLeftY > 221 && blinkyLeftY < 284) || (blinkyLeftX > 90 && blinkyLeftX < 202 && blinkyLeftY > 221 && blinkyLeftY < 284) || (blinkyLeftX > 718 && blinkyLeftX < 834 && blinkyLeftY > 221 && blinkyLeftY < 284) || 
-        (blinkyLeftX < 44)) != true) {
+        console.log(`blinky left x is ${blinkyLeftX}`);
+        console.log(`blinky right x is ${blinkyRightY}`);
+        console.log(`blinky top y is ${blinkyTopY}`);
+        console.log(`blinky bottom y is ${blinkyBottomY}`);
+        if ((blinkyLeftX > 0 && blinkyLeftX < 68 && blinkyLeftY > 68 && blinkyLeftY < 292) || 
+        (blinkyLeftX > 0 && blinkyLeftX < 68 && blinkyLeftY > 640 && blinkyLeftY < 864) || 
+        (blinkyLeftX > 70 && blinkyLeftX < 232 && blinkyLeftY > 70 && blinkyLeftY < 196) || 
+        (blinkyLeftX > 240 && blinkyLeftX < 420 && blinkyLeftY < 196 && blinkyLeftY > 70) || 
+        (blinkyLeftX > 424 && blinkyLeftX < 508 && blinkyLeftY < 196) || 
+        (blinkyLeftX > 512 && blinkyLeftX < 692 && blinkyLeftY < 196 && blinkyLeftY > 70) || 
+        (blinkyLeftX > 700 && blinkyLeftX < 856 && blinkyLeftY < 196 && blinkyLeftY > 70) || 
+        (blinkyLeftX > 70 && blinkyLeftX < 232 && blinkyLeftY > 204 && blinkyLeftY < 284) || 
+        (blinkyLeftX > 240 && blinkyLeftX < 320 && blinkyLeftY > 204 && blinkyLeftY < 464) || 
+        (blinkyLeftX > 328 && blinkyLeftX < 608 && blinkyLeftY > 204 && blinkyLeftY < 284) || 
+        (blinkyLeftX > 612 && blinkyLeftX < 696 && blinkyLeftY > 204 && blinkyLeftY < 464) || 
+        (blinkyLeftX > 700 && blinkyLeftX < 856 && blinkyLeftY > 204 && blinkyLeftY < 284) || 
+        (blinkyLeftX > 424 && blinkyLeftX < 508 && blinkyLeftY > 204 && blinkyLeftY < 376) || 
+        (blinkyLeftX > 240 && blinkyLeftX < 420 && blinkyLeftY > 292 && blinkyLeftY < 376) || 
+        (blinkyLeftX > 512 && blinkyLeftX < 696 && blinkyLeftY > 292 && blinkyLeftY < 376) || 
+        (blinkyLeftX > 700 && blinkyLeftY > 292 && blinkyLeftY < 464) || 
+        (blinkyLeftX < 232 && blinkyLeftY > 292 && blinkyLeftY < 464) || 
+        (blinkyLeftX > 328 && blinkyLeftX < 392 && blinkyLeftY > 380 && blinkyLeftY < 552) || 
+        (blinkyLeftX > 540 && blinkyLeftX < 608 && blinkyLeftY > 380 && blinkyLeftY < 552) || 
+        (blinkyLeftX > 328 && blinkyLeftX < 460 && blinkyLeftY > 380 && blinkyLeftY < 448) || 
+        (blinkyLeftX > 472 && blinkyLeftX < 608 && blinkyLeftY > 380 && blinkyLeftY < 448) || 
+        (blinkyLeftX > 328 && blinkyLeftX < 608 && blinkyLeftY > 484 && blinkyLeftY < 552) || 
+        (blinkyLeftX < 232 && blinkyLeftY > 468 && blinkyLeftY < 640) || 
+        (blinkyLeftX > 700 && blinkyLeftY > 468 && blinkyLeftY < 640) || 
+        (blinkyLeftX > 240 && blinkyLeftX < 320 && blinkyLeftY > 468 && blinkyLeftY < 640) || 
+        (blinkyLeftX > 612 && blinkyLeftX < 696 && blinkyLeftY > 468 && blinkyLeftY < 640) || 
+        (blinkyLeftX > 328 && blinkyLeftX < 608 && blinkyLeftY > 556 && blinkyLeftY < 640) || 
+        (blinkyLeftX > 70 && blinkyLeftX < 232 && blinkyLeftY > 644 && blinkyLeftY < 728) || 
+        (blinkyLeftX > 240 && blinkyLeftX < 420 && blinkyLeftY > 644 && blinkyLeftY < 728) || 
+        (blinkyLeftX > 512 && blinkyLeftX < 692 && blinkyLeftY > 644 && blinkyLeftY < 728) || 
+        (blinkyLeftX > 700 && blinkyLeftX < 856 && blinkyLeftY > 644 && blinkyLeftY < 728) || 
+        (blinkyLeftX > 424 && blinkyLeftX < 508 && blinkyLeftY > 556 && blinkyLeftY < 728) || 
+        (blinkyLeftX > 148 && blinkyLeftX < 232 && blinkyLeftY > 644 && blinkyLeftY < 816) || 
+        (blinkyLeftX > 700 && blinkyLeftX < 788 && blinkyLeftY > 644 && blinkyLeftY < 816) || 
+        (blinkyLeftX < 132 && blinkyLeftY > 732 && blinkyLeftY < 816) || 
+        (blinkyLeftX > 796 && blinkyLeftY > 732 && blinkyLeftY < 816) || 
+        (blinkyLeftX > 328 && blinkyLeftX < 608 && blinkyLeftY > 732 && blinkyLeftY < 816) || 
+        (blinkyLeftX > 240 && blinkyLeftX < 320 && blinkyLeftY > 732 && blinkyLeftY < 900) || 
+        (blinkyLeftX > 612 && blinkyLeftX < 696 && blinkyLeftY > 732 && blinkyLeftY < 900) || 
+        (blinkyLeftX > 424 && blinkyLeftX < 508 && blinkyLeftY > 732 && blinkyLeftY < 900) || 
+        (blinkyLeftX > 70 && blinkyLeftX < 420 && blinkyLeftY > 820 && blinkyLeftY < 900) || 
+        (blinkyLeftX > 512 && blinkyLeftX < 856 && blinkyLeftY > 820 && blinkyLeftY < 900)
+        ) {
+            for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
+                for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
+                    console.log('here');
+                    if ((blinkyLeftX <= possibleMovesPosition[i + 12][j][0] && blinkyRightX >= possibleMovesPosition[i + 12][j][0]) && (blinkyTopY <= possibleMovesPosition[i + 12][j][1] && blinkyBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentBlinkyGhostPosition != possibleMovesPosition[i + 12][j])) {
+                        currentBlinkyGhostPosition = possibleMovesPosition[i + 12][j];
+                        let nextDirection = possibleMoves[i + 12][Math.floor(Math.random() * possibleMoves[i + 12].length)];
+                        blinkyX = possibleMovesPosition[i + 12][j][0];
+                        blinkyY = possibleMovesPosition[i + 12][j][1];
+                        blinkyLeftX = blinkyX - WALL_W/2;
+                        blinkyLeftY = blinkyY - WALL_H/2 + CHARACTER_H/2;
+                        blinkyRightX = blinkyX - WALL_W/2 + CHARACTER_W;
+                        blinkyRightY = blinkyY - WALL_H/2 + CHARACTER_H/2;
+                        blinkyTopX = blinkyX - WALL_W/2 + CHARACTER_W/2;
+                        blinkyTopY = blinkyY - WALL_H/2;
+                        blinkyBottomX = blinkyX - WALL_W/2 + CHARACTER_W/2;
+                        blinkyBottomY = blinkyY - WALL_H/2 + CHARACTER_H;
+                        if (nextDirection === 'right') {
+                            blinkyHeldLeft = false;
+                            blinkyHeldRight = true;
+                            break;
+                        } else if (nextDirection === 'up') {
+                            blinkyHeldLeft = false;
+                            blinkyHeldUp = true;
+                            break;
+                        } else if (nextDirection === 'down') {
+                            blinkyHeldLeft = false;
+                            blinkyHeldDown = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        } else if (blinkyLeftX < -27) {
+            blinkyX = 954;
+            blinkyY = 462;
+            blinkyLeftX = 952;
+            blinkyLeftY = 466;
+            blinkyRightX = 964;
+            blinkyRightY = 466;
+            blinkyTopX = 958;
+            blinkyTopY = 460;
+            blinkyBottomX = 958;
+            blinkyBottomY = 472;
+        } else {
+            if (blinkyRightX > 964) {
+                blinkyX = -26;
+                blinkyY = 462;
+                blinkyLeftX = -28;
+                blinkyLeftY = 466;
+                blinkyRightX = -16;
+                blinkyRightY = 466;
+                blinkyTopX = -22;
+                blinkyTopY = 460;
+                blinkyBottomX = -22;
+                blinkyBottomY = 472;
+            } 
             if (blinkyLeftFirstLoaded) {
                 blinkyLeftFirstLoaded = false;
                 blinkyDownFirstLoaded = false;
@@ -1326,72 +1347,110 @@ function pacmanMove() {
                 blinkyBottomX -= blinkySpeed;
                 blinkyLeftFirstLoaded = true;
             }
+        }
+    } else if (blinkyHeldRight) {
+        console.log(`blinky left x is ${blinkyLeftX}`);
+        console.log(`blinky right x is ${blinkyRightY}`);
+        console.log(`blinky top y is ${blinkyTopY}`);
+        console.log(`blinky bottom y is ${blinkyBottomY}`);
+        if ((blinkyRightX > 70 && blinkyRightX < 232 && blinkyRightY > 70 && blinkyRightY < 196) || 
+        (blinkyRightX > 240 && blinkyRightX < 420 && blinkyRightY < 196 && blinkyRightY > 70) || 
+        (blinkyRightX > 424 && blinkyRightX < 508 && blinkyRightY < 196) || 
+        (blinkyRightX > 512 && blinkyRightX < 692 && blinkyRightY < 196 && blinkyRightY > 70) || 
+        (blinkyRightX > 700 && blinkyRightX < 856 && blinkyRightY < 196 && blinkyRightY > 70) ||
+        (blinkyRightX > 70 && blinkyRightX < 232 && blinkyRightY > 204 && blinkyRightY < 284) || 
+        (blinkyRightX > 240 && blinkyRightX < 320 && blinkyRightY > 204 && blinkyRightY < 464) || 
+        (blinkyRightX > 328 && blinkyRightX < 608 && blinkyRightY > 204 && blinkyRightY < 284) || 
+        (blinkyRightX > 612 && blinkyRightX < 696 && blinkyRightY > 204 && blinkyRightY < 464) || 
+        (blinkyRightX > 700 && blinkyRightX < 856 && blinkyRightY > 204 && blinkyRightY < 284) || 
+        (blinkyRightX > 424 && blinkyRightX < 508 && blinkyRightY > 204 && blinkyRightY < 376) || 
+        (blinkyRightX > 240 && blinkyRightX < 420 && blinkyRightY > 292 && blinkyRightY < 376) || 
+        (blinkyRightX > 512 && blinkyRightX < 696 && blinkyRightY > 292 && blinkyRightY < 376) || 
+        (blinkyRightX > 700 && blinkyRightY > 292 && blinkyRightY < 464) || 
+        (blinkyRightX < 232 && blinkyRightY > 292 && blinkyRightY < 464) || 
+        (blinkyRightX > 328 && blinkyRightX < 392 && blinkyRightY > 380 && blinkyRightY < 552) || 
+        (blinkyRightX > 540 && blinkyRightX < 608 && blinkyRightY > 380 && blinkyRightY < 552) || 
+        (blinkyRightX > 328 && blinkyRightX < 460 && blinkyRightY > 380 && blinkyRightY < 448) || 
+        (blinkyRightX > 472 && blinkyRightX < 608 && blinkyRightY > 380 && blinkyRightY < 448) || 
+        (blinkyRightX > 328 && blinkyRightX < 608 && blinkyRightY > 484 && blinkyRightY < 552) || 
+        (blinkyRightX < 232 && blinkyRightY > 468 && blinkyRightY < 640) || 
+        (blinkyRightX > 700 && blinkyRightY > 468 && blinkyRightY < 640) || 
+        (blinkyRightX > 240 && blinkyRightX < 320 && blinkyRightY > 468 && blinkyRightY < 640) || 
+        (blinkyRightX > 612 && blinkyRightX < 696 && blinkyRightY > 468 && blinkyRightY < 640) || 
+        (blinkyRightX > 328 && blinkyRightX < 608 && blinkyRightY > 556 && blinkyRightY < 640) || 
+        (blinkyRightX > 70 && blinkyRightX < 232 && blinkyRightY > 644 && blinkyRightY < 728) || 
+        (blinkyRightX > 240 && blinkyRightX < 420 && blinkyRightY > 644 && blinkyRightY < 728) || 
+        (blinkyRightX > 512 && blinkyRightX < 692 && blinkyRightY > 644 && blinkyRightY < 728) || 
+        (blinkyRightX > 700 && blinkyRightX < 856 && blinkyRightY > 644 && blinkyRightY < 728) || 
+        (blinkyRightX > 424 && blinkyRightX < 508 && blinkyRightY > 556 && blinkyRightY < 728) || 
+        (blinkyRightX > 148 && blinkyRightX < 232 && blinkyRightY > 644 && blinkyRightY < 816) || 
+        (blinkyRightX > 700 && blinkyRightX < 788 && blinkyRightY > 644 && blinkyRightY < 816) || 
+        (blinkyRightX < 132 && blinkyRightY > 732 && blinkyRightY < 816) || 
+        (blinkyRightX > 796 && blinkyRightY > 732 && blinkyRightY < 816) || 
+        (blinkyRightX > 328 && blinkyRightX < 608 && blinkyRightY > 732 && blinkyRightY < 816) || 
+        (blinkyRightX > 240 && blinkyRightX < 320 && blinkyRightY > 732 && blinkyRightY < 900) || 
+        (blinkyRightX > 612 && blinkyRightX < 696 && blinkyRightY > 732 && blinkyRightY < 900) || 
+        (blinkyRightX > 424 && blinkyRightX < 508 && blinkyRightY > 732 && blinkyRightY < 900) || 
+        (blinkyRightX > 70 && blinkyRightX < 420 && blinkyRightY > 820 && blinkyRightY < 900) || 
+        (blinkyRightX > 512 && blinkyRightX < 856 && blinkyRightY > 820 && blinkyRightY < 900) || 
+        (blinkyRightX > 864 && blinkyRightX < 904 && blinkyRightY > 65 && blinkyRightY < 292) || 
+        (blinkyRightX > 864 && blinkyRightX < 904 && blinkyRightY > 640 && blinkyRightY < 864)) {
             for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
                 for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
                     if ((blinkyLeftX <= possibleMovesPosition[i + 12][j][0] && blinkyRightX >= possibleMovesPosition[i + 12][j][0]) && (blinkyTopY <= possibleMovesPosition[i + 12][j][1] && blinkyBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentBlinkyGhostPosition != possibleMovesPosition[i + 12][j])) {
                         currentBlinkyGhostPosition = possibleMovesPosition[i + 12][j];
-                        console.log(possibleMoves[i + 12]);
-                        let changedPositionX = possibleMovesPosition[i + 12][j][0] - blinkyX;
-                        let changedPositionY = possibleMovesPosition[i + 12][j][0] - blinkyY;
                         let nextDirection = possibleMoves[i + 12][Math.floor(Math.random() * possibleMoves[i + 12].length)];
-                        if (nextDirection === 'right') {
-                            blinkyX = possibleMovesPosition[i + 12][j][0];
-                            blinkyY = possibleMovesPosition[i + 12][j][1];
-                            blinkyLeftX = blinkyLeftX + changedPositionX;
-                            blinkyLeftY = blinkyLeftY + changedPositionY;
-                            blinkyRightX = blinkyRightX + changedPositionX;
-                            blinkyRightY = blinkyRightY + changedPositionY;
-                            blinkyTopX = blinkyTopX + changedPositionX;
-                            blinkyTopY = blinkyTopY + changedPositionY;
-                            blinkyBottomX = blinkyBottomX + changedPositionX;
-                            blinkyBottomY = blinkyBottomY + changedPositionY;
-                            blinkyHeldLeft = false;
-                            blinkyHeldRight = true;
+                        blinkyX = possibleMovesPosition[i + 12][j][0];
+                        blinkyY = possibleMovesPosition[i + 12][j][1];
+                        blinkyLeftX = blinkyX - WALL_W/2;
+                        blinkyLeftY = blinkyY - WALL_H/2 + CHARACTER_H/2;
+                        blinkyRightX = blinkyX - WALL_W/2 + CHARACTER_W;
+                        blinkyRightY = blinkyY - WALL_H/2 + CHARACTER_H/2;
+                        blinkyTopX = blinkyX - WALL_W/2 + CHARACTER_W/2;
+                        blinkyTopY = blinkyY - WALL_H/2;
+                        blinkyBottomX = blinkyX - WALL_W/2 + CHARACTER_W/2;
+                        blinkyBottomY = blinkyY - WALL_H/2 + CHARACTER_H;
+                        if (nextDirection === 'left') {
+                            blinkyHeldRight = false;
+                            blinkyHeldLeft = true;
+                            break;
                         } else if (nextDirection === 'up') {
-                            blinkyX = possibleMovesPosition[i + 12][j][0];
-                            blinkyY = possibleMovesPosition[i + 12][j][1];
-                            blinkyLeftX = blinkyLeftX + changedPositionX;
-                            blinkyLeftY = blinkyLeftY + changedPositionY;
-                            blinkyRightX = blinkyRightX + changedPositionX;
-                            blinkyRightY = blinkyRightY + changedPositionY;
-                            blinkyTopX = blinkyTopX + changedPositionX;
-                            blinkyTopY = blinkyTopY + changedPositionY;
-                            blinkyBottomX = blinkyBottomX + changedPositionX;
-                            blinkyBottomY = blinkyBottomY + changedPositionY;
-                            blinkyHeldLeft = false;
+                            blinkyHeldRight = false;
                             blinkyHeldUp = true;
+                            break;
                         } else if (nextDirection === 'down') {
-                            blinkyX = possibleMovesPosition[i + 12][j][0];
-                            blinkyY = possibleMovesPosition[i + 12][j][1];
-                            blinkyLeftX = blinkyLeftX + changedPositionX;
-                            blinkyLeftY = blinkyLeftY + changedPositionY;
-                            blinkyRightX = blinkyRightX + changedPositionX;
-                            blinkyRightY = blinkyRightY + changedPositionY;
-                            blinkyTopX = blinkyTopX + changedPositionX;
-                            blinkyTopY = blinkyTopY + changedPositionY;
-                            blinkyBottomX = blinkyBottomX + changedPositionX;
-                            blinkyBottomY = blinkyBottomY + changedPositionY;
-                            blinkyHeldLeft = false;
+                            blinkyHeldRight = false;
                             blinkyHeldDown = true;
+                            break;
                         }
                     }
                 }
             }
-        }
-    } else if (blinkyHeldRight) {
-        if (((blinkyRightX > 90 && blinkyRightX < 202 && blinkyRightY > 89 && blinkyRightY < 173) || (blinkyRightX > 232 && blinkyRightX < 420 && blinkyRightY < 173 && blinkyRightY > 89) || (blinkyRightX > 440 && blinkyRightX < 484 && blinkyRightY < 173) || (blinkyRightX > 530 && blinkyRightX < 673 && blinkyRightY < 173 && blinkyRightY > 89) || (blinkyRightX > 718 && blinkyRightX < 834 && blinkyRightY < 173 && blinkyRightY > 89) ||
-        (blinkyRightX > 90 && blinkyRightX < 420 && blinkyRightY > 839 && blinkyRightY < 874) || (blinkyRightX > 530 && blinkyRightX < 834 && blinkyRightY > 839 && blinkyRightY < 874) || (blinkyRightX > 255 && blinkyRightX < 300 && blinkyRightY > 749 && blinkyRightY < 874) || (blinkyRightX > 630 && blinkyRightX < 669 && blinkyRightY > 749 && blinkyRightY < 874) || 
-        (blinkyRightX > 440 && blinkyRightX < 484 && blinkyRightY > 749 && blinkyRightY < 874) || (blinkyRightX > 343 && blinkyRightX < 581 && blinkyRightY > 749 && blinkyRightY < 800) || (blinkyRightX < 109 && blinkyRightY > 749 && blinkyRightY < 800) || (blinkyRightX > 796 && blinkyRightY > 749 && blinkyRightY < 800) || 
-        (blinkyRightX > 715 && blinkyRightX < 764 && blinkyRightY > 662 && blinkyRightY < 800) || (blinkyRightX > 160 && blinkyRightX < 209 && blinkyRightY > 662 && blinkyRightY < 800) || (blinkyRightX > 90 && blinkyRightX < 209 && blinkyRightY > 662 && blinkyRightY < 703) || (blinkyRightX > 715 && blinkyRightX < 764 && blinkyRightY > 662 && blinkyRightY < 703) || (blinkyRightX > 715 && blinkyRightX < 835 && blinkyRightY > 662 && blinkyRightY < 703) || 
-        (blinkyRightX > 530 && blinkyRightX < 673 && blinkyRightY > 662 && blinkyRightY < 703) || (blinkyRightX > 232 && blinkyRightX < 420 && blinkyRightY > 662 && blinkyRightY < 703) || (blinkyRightX > 715 && blinkyRightY > 484 && blinkyRightY < 613) || (blinkyRightX < 209 && blinkyRightY > 484 && blinkyRightY < 613) || 
-        (blinkyRightX > 440 && blinkyRightX < 484 && blinkyRightY > 572 && blinkyRightY < 703) || (blinkyRightX > 343 && blinkyRightX < 581 && blinkyRightY > 574 && blinkyRightY < 613) || (blinkyRightX > 630 && blinkyRightX < 669 && blinkyRightY > 484 && blinkyRightY < 613) || (blinkyRightX > 630 && blinkyRightX < 669 && blinkyRightY > 484 && blinkyRightY < 613) || (blinkyRightX > 255 && blinkyRightX < 300 && blinkyRightY > 484 && blinkyRightY < 613) || 
-        (blinkyRightX > 343 && blinkyRightX < 581 && blinkyRightY > 468 && blinkyRightY < 528) || (blinkyRightX > 343 && blinkyRightX < 360 && blinkyRightY > 402 && blinkyRightY < 528) || (blinkyRightX > 343 && blinkyRightX < 581 && blinkyRightY > 399 && blinkyRightY < 414) || (blinkyRightX > 564 && blinkyRightX < 581 && blinkyRightY > 402 && blinkyRightY < 528) ||
-        (blinkyRightX > 715 && blinkyRightY > 309 && blinkyRightY < 438) || (blinkyRightX < 209 && blinkyRightY > 309 && blinkyRightY < 438) || (blinkyRightX > 255 && blinkyRightX < 300 && blinkyRightY > 484 && blinkyRightY < 613) || (blinkyRightX > 630 && blinkyRightX < 669 && blinkyRightY > 484 && blinkyRightY < 613) || 
-        (blinkyRightX > 255 && blinkyRightX < 294 && blinkyRightY > 221 && blinkyRightY < 438) || (blinkyRightX > 630 && blinkyRightX < 669 && blinkyRightY > 221 && blinkyRightY < 438) || (blinkyRightX > 255 && blinkyRightX < 420 && blinkyRightY > 309 && blinkyRightY < 348) || (blinkyRightX > 530 && blinkyRightX < 669 && blinkyRightY > 309 && blinkyRightY < 348) || 
-        (blinkyRightX > 440 && blinkyRightX < 484 && blinkyRightY > 221 && blinkyRightY < 348) || (blinkyRightX > 343 && blinkyRightX < 581 && blinkyRightY > 221 && blinkyRightY < 284) || (blinkyRightX > 90 && blinkyRightX < 202 && blinkyRightY > 221 && blinkyRightY < 284) || (blinkyRightX > 718 && blinkyRightX < 834 && blinkyRightY > 221 && blinkyRightY < 284) || 
-        (blinkyRightX > 880)) != true) {
+        } else if (blinkyLeftX < -27) {
+            blinkyX = 954;
+            blinkyY = 462;
+            blinkyLeftX = 952;
+            blinkyLeftY = 466;
+            blinkyRightX = 964;
+            blinkyRightY = 466;
+            blinkyTopX = 958;
+            blinkyTopY = 460;
+            blinkyBottomX = 958;
+            blinkyBottomY = 472;
+        } else {
+            if (blinkyRightX > 964) {
+                blinkyX = -26;
+                blinkyY = 462;
+                blinkyLeftX = -28;
+                blinkyLeftY = 466;
+                blinkyRightX = -16;
+                blinkyRightY = 466;
+                blinkyTopX = -22;
+                blinkyTopY = 460;
+                blinkyBottomX = -22;
+                blinkyBottomY = 472;
+            } 
             if (blinkyRightFirstLoaded) {
-                console.log('here');
                 blinkyRightFirstLoaded = false;
                 blinkyDownFirstLoaded = false;
                 blinkyDownSecondLoaded = false;
@@ -1406,7 +1465,6 @@ function pacmanMove() {
                 blinkyBottomX += blinkySpeed;
                 blinkyRightSecondLoaded = true;
             } else {
-                console.log('here');
                 blinkyRightSecondLoaded = false;
                 blinkyX += blinkySpeed;
                 blinkyLeftX += blinkySpeed;
@@ -1415,73 +1473,110 @@ function pacmanMove() {
                 blinkyBottomX += blinkySpeed;
                 blinkyRightFirstLoaded = true;
             }
+        }
+    } else if (blinkyHeldUp) {
+        console.log(`blinky left x is ${blinkyLeftX}`);
+        console.log(`blinky right x is ${blinkyRightY}`);
+        console.log(`blinky top y is ${blinkyTopY}`);
+        console.log(`blinky bottom y is ${blinkyBottomY}`);
+        if ((blinkyTopY < 64) || (blinkyTopX > 70 && blinkyTopX < 232 && blinkyTopY > 70 && blinkyTopY < 196) || 
+        (blinkyTopX > 240 && blinkyTopX < 420 && blinkyTopY < 196 && blinkyTopY > 70) || 
+        (blinkyTopX > 424 && blinkyTopX < 508 && blinkyTopY < 196) || 
+        (blinkyTopX > 512 && blinkyTopX < 692 && blinkyTopY < 196 && blinkyTopY > 70) || 
+        (blinkyTopX > 700 && blinkyTopX < 856 && blinkyTopY < 196 && blinkyTopY > 70) || 
+        (blinkyTopX > 70 && blinkyTopX < 232 && blinkyTopY > 204 && blinkyTopY < 284) || 
+        (blinkyTopX > 240 && blinkyTopX < 320 && blinkyTopY > 204 && blinkyTopY < 464) || 
+        (blinkyTopX > 328 && blinkyTopX < 608 && blinkyTopY > 204 && blinkyTopY < 284) || 
+        (blinkyTopX > 612 && blinkyTopX < 696 && blinkyTopY > 204 && blinkyTopY < 464) || 
+        (blinkyTopX > 700 && blinkyTopX < 856 && blinkyTopY > 204 && blinkyTopY < 284) || 
+        (blinkyTopX > 424 && blinkyTopX < 508 && blinkyTopY > 204 && blinkyTopY < 376) || 
+        (blinkyTopX > 240 && blinkyTopX < 420 && blinkyTopY > 292 && blinkyTopY < 376) || 
+        (blinkyTopX > 512 && blinkyTopX < 696 && blinkyTopY > 292 && blinkyTopY < 376) || 
+        (blinkyTopX > 700 && blinkyTopY > 292 && blinkyTopY < 464) || 
+        (blinkyTopX < 232 && blinkyTopY > 292 && blinkyTopY < 464) || 
+        (blinkyTopX > 328 && blinkyTopX < 392 && blinkyTopY > 380 && blinkyTopY < 552) || 
+        (blinkyTopX > 540 && blinkyTopX < 608 && blinkyTopY > 380 && blinkyTopY < 552) || 
+        (blinkyTopX > 328 && blinkyTopX < 460 && blinkyTopY > 380 && blinkyTopY < 448) || 
+        (blinkyTopX > 472 && blinkyTopX < 608 && blinkyTopY > 380 && blinkyTopY < 448) || 
+        (blinkyTopX > 328 && blinkyTopX < 608 && blinkyTopY > 484 && blinkyTopY < 552) || 
+        (blinkyTopX < 232 && blinkyTopY > 468 && blinkyTopY < 640) || 
+        (blinkyTopX > 700 && blinkyTopY > 468 && blinkyTopY < 640) || 
+        (blinkyTopX > 240 && blinkyTopX < 320 && blinkyTopY > 468 && blinkyTopY < 640) || 
+        (blinkyTopX > 612 && blinkyTopX < 696 && blinkyTopY > 468 && blinkyTopY < 640) || 
+        (blinkyTopX > 328 && blinkyTopX < 608 && blinkyTopY > 556 && blinkyTopY < 640) || 
+        (blinkyTopX > 70 && blinkyTopX < 232 && blinkyTopY > 644 && blinkyTopY < 728) || 
+        (blinkyTopX > 240 && blinkyTopX < 420 && blinkyTopY > 644 && blinkyTopY < 728) || 
+        (blinkyTopX > 512 && blinkyTopX < 692 && blinkyTopY > 644 && blinkyTopY < 728) || 
+        (blinkyTopX > 700 && blinkyTopX < 856 && blinkyTopY > 644 && blinkyTopY < 728) || 
+        (blinkyTopX > 424 && blinkyTopX < 508 && blinkyTopY > 556 && blinkyTopY < 728) || 
+        (blinkyTopX > 148 && blinkyTopX < 232 && blinkyTopY > 644 && blinkyTopY < 816) || 
+        (blinkyTopX > 700 && blinkyTopX < 788 && blinkyTopY > 644 && blinkyTopY < 816) || 
+        (blinkyTopX < 132 && blinkyTopY > 732 && blinkyTopY < 816) || 
+        (blinkyTopX > 796 && blinkyTopY > 732 && blinkyTopY < 816) || 
+        (blinkyTopX > 328 && blinkyTopX < 608 && blinkyTopY > 732 && blinkyTopY < 816) || 
+        (blinkyTopX > 240 && blinkyTopX < 320 && blinkyTopY > 732 && blinkyTopY < 900) || 
+        (blinkyTopX > 612 && blinkyTopX < 696 && blinkyTopY > 732 && blinkyTopY < 900) || 
+        (blinkyTopX > 424 && blinkyTopX < 508 && blinkyTopY > 732 && blinkyTopY < 900) || 
+        (blinkyTopX > 70 && blinkyTopX < 420 && blinkyTopY > 820 && blinkyTopY < 900) || 
+        (blinkyTopX > 512 && blinkyTopX < 856 && blinkyTopY > 820 && blinkyTopY < 900) || 
+        (blinkyTopX > 0 && blinkyTopX < 68 && blinkyTopY > 68 && blinkyTopY < 292) || 
+        (blinkyTopX > 0 && blinkyTopX < 68 && blinkyTopY > 640 && blinkyTopY < 864)) {
             for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
                 for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
                     if ((blinkyLeftX <= possibleMovesPosition[i + 12][j][0] && blinkyRightX >= possibleMovesPosition[i + 12][j][0]) && (blinkyTopY <= possibleMovesPosition[i + 12][j][1] && blinkyBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentBlinkyGhostPosition != possibleMovesPosition[i + 12][j])) {
                         currentBlinkyGhostPosition = possibleMovesPosition[i + 12][j];
-                        console.log(possibleMoves[i + 12]);
-                        let changedPositionX = possibleMovesPosition[i + 12][j][0] - blinkyX;
-                        let changedPositionY = possibleMovesPosition[i + 12][j][0] - blinkyY;
                         let nextDirection = possibleMoves[i + 12][Math.floor(Math.random() * possibleMoves[i + 12].length)];
-                        if (nextDirection === 'left') {
-                            blinkyX = possibleMovesPosition[i + 12][j][0];
-                            blinkyY = possibleMovesPosition[i + 12][j][1];
-                            blinkyLeftX = blinkyLeftX + changedPositionX;
-                            blinkyLeftY = blinkyLeftY + changedPositionY;
-                            blinkyRightX = blinkyRightX + changedPositionX;
-                            blinkyRightY = blinkyRightY + changedPositionY;
-                            blinkyTopX = blinkyTopX + changedPositionX;
-                            blinkyTopY = blinkyTopY + changedPositionY;
-                            blinkyBottomX = blinkyBottomX + changedPositionX;
-                            blinkyBottomY = blinkyBottomY + changedPositionY;
-                            blinkyHeldRight = false;
+                        blinkyX = possibleMovesPosition[i + 12][j][0];
+                        blinkyY = possibleMovesPosition[i + 12][j][1];
+                        blinkyLeftX = blinkyX - WALL_W/2;
+                        blinkyLeftY = blinkyY - WALL_H/2 + CHARACTER_H/2;
+                        blinkyRightX = blinkyX - WALL_W/2 + CHARACTER_W;
+                        blinkyRightY = blinkyY - WALL_H/2 + CHARACTER_H/2;
+                        blinkyTopX = blinkyX - WALL_W/2 + CHARACTER_W/2;
+                        blinkyTopY = blinkyY - WALL_H/2;
+                        blinkyBottomX = blinkyX - WALL_W/2 + CHARACTER_W/2;
+                        blinkyBottomY = blinkyY - WALL_H/2 + CHARACTER_H;
+                        if (nextDirection === 'right') {
+                            blinkyHeldUp = false;
+                            blinkyHeldRight = true;
+                            break;
+                        } else if (nextDirection === 'left') {
+                            blinkyHeldUp = false;
                             blinkyHeldLeft = true;
-                        } else if (nextDirection === 'up') {
-                            blinkyX = possibleMovesPosition[i + 12][j][0];
-                            blinkyY = possibleMovesPosition[i + 12][j][1];
-                            blinkyLeftX = blinkyLeftX + changedPositionX;
-                            blinkyLeftY = blinkyLeftY + changedPositionY;
-                            blinkyRightX = blinkyRightX + changedPositionX;
-                            blinkyRightY = blinkyRightY + changedPositionY;
-                            blinkyTopX = blinkyTopX + changedPositionX;
-                            blinkyTopY = blinkyTopY + changedPositionY;
-                            blinkyBottomX = blinkyBottomX + changedPositionX;
-                            blinkyBottomY = blinkyBottomY + changedPositionY;
-                            blinkyHeldRight = false;
-                            blinkyHeldUp = true;
+                            break;
                         } else if (nextDirection === 'down') {
-                            blinkyX = possibleMovesPosition[i + 12][j][0];
-                            blinkyY = possibleMovesPosition[i + 12][j][1];
-                            blinkyLeftX = blinkyLeftX + changedPositionX;
-                            blinkyLeftY = blinkyLeftY + changedPositionY;
-                            blinkyRightX = blinkyRightX + changedPositionX;
-                            blinkyRightY = blinkyRightY + changedPositionY;
-                            blinkyTopX = blinkyTopX + changedPositionX;
-                            blinkyTopY = blinkyTopY + changedPositionY;
-                            blinkyBottomX = blinkyBottomX + changedPositionX;
-                            blinkyBottomY = blinkyBottomY + changedPositionY;
-                            blinkyHeldRight = false;
+                            blinkyHeldUp = false;
                             blinkyHeldDown = true;
+                            break;
                         }
                     }
                 }
             }
-        }
-    } else if (blinkyHeldUp) {
-        console.log('up');
-        if (((blinkyTopX > 90 && blinkyTopX < 202 && blinkyTopY > 89 && blinkyTopY < 173) || (blinkyTopX > 232 && blinkyTopX < 394 && blinkyTopY < 173 && blinkyTopY > 89) || (blinkyTopX > 440 && blinkyTopX < 484 && blinkyTopY < 173) || (blinkyTopX > 530 && blinkyTopX < 673 && blinkyTopY < 173 && blinkyTopY > 89) || (blinkyTopX > 718 && blinkyTopX < 834 && blinkyTopY < 173 && blinkyTopY > 89) || 
-        (blinkyTopX > 90 && blinkyTopX < 394 && blinkyTopY > 839 && blinkyTopY < 874) || (blinkyTopX > 530 && blinkyTopX < 834 && blinkyTopY > 839 && blinkyTopY < 874) || (blinkyTopX > 255 && blinkyTopX < 294 && blinkyTopY > 749 && blinkyTopY < 874) || (blinkyTopX > 630 && blinkyTopX < 669 && blinkyTopY > 749 && blinkyTopY < 874) || 
-        (blinkyTopX > 440 && blinkyTopX < 484 && blinkyTopY > 749 && blinkyTopY < 874) || (blinkyTopX > 343 && blinkyTopX < 581 && blinkyTopY > 749 && blinkyTopY < 800) || (blinkyTopX < 109 && blinkyTopY > 749 && blinkyTopY < 800) || (blinkyTopX > 815 && blinkyTopY > 749 && blinkyTopY < 800) || 
-        (blinkyTopX > 715 && blinkyTopX < 764 && blinkyTopY > 662 && blinkyTopY < 800) || (blinkyTopX > 160 && blinkyTopX < 209 && blinkyTopY > 662 && blinkyTopY < 800) || (blinkyTopX > 90 && blinkyTopX < 209 && blinkyTopY > 662 && blinkyTopY < 703) || (blinkyTopX > 715 && blinkyTopX < 764 && blinkyTopY > 662 && blinkyTopY < 703) || (blinkyTopX > 715 && blinkyTopX < 835 && blinkyTopY > 662 && blinkyTopY < 703) || 
-        (blinkyTopX > 530 && blinkyTopX < 673 && blinkyTopY > 662 && blinkyTopY < 703) || (blinkyTopX > 232 && blinkyTopX < 394 && blinkyTopY > 662 && blinkyTopY < 703) || (blinkyTopX > 715 && blinkyTopY > 484 && blinkyTopY < 613) || (blinkyTopX < 209 && blinkyTopY > 484 && blinkyTopY < 613) || 
-        (blinkyTopX > 440 && blinkyTopX < 484 && blinkyTopY > 572 && blinkyTopY < 703) || (blinkyTopX > 343 && blinkyTopX < 581 && blinkyTopY > 574 && blinkyTopY < 613) || (blinkyTopX > 630 && blinkyTopX < 669 && blinkyTopY > 484 && blinkyTopY < 613) || (blinkyTopX > 630 && blinkyTopX < 669 && blinkyTopY > 484 && blinkyTopY < 613) || (blinkyTopX > 255 && blinkyTopX < 294 && blinkyTopY > 484 && blinkyTopY < 613) || 
-        (blinkyTopX > 343 && blinkyTopX < 581 && blinkyTopY > 468 && blinkyTopY < 528) || (blinkyTopX > 343 && blinkyTopX < 360 && blinkyTopY > 402 && blinkyTopY < 528) || (blinkyTopX > 343 && blinkyTopX < 581 && blinkyTopY > 399 && blinkyTopY < 414) || (blinkyTopX > 564 && blinkyTopX < 581 && blinkyTopY > 402 && blinkyTopY < 528) ||
-        (blinkyTopX > 715 && blinkyTopY > 309 && blinkyTopY < 438) || (blinkyTopX < 209 && blinkyTopY > 309 && blinkyTopY < 438) || (blinkyTopX > 255 && blinkyTopX < 294 && blinkyTopY > 484 && blinkyTopY < 613) || (blinkyTopX > 630 && blinkyTopX < 669 && blinkyTopY > 484 && blinkyTopY < 613) || 
-        (blinkyTopX > 255 && blinkyTopX < 294 && blinkyTopY > 221 && blinkyTopY < 438) || (blinkyTopX > 630 && blinkyTopX < 669 && blinkyTopY > 221 && blinkyTopY < 438) || (blinkyTopX > 255 && blinkyTopX < 394 && blinkyTopY > 309 && blinkyTopY < 348) || (blinkyTopX > 530 && blinkyTopX < 669 && blinkyTopY > 309 && blinkyTopY < 348) || 
-        (blinkyTopX > 440 && blinkyTopX < 484 && blinkyTopY > 221 && blinkyTopY < 348) || (blinkyTopX > 343 && blinkyTopX < 581 && blinkyTopY > 221 && blinkyTopY < 284) || (blinkyTopX > 90 && blinkyTopX < 202 && blinkyTopY > 221 && blinkyTopY < 284) || (blinkyTopX > 718 && blinkyTopX < 834 && blinkyTopY > 221 && blinkyTopY < 263) || 
-        (blinkyTopY < 43)) != true) {
+        } else if (blinkyLeftX < -27) {
+            blinkyX = 954;
+            blinkyY = 462;
+            blinkyLeftX = 952;
+            blinkyLeftY = 466;
+            blinkyRightX = 964;
+            blinkyRightY = 466;
+            blinkyTopX = 958;
+            blinkyTopY = 460;
+            blinkyBottomX = 958;
+            blinkyBottomY = 472;
+        } else {
+            if (blinkyRightX > 964) {
+                blinkyX = -26;
+                blinkyY = 462;
+                blinkyLeftX = -28;
+                blinkyLeftY = 466;
+                blinkyRightX = -16;
+                blinkyRightY = 466;
+                blinkyTopX = -22;
+                blinkyTopY = 460;
+                blinkyBottomX = -22;
+                blinkyBottomY = 472;
+            } 
             if (blinkyUpFirstLoaded) {
-                console.log('here');
                 blinkyUpFirstLoaded = false;
                 blinkyDownFirstLoaded = false;
                 blinkyDownSecondLoaded = false;
@@ -1496,7 +1591,6 @@ function pacmanMove() {
                 blinkyBottomY -= blinkySpeed;
                 blinkyUpSecondLoaded = true;
             } else {
-                console.log('here');
                 blinkyUpSecondLoaded = false;
                 blinkyY -= blinkySpeed;
                 blinkyLeftY -= blinkySpeed;
@@ -1505,73 +1599,108 @@ function pacmanMove() {
                 blinkyBottomY -= blinkySpeed;
                 blinkyUpFirstLoaded = true;
             }
+        }
+    } else if (blinkyHeldDown) {
+        console.log(`blinky left x is ${blinkyLeftX}`);
+        console.log(`blinky right x is ${blinkyRightY}`);
+        console.log(`blinky top y is ${blinkyTopY}`);
+        console.log(`blinky bottom y is ${blinkyBottomY}`);
+        if ((blinkyBottomX > 70 && blinkyBottomX < 232 && blinkyBottomY > 70 && blinkyBottomY < 196) || 
+        (blinkyBottomX > 240 && blinkyBottomX < 420 && blinkyBottomY < 196 && blinkyBottomY > 70) || 
+        (blinkyBottomX > 424 && blinkyBottomX < 508 && blinkyBottomY < 196) || 
+        (blinkyBottomX > 512 && blinkyBottomX < 692 && blinkyBottomY < 196 && blinkyBottomY > 70) || 
+        (blinkyBottomX > 700 && blinkyBottomX < 856 && blinkyBottomY < 196 && blinkyBottomY > 70) || 
+        (blinkyBottomX > 70 && blinkyBottomX < 232 && blinkyBottomY > 204 && blinkyBottomY < 284) || 
+        (blinkyBottomX > 240 && blinkyBottomX < 320 && blinkyBottomY > 204 && blinkyBottomY < 464) || 
+        (blinkyBottomX > 328 && blinkyBottomX < 608 && blinkyBottomY > 204 && blinkyBottomY < 284) || 
+        (blinkyBottomX > 612 && blinkyBottomX < 696 && blinkyBottomY > 204 && blinkyBottomY < 464) || 
+        (blinkyBottomX > 700 && blinkyBottomX < 856 && blinkyBottomY > 204 && blinkyBottomY < 284) || 
+        (blinkyBottomX > 424 && blinkyBottomX < 508 && blinkyBottomY > 204 && blinkyBottomY < 376) || 
+        (blinkyBottomX > 240 && blinkyBottomX < 420 && blinkyBottomY > 292 && blinkyBottomY < 376) || 
+        (blinkyBottomX > 512 && blinkyBottomX < 696 && blinkyBottomY > 292 && blinkyBottomY < 376) || 
+        (blinkyBottomX > 700 && blinkyBottomY > 292 && blinkyBottomY < 464) || 
+        (blinkyBottomX < 232 && blinkyBottomY > 292 && blinkyBottomY < 464) || 
+        (blinkyBottomX > 328 && blinkyBottomX < 392 && blinkyBottomY > 380 && blinkyBottomY < 552) || 
+        (blinkyBottomX > 540 && blinkyBottomX < 608 && blinkyBottomY > 380 && blinkyBottomY < 552) || 
+        (blinkyBottomX > 328 && blinkyBottomX < 460 && blinkyBottomY > 380 && blinkyBottomY < 448) || 
+        (blinkyBottomX > 472 && blinkyBottomX < 608 && blinkyBottomY > 380 && blinkyBottomY < 448) || 
+        (blinkyBottomX > 328 && blinkyBottomX < 608 && blinkyBottomY > 484 && blinkyBottomY < 552) || 
+        (blinkyBottomX < 232 && blinkyBottomY > 468 && blinkyBottomY < 640) || 
+        (blinkyBottomX > 700 && blinkyBottomY > 468 && blinkyBottomY < 640) || 
+        (blinkyBottomX > 612 && blinkyBottomX < 696 && blinkyBottomY > 468 && blinkyBottomY < 640) || 
+        (blinkyBottomX > 328 && blinkyBottomX < 608 && blinkyBottomY > 556 && blinkyBottomY < 640) || 
+        (blinkyBottomX > 70 && blinkyBottomX < 232 && blinkyBottomY > 644 && blinkyBottomY < 728) || 
+        (blinkyBottomX > 240 && blinkyBottomX < 420 && blinkyBottomY > 644 && blinkyBottomY < 728) || 
+        (blinkyBottomX > 512 && blinkyBottomX < 692 && blinkyBottomY > 644 && blinkyBottomY < 728) || 
+        (blinkyBottomX > 700 && blinkyBottomX < 856 && blinkyBottomY > 644 && blinkyBottomY < 728) || 
+        (blinkyBottomX > 424 && blinkyBottomX < 508 && blinkyBottomY > 556 && blinkyBottomY < 728) || 
+        (blinkyBottomX > 148 && blinkyBottomX < 232 && blinkyBottomY > 644 && blinkyBottomY < 816) || 
+        (blinkyBottomX > 700 && blinkyBottomX < 788 && blinkyBottomY > 644 && blinkyBottomY < 816) || 
+        (blinkyBottomX < 132 && blinkyBottomY > 732 && blinkyBottomY < 816) || 
+        (blinkyBottomX > 796 && blinkyBottomY > 732 && blinkyBottomY < 816) || 
+        (blinkyBottomX > 328 && blinkyBottomX < 608 && blinkyBottomY > 732 && blinkyBottomY < 816) || 
+        (blinkyBottomX > 240 && blinkyBottomX < 320 && blinkyBottomY > 732 && blinkyBottomY < 900) || 
+        (blinkyBottomX > 612 && blinkyBottomX < 696 && blinkyBottomY > 732 && blinkyBottomY < 900) || 
+        (blinkyBottomX > 424 && blinkyBottomX < 508 && blinkyBottomY > 732 && blinkyBottomY < 900) || 
+        (blinkyBottomX > 70 && blinkyBottomX < 420 && blinkyBottomY > 820 && blinkyBottomY < 900) || 
+        (blinkyBottomX > 512 && blinkyBottomX < 856 && blinkyBottomY > 820 && blinkyBottomY < 900) || 
+        (blinkyBottomY > 908)) {
             for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
                 for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
                     if ((blinkyLeftX <= possibleMovesPosition[i + 12][j][0] && blinkyRightX >= possibleMovesPosition[i + 12][j][0]) && (blinkyTopY <= possibleMovesPosition[i + 12][j][1] && blinkyBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentBlinkyGhostPosition != possibleMovesPosition[i + 12][j])) {
                         currentBlinkyGhostPosition = possibleMovesPosition[i + 12][j];
-                        console.log(possibleMoves[i + 12]);
-                        let changedPositionX = possibleMovesPosition[i + 12][j][0] - blinkyX;
-                        let changedPositionY = possibleMovesPosition[i + 12][j][0] - blinkyY;
                         let nextDirection = possibleMoves[i + 12][Math.floor(Math.random() * possibleMoves[i + 12].length)];
+                        blinkyX = possibleMovesPosition[i + 12][j][0];
+                        blinkyY = possibleMovesPosition[i + 12][j][1];
+                        blinkyLeftX = blinkyX - WALL_W/2;
+                        blinkyLeftY = blinkyY - WALL_H/2 + CHARACTER_H/2;
+                        blinkyRightX = blinkyX - WALL_W/2 + CHARACTER_W;
+                        blinkyRightY = blinkyY - WALL_H/2 + CHARACTER_H/2;
+                        blinkyTopX = blinkyX - WALL_W/2 + CHARACTER_W/2;
+                        blinkyTopY = blinkyY - WALL_H/2;
+                        blinkyBottomX = blinkyX - WALL_W/2 + CHARACTER_W/2;
+                        blinkyBottomY = blinkyY - WALL_H/2 + CHARACTER_H;
                         if (nextDirection === 'right') {
-                            blinkyX = possibleMovesPosition[i + 12][j][0];
-                            blinkyY = possibleMovesPosition[i + 12][j][1];
-                            blinkyLeftX = blinkyLeftX + changedPositionX;
-                            blinkyLeftY = blinkyLeftY + changedPositionY;
-                            blinkyRightX = blinkyRightX + changedPositionX;
-                            blinkyRightY = blinkyRightY + changedPositionY;
-                            blinkyTopX = blinkyTopX + changedPositionX;
-                            blinkyTopY = blinkyTopY + changedPositionY;
-                            blinkyBottomX = blinkyBottomX + changedPositionX;
-                            blinkyBottomY = blinkyBottomY + changedPositionY;
-                            blinkyHeldUp = false;
+                            blinkyHeldDown = false;
                             blinkyHeldRight = true;
+                            break;
+                        } else if (nextDirection === 'up') {
+                            blinkyHeldDown = false;
+                            blinkyHeldUp = true;
+                            break;
                         } else if (nextDirection === 'left') {
-                            blinkyX = possibleMovesPosition[i + 12][j][0];
-                            blinkyY = possibleMovesPosition[i + 12][j][1];
-                            blinkyLeftX = blinkyLeftX + changedPositionX;
-                            blinkyLeftY = blinkyLeftY + changedPositionY;
-                            blinkyRightX = blinkyRightX + changedPositionX;
-                            blinkyRightY = blinkyRightY + changedPositionY;
-                            blinkyTopX = blinkyTopX + changedPositionX;
-                            blinkyTopY = blinkyTopY + changedPositionY;
-                            blinkyBottomX = blinkyBottomX + changedPositionX;
-                            blinkyBottomY = blinkyBottomY + changedPositionY;
-                            blinkyHeldUp = false;
+                            blinkyHeldDown = false;
                             blinkyHeldLeft = true;
-                        } else if (nextDirection === 'down') {
-                            blinkyX = possibleMovesPosition[i + 12][j][0];
-                            blinkyY = possibleMovesPosition[i + 12][j][1];
-                            blinkyLeftX = blinkyLeftX + changedPositionX;
-                            blinkyLeftY = blinkyLeftY + changedPositionY;
-                            blinkyRightX = blinkyRightX + changedPositionX;
-                            blinkyRightY = blinkyRightY + changedPositionY;
-                            blinkyTopX = blinkyTopX + changedPositionX;
-                            blinkyTopY = blinkyTopY + changedPositionY;
-                            blinkyBottomX = blinkyBottomX + changedPositionX;
-                            blinkyBottomY = blinkyBottomY + changedPositionY;
-                            blinkyHeldUp = false;
-                            blinkyHeldDown = true;
+                            break;
                         }
                     }
                 }
             }
-        }
-    } else if (blinkyHeldDown) {
-        console.log('down');
-        if ((blinkyBottomX > 90 && blinkyBottomX < 202 && blinkyBottomY > 89 && blinkyBottomY < 173) || (blinkyBottomX > 232 && blinkyBottomX < 394 && blinkyBottomY < 173 && blinkyBottomY > 89) || (blinkyBottomX > 440 && blinkyBottomX < 484 && blinkyBottomY < 173) || (blinkyBottomX > 530 && blinkyBottomX < 673 && blinkyBottomY < 173 && blinkyBottomY > 89) || (blinkyBottomX > 718 && blinkyBottomX < 834 && blinkyBottomY < 173 && blinkyBottomY > 89) || 
-        (blinkyBottomX > 90 && blinkyBottomX < 394 && blinkyBottomY > 839 && blinkyBottomY < 874) || (blinkyBottomX > 530 && blinkyBottomX < 834 && blinkyBottomY > 839 && blinkyBottomY < 874) || (blinkyBottomX > 255 && blinkyBottomX < 294 && blinkyBottomY > 749 && blinkyBottomY < 874) || (blinkyBottomX > 630 && blinkyBottomX < 669 && blinkyBottomY > 749 && blinkyBottomY < 874) || 
-        (blinkyBottomX > 440 && blinkyBottomX < 484 && blinkyBottomY > 749 && blinkyBottomY < 874) || (blinkyBottomX > 343 && blinkyBottomX < 581 && blinkyBottomY > 749 && blinkyBottomY < 800) || (blinkyBottomX < 109 && blinkyBottomY > 749 && blinkyBottomY < 800) || (blinkyBottomX > 815 && blinkyBottomY > 749 && blinkyBottomY < 800) || 
-        (blinkyBottomX > 715 && blinkyBottomX < 764 && blinkyBottomY > 662 && blinkyBottomY < 800) || (blinkyBottomX > 160 && blinkyBottomX < 209 && blinkyBottomY > 662 && blinkyBottomY < 800) || (blinkyBottomX > 90 && blinkyBottomX < 209 && blinkyBottomY > 662 && blinkyBottomY < 703) || (blinkyBottomX > 715 && blinkyBottomX < 764 && blinkyBottomY > 662 && blinkyBottomY < 703) || (blinkyBottomX > 715 && blinkyBottomX < 835 && blinkyBottomY > 662 && blinkyBottomY < 703) || 
-        (blinkyBottomX > 530 && blinkyBottomX < 673 && blinkyBottomY > 662 && blinkyBottomY < 703) || (blinkyBottomX > 232 && blinkyBottomX < 394 && blinkyBottomY > 662 && blinkyBottomY < 703) || (blinkyBottomX > 715 && blinkyBottomY > 484 && blinkyBottomY < 613) || (blinkyBottomX < 209 && blinkyBottomY > 484 && blinkyBottomY < 613) || 
-        (blinkyBottomX > 440 && blinkyBottomX < 484 && blinkyBottomY > 572 && blinkyBottomY < 703) || (blinkyBottomX > 343 && blinkyBottomX < 581 && blinkyBottomY > 574 && blinkyBottomY < 613) || (blinkyBottomX > 630 && blinkyBottomX < 669 && blinkyBottomY > 484 && blinkyBottomY < 613) || (blinkyBottomX > 255 && blinkyBottomX < 294 && blinkyBottomY > 484 && blinkyBottomY < 613) || 
-        (blinkyBottomX > 343 && blinkyBottomX < 581 && blinkyBottomY > 508 && blinkyBottomY < 528) || (blinkyBottomX > 343 && blinkyBottomX < 360 && blinkyBottomY > 402 && blinkyBottomY < 528) || (blinkyBottomX > 343 && blinkyBottomX < 581 && blinkyBottomY > 399 && blinkyBottomY < 414) || (blinkyBottomX > 564 && blinkyBottomX < 581 && blinkyBottomY > 402 && blinkyBottomY < 528) ||
-        (blinkyBottomX > 715 && blinkyBottomY > 309 && blinkyBottomY < 438) || (blinkyBottomX < 209 && blinkyBottomY > 309 && blinkyBottomY < 438) || (blinkyBottomX > 255 && blinkyBottomX < 294 && blinkyBottomY > 484 && blinkyBottomY < 613) || (blinkyBottomX > 630 && blinkyBottomX < 669 && blinkyBottomY > 484 && blinkyBottomY < 613) || 
-        (blinkyBottomX > 255 && blinkyBottomX < 294 && blinkyBottomY > 221 && blinkyBottomY < 438) || (blinkyBottomX > 630 && blinkyBottomX < 669 && blinkyBottomY > 221 && blinkyBottomY < 438) || (blinkyBottomX > 255 && blinkyBottomX < 394 && blinkyBottomY > 309 && blinkyBottomY < 348) || (blinkyBottomX > 530 && blinkyBottomX < 669 && blinkyBottomY > 309 && blinkyBottomY < 348) || 
-        (blinkyBottomX > 440 && blinkyBottomX < 484 && blinkyBottomY > 221 && blinkyBottomY < 348) || (blinkyBottomX > 343 && blinkyBottomX < 581 && blinkyBottomY > 221 && blinkyBottomY < 263) || (blinkyBottomX > 90 && blinkyBottomX < 202 && blinkyBottomY > 221 && blinkyBottomY < 263) || (blinkyBottomX > 718 && blinkyBottomX < 834 && blinkyBottomY > 221 && blinkyBottomY < 263) || 
-        (blinkyBottomY > 924)) {
+        } else if (blinkyLeftX < -27) {
+            blinkyX = 954;
+            blinkyY = 462;
+            blinkyLeftX = 952;
+            blinkyLeftY = 466;
+            blinkyRightX = 964;
+            blinkyRightY = 466;
+            blinkyTopX = 958;
+            blinkyTopY = 460;
+            blinkyBottomX = 958;
+            blinkyBottomY = 472;
+        } else {
+            if (blinkyRightX > 964) {
+                blinkyX = -26;
+                blinkyY = 462;
+                blinkyLeftX = -28;
+                blinkyLeftY = 466;
+                blinkyRightX = -16;
+                blinkyRightY = 466;
+                blinkyTopX = -22;
+                blinkyTopY = 460;
+                blinkyBottomX = -22;
+                blinkyBottomY = 472;
+            } 
             if (blinkyDownFirstLoaded) {
-                console.log('here');
                 blinkyDownFirstLoaded = false;
                 blinkyRightFirstLoaded = false;
                 blinkyRightSecondLoaded = false;
@@ -1586,7 +1715,6 @@ function pacmanMove() {
                 blinkyBottomY += blinkySpeed;
                 blinkyDownSecondLoaded = true;
             } else {
-                console.log('here');
                 blinkyDownSecondLoaded = false;
                 blinkyY += blinkySpeed;
                 blinkyLeftY += blinkySpeed;
@@ -1595,74 +1723,112 @@ function pacmanMove() {
                 blinkyBottomY += blinkySpeed;
                 blinkyDownFirstLoaded = true;
             }
+        }
+    }
+    if (pinkyHeldLeft) {
+        console.log(`pinky left x is ${pinkyLeftX}`);
+        console.log(`pinky right x is ${pinkyRightY}`);
+        console.log(`pinky top y is ${pinkyTopY}`);
+        console.log(`pinky bottom y is ${pinkyBottomY}`);
+        if ((pinkyLeftX > 0 && pinkyLeftX < 64 && pinkyLeftY > 68 && pinkyLeftY < 292) || 
+        (pinkyLeftX > 0 && pinkyLeftX < 64 && pinkyLeftY > 640 && pinkyLeftY < 864) || 
+        (pinkyLeftX > 70 && pinkyLeftX < 232 && pinkyLeftY > 70 && pinkyLeftY < 196) || 
+        (pinkyLeftX > 240 && pinkyLeftX < 420 && pinkyLeftY < 196 && pinkyLeftY > 70) || 
+        (pinkyLeftX > 424 && pinkyLeftX < 508 && pinkyLeftY < 196) || 
+        (pinkyLeftX > 512 && pinkyLeftX < 692 && pinkyLeftY < 196 && pinkyLeftY > 70) || 
+        (pinkyLeftX > 700 && pinkyLeftX < 856 && pinkyLeftY < 196 && pinkyLeftY > 70) || 
+        (pinkyLeftX > 70 && pinkyLeftX < 232 && pinkyLeftY > 204 && pinkyLeftY < 284) || 
+        (pinkyLeftX > 240 && pinkyLeftX < 320 && pinkyLeftY > 204 && pinkyLeftY < 464) || 
+        (pinkyLeftX > 328 && pinkyLeftX < 608 && pinkyLeftY > 204 && pinkyLeftY < 284) || 
+        (pinkyLeftX > 612 && pinkyLeftX < 696 && pinkyLeftY > 204 && pinkyLeftY < 464) || 
+        (pinkyLeftX > 700 && pinkyLeftX < 856 && pinkyLeftY > 204 && pinkyLeftY < 284) || 
+        (pinkyLeftX > 424 && pinkyLeftX < 508 && pinkyLeftY > 204 && pinkyLeftY < 376) || 
+        (pinkyLeftX > 240 && pinkyLeftX < 420 && pinkyLeftY > 292 && pinkyLeftY < 376) || 
+        (pinkyLeftX > 512 && pinkyLeftX < 696 && pinkyLeftY > 292 && pinkyLeftY < 376) || 
+        (pinkyLeftX > 700 && pinkyLeftY > 292 && pinkyLeftY < 464) || 
+        (pinkyLeftX < 232 && pinkyLeftY > 292 && pinkyLeftY < 464) || 
+        (pinkyLeftX > 328 && pinkyLeftX < 392 && pinkyLeftY > 380 && pinkyLeftY < 552) || 
+        (pinkyLeftX > 540 && pinkyLeftX < 608 && pinkyLeftY > 380 && pinkyLeftY < 552) || 
+        (pinkyLeftX > 328 && pinkyLeftX < 460 && pinkyLeftY > 380 && pinkyLeftY < 448) || 
+        (pinkyLeftX > 472 && pinkyLeftX < 608 && pinkyLeftY > 380 && pinkyLeftY < 448) || 
+        (pinkyLeftX > 328 && pinkyLeftX < 608 && pinkyLeftY > 484 && pinkyLeftY < 552) || 
+        (pinkyLeftX < 232 && pinkyLeftY > 468 && pinkyLeftY < 640) || 
+        (pinkyLeftX > 700 && pinkyLeftY > 468 && pinkyLeftY < 640) || 
+        (pinkyLeftX > 240 && pinkyLeftX < 320 && pinkyLeftY > 468 && pinkyLeftY < 640) || 
+        (pinkyLeftX > 612 && pinkyLeftX < 696 && pinkyLeftY > 468 && pinkyLeftY < 640) || 
+        (pinkyLeftX > 328 && pinkyLeftX < 608 && pinkyLeftY > 556 && pinkyLeftY < 640) || 
+        (pinkyLeftX > 70 && pinkyLeftX < 232 && pinkyLeftY > 644 && pinkyLeftY < 728) || 
+        (pinkyLeftX > 240 && pinkyLeftX < 420 && pinkyLeftY > 644 && pinkyLeftY < 728) || 
+        (pinkyLeftX > 512 && pinkyLeftX < 692 && pinkyLeftY > 644 && pinkyLeftY < 728) || 
+        (pinkyLeftX > 700 && pinkyLeftX < 856 && pinkyLeftY > 644 && pinkyLeftY < 728) || 
+        (pinkyLeftX > 424 && pinkyLeftX < 508 && pinkyLeftY > 556 && pinkyLeftY < 728) || 
+        (pinkyLeftX > 148 && pinkyLeftX < 232 && pinkyLeftY > 644 && pinkyLeftY < 816) || 
+        (pinkyLeftX > 700 && pinkyLeftX < 788 && pinkyLeftY > 644 && pinkyLeftY < 816) || 
+        (pinkyLeftX < 132 && pinkyLeftY > 732 && pinkyLeftY < 816) || 
+        (pinkyLeftX > 796 && pinkyLeftY > 732 && pinkyLeftY < 816) || 
+        (pinkyLeftX > 328 && pinkyLeftX < 608 && pinkyLeftY > 732 && pinkyLeftY < 816) || 
+        (pinkyLeftX > 240 && pinkyLeftX < 320 && pinkyLeftY > 732 && pinkyLeftY < 900) || 
+        (pinkyLeftX > 612 && pinkyLeftX < 696 && pinkyLeftY > 732 && pinkyLeftY < 900) || 
+        (pinkyLeftX > 424 && pinkyLeftX < 508 && pinkyLeftY > 732 && pinkyLeftY < 900) || 
+        (pinkyLeftX > 70 && pinkyLeftX < 420 && pinkyLeftY > 820 && pinkyLeftY < 900) || 
+        (pinkyLeftX > 512 && pinkyLeftX < 856 && pinkyLeftY > 820 && pinkyLeftY < 900)
+        ) {
             for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
                 for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
-                    if ((blinkyLeftX <= possibleMovesPosition[i + 12][j][0] && blinkyRightX >= possibleMovesPosition[i + 12][j][0]) && (blinkyTopY <= possibleMovesPosition[i + 12][j][1] && blinkyBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentBlinkyGhostPosition != possibleMovesPosition[i + 12][j])) {
-                        currentBlinkyGhostPosition = possibleMovesPosition[i + 12][j];
-                        console.log(possibleMoves[i + 12]);
-                        let changedPositionX = possibleMovesPosition[i + 12][j][0] - blinkyX;
-                        let changedPositionY = possibleMovesPosition[i + 12][j][0] - blinkyY;
+                    if ((pinkyLeftX <= possibleMovesPosition[i + 12][j][0] && pinkyRightX >= possibleMovesPosition[i + 12][j][0]) && (pinkyTopY <= possibleMovesPosition[i + 12][j][1] && pinkyBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentPinkyGhostPosition != possibleMovesPosition[i + 12][j])) {
+                        currentPinkyGhostPosition = possibleMovesPosition[i + 12][j];
                         let nextDirection = possibleMoves[i + 12][Math.floor(Math.random() * possibleMoves[i + 12].length)];
+                        pinkyX = possibleMovesPosition[i + 12][j][0];
+                        pinkyY = possibleMovesPosition[i + 12][j][1];
+                        pinkyLeftX = pinkyX - WALL_W/2;
+                        pinkyLeftY = pinkyY - WALL_H/2 + CHARACTER_H/2;
+                        pinkyRightX = pinkyX - WALL_W/2 + CHARACTER_W;
+                        pinkyRightY = pinkyY - WALL_H/2 + CHARACTER_H/2;
+                        pinkyTopX = pinkyX - WALL_W/2 + CHARACTER_W/2;
+                        pinkyTopY = pinkyY - WALL_H/2;
+                        pinkyBottomX = pinkyX - WALL_W/2 + CHARACTER_W/2;
+                        pinkyBottomY = pinkyY - WALL_H/2 + CHARACTER_H;
                         if (nextDirection === 'right') {
-                            blinkyX = possibleMovesPosition[i + 12][j][0];
-                            blinkyY = possibleMovesPosition[i + 12][j][1];
-                            blinkyLeftX = blinkyLeftX + changedPositionX;
-                            blinkyLeftY = blinkyLeftY + changedPositionY;
-                            blinkyRightX = blinkyRightX + changedPositionX;
-                            blinkyRightY = blinkyRightY + changedPositionY;
-                            blinkyTopX = blinkyTopX + changedPositionX;
-                            blinkyTopY = blinkyTopY + changedPositionY;
-                            blinkyBottomX = blinkyBottomX + changedPositionX;
-                            blinkyBottomY = blinkyBottomY + changedPositionY;
-                            blinkyHeldDown = false;
-                            blinkyHeldRight = true;
+                            pinkyHeldLeft = false;
+                            pinkyHeldRight = true;
+                            break;
                         } else if (nextDirection === 'up') {
-                            blinkyX = possibleMovesPosition[i + 12][j][0];
-                            blinkyY = possibleMovesPosition[i + 12][j][1];
-                            blinkyLeftX = blinkyLeftX + changedPositionX;
-                            blinkyLeftY = blinkyLeftY + changedPositionY;
-                            blinkyRightX = blinkyRightX + changedPositionX;
-                            blinkyRightY = blinkyRightY + changedPositionY;
-                            blinkyTopX = blinkyTopX + changedPositionX;
-                            blinkyTopY = blinkyTopY + changedPositionY;
-                            blinkyBottomX = blinkyBottomX + changedPositionX;
-                            blinkyBottomY = blinkyBottomY + changedPositionY;
-                            blinkyHeldDown = false;
-                            blinkyHeldUp = true;
-                        } else if (nextDirection === 'left') {
-                            blinkyX = possibleMovesPosition[i + 12][j][0];
-                            blinkyY = possibleMovesPosition[i + 12][j][1];
-                            blinkyLeftX = blinkyLeftX + changedPositionX;
-                            blinkyLeftY = blinkyLeftY + changedPositionY;
-                            blinkyRightX = blinkyRightX + changedPositionX;
-                            blinkyRightY = blinkyRightY + changedPositionY;
-                            blinkyTopX = blinkyTopX + changedPositionX;
-                            blinkyTopY = blinkyTopY + changedPositionY;
-                            blinkyBottomX = blinkyBottomX + changedPositionX;
-                            blinkyBottomY = blinkyBottomY + changedPositionY;
-                            blinkyHeldDown = false;
-                            blinkyHeldLeft = true;
+                            pinkyHeldLeft = false;
+                            pinkyHeldUp = true;
+                            break;
+                        } else if (nextDirection === 'down') {
+                            pinkyHeldLeft = false;
+                            pinkyHeldDown = true;
+                            break;
                         }
                     }
                 }
             }
-        }
-    }
-    
-    if (pinkyHeldLeft) {
-        if ((pinkyLeftX > 90 && pinkyLeftX < 202 && pinkyLeftY > 89 && pinkyLeftY < 173) || (pinkyLeftX > 232 && pinkyLeftX < 394 && pinkyLeftY < 173 && pinkyLeftY > 89) || (pinkyLeftX > 440 && pinkyLeftX < 484 && pinkyLeftY < 173) || (pinkyLeftX > 530 && pinkyLeftX < 673 && pinkyLeftY < 173 && pinkyLeftY > 89) || (pinkyLeftX > 718 && pinkyLeftX < 834 && pinkyLeftY < 173 && pinkyLeftY > 89) || 
-        (pinkyLeftX > 90 && pinkyLeftX < 394 && pinkyLeftY > 839 && pinkyLeftY < 874) || (pinkyLeftX > 530 && pinkyLeftX < 834 && pinkyLeftY > 839 && pinkyLeftY < 874) || (pinkyLeftX > 255 && pinkyLeftX < 294 && pinkyLeftY > 749 && pinkyLeftY < 874) || (pinkyLeftX > 630 && pinkyLeftX < 669 && pinkyLeftY > 749 && pinkyLeftY < 874) || 
-        (pinkyLeftX > 440 && pinkyLeftX < 484 && pinkyLeftY > 749 && pinkyLeftY < 874) || (pinkyLeftX > 343 && pinkyLeftX < 581 && pinkyLeftY > 749 && pinkyLeftY < 800) || (pinkyLeftX < 109 && pinkyLeftY > 749 && pinkyLeftY < 800) || (pinkyLeftX > 815 && pinkyLeftY > 749 && pinkyLeftY < 800) || 
-        (pinkyLeftX > 715 && pinkyLeftX < 764 && pinkyLeftY > 662 && pinkyLeftY < 800) || (pinkyLeftX > 160 && pinkyLeftX < 209 && pinkyLeftY > 662 && pinkyLeftY < 800) || (pinkyLeftX > 90 && pinkyLeftX < 209 && pinkyLeftY > 662 && pinkyLeftY < 703) || (pinkyLeftX > 715 && pinkyLeftX < 764 && pinkyLeftY > 662 && pinkyLeftY < 703) || (pinkyLeftX > 715 && pinkyLeftX < 835 && pinkyLeftY > 662 && pinkyLeftY < 703) || 
-        (pinkyLeftX > 530 && pinkyLeftX < 673 && pinkyLeftY > 662 && pinkyLeftY < 703) || (pinkyLeftX > 254 && pinkyLeftX < 394 && pinkyLeftY > 662 && pinkyLeftY < 703) || (pinkyLeftX > 715 && pinkyLeftY > 484 && pinkyLeftY < 613) || (pinkyLeftX < 209 && pinkyLeftY > 484 && pinkyLeftY < 613) || (pinkyLeftX > 630 && pinkyLeftX < 669 && pinkyLeftY > 484 && pinkyLeftY < 613) || (pinkyLeftX > 255 && pinkyLeftX < 294 && pinkyLeftY > 484 && pinkyLeftY < 613) || 
-        (pinkyLeftX > 440 && pinkyLeftX < 484 && pinkyLeftY > 572 && pinkyLeftY < 703) || (pinkyLeftX > 343 && pinkyLeftX < 581 && pinkyLeftY > 574 && pinkyLeftY < 613) || (pinkyLeftX > 630 && pinkyLeftX < 669 && pinkyLeftY > 484 && pinkyLeftY < 613) || 
-        (pinkyLeftX > 343 && pinkyLeftX < 581 && pinkyLeftY > 508 && pinkyLeftY < 528) || (pinkyLeftX > 343 && pinkyLeftX < 360 && pinkyLeftY > 402 && pinkyLeftY < 528) || (pinkyLeftX > 343 && pinkyLeftX < 581 && pinkyLeftY > 399 && pinkyLeftY < 414) || (pinkyLeftX > 564 && pinkyLeftX < 581 && pinkyLeftY > 402 && pinkyLeftY < 528) ||
-        (pinkyLeftX > 715 && pinkyLeftY > 309 && pinkyLeftY < 438) || (pinkyLeftX < 209 && pinkyLeftY > 309 && pinkyLeftY < 438) || (pinkyLeftX > 255 && pinkyLeftX < 294 && pinkyLeftY > 484 && pinkyLeftY < 613) || (pinkyLeftX > 630 && pinkyLeftX < 669 && pinkyLeftY > 484 && pinkyLeftY < 613) || 
-        (pinkyLeftX > 255 && pinkyLeftX < 294 && pinkyLeftY > 221 && pinkyLeftY < 438) || (pinkyLeftX > 630 && pinkyLeftX < 669 && pinkyLeftY > 221 && pinkyLeftY < 438) || (pinkyLeftX > 255 && pinkyLeftX < 394 && pinkyLeftY > 309 && pinkyLeftY < 348) || (pinkyLeftX > 530 && pinkyLeftX < 669 && pinkyLeftY > 309 && pinkyLeftY < 348) || 
-        (pinkyLeftX > 440 && pinkyLeftX < 484 && pinkyLeftY > 221 && pinkyLeftY < 348) || (pinkyLeftX > 343 && pinkyLeftX < 581 && pinkyLeftY > 221 && pinkyLeftY < 263) || (pinkyLeftX > 90 && pinkyLeftX < 202 && pinkyLeftY > 221 && pinkyLeftY < 263) || (pinkyLeftX > 718 && pinkyLeftX < 834 && pinkyLeftY > 221 && pinkyLeftY < 263) || 
-        (pinkyLeftX < 44)) {
+        } else if (pinkyLeftX < -27) {
+            pinkyX = 954;
+            pinkyY = 462;
+            pinkyLeftX = 952;
+            pinkyLeftY = 466;
+            pinkyRightX = 964;
+            pinkyRightY = 466;
+            pinkyTopX = 958;
+            pinkyTopY = 460;
+            pinkyBottomX = 958;
+            pinkyBottomY = 472;
+        } else {
+            if (pinkyRightX > 964) {
+                pinkyX = -26;
+                pinkyY = 462;
+                pinkyLeftX = -28;
+                pinkyLeftY = 466;
+                pinkyRightX = -16;
+                pinkyRightY = 466;
+                pinkyTopX = -22;
+                pinkyTopY = 460;
+                pinkyBottomX = -22;
+                pinkyBottomY = 472;
+            } 
             if (pinkyLeftFirstLoaded) {
-                console.log('here');
                 pinkyLeftFirstLoaded = false;
                 pinkyDownFirstLoaded = false;
                 pinkyDownSecondLoaded = false;
@@ -1677,7 +1843,6 @@ function pacmanMove() {
                 pinkyBottomX -= pinkySpeed;
                 pinkyLeftSecondLoaded = true;
             } else {
-                console.log('here');
                 pinkyLeftSecondLoaded = false;
                 pinkyX -= pinkySpeed;
                 pinkyLeftX -= pinkySpeed;
@@ -1686,40 +1851,109 @@ function pacmanMove() {
                 pinkyBottomX -= pinkySpeed;
                 pinkyLeftFirstLoaded = true;
             }
-            debugger;
+        }
+    } else if (pinkyHeldRight) {
+        console.log(`pinky left x is ${pinkyLeftX}`);
+        console.log(`pinky right x is ${pinkyRightY}`);
+        console.log(`pinky top y is ${pinkyTopY}`);
+        console.log(`pinky bottom y is ${pinkyBottomY}`);
+        if ((pinkyRightX > 70 && pinkyRightX < 232 && pinkyRightY > 70 && pinkyRightY < 196) || 
+        (pinkyRightX > 240 && pinkyRightX < 420 && pinkyRightY < 196 && pinkyRightY > 70) || 
+        (pinkyRightX > 424 && pinkyRightX < 508 && pinkyRightY < 196) || 
+        (pinkyRightX > 512 && pinkyRightX < 692 && pinkyRightY < 196 && pinkyRightY > 70) || 
+        (pinkyRightX > 700 && pinkyRightX < 856 && pinkyRightY < 196 && pinkyRightY > 70) ||
+        (pinkyRightX > 70 && pinkyRightX < 232 && pinkyRightY > 204 && pinkyRightY < 284) || 
+        (pinkyRightX > 240 && pinkyRightX < 320 && pinkyRightY > 204 && pinkyRightY < 464) || 
+        (pinkyRightX > 328 && pinkyRightX < 608 && pinkyRightY > 204 && pinkyRightY < 284) || 
+        (pinkyRightX > 612 && pinkyRightX < 696 && pinkyRightY > 204 && pinkyRightY < 464) || 
+        (pinkyRightX > 700 && pinkyRightX < 856 && pinkyRightY > 204 && pinkyRightY < 284) || 
+        (pinkyRightX > 424 && pinkyRightX < 508 && pinkyRightY > 204 && pinkyRightY < 376) || 
+        (pinkyRightX > 240 && pinkyRightX < 420 && pinkyRightY > 292 && pinkyRightY < 376) || 
+        (pinkyRightX > 512 && pinkyRightX < 696 && pinkyRightY > 292 && pinkyRightY < 376) || 
+        (pinkyRightX > 700 && pinkyRightY > 292 && pinkyRightY < 464) || 
+        (pinkyRightX < 232 && pinkyRightY > 292 && pinkyRightY < 464) || 
+        (pinkyRightX > 328 && pinkyRightX < 392 && pinkyRightY > 380 && pinkyRightY < 552) || 
+        (pinkyRightX > 540 && pinkyRightX < 608 && pinkyRightY > 380 && pinkyRightY < 552) || 
+        (pinkyRightX > 328 && pinkyRightX < 460 && pinkyRightY > 380 && pinkyRightY < 448) || 
+        (pinkyRightX > 472 && pinkyRightX < 608 && pinkyRightY > 380 && pinkyRightY < 448) || 
+        (pinkyRightX > 328 && pinkyRightX < 608 && pinkyRightY > 484 && pinkyRightY < 552) || 
+        (pinkyRightX < 232 && pinkyRightY > 468 && pinkyRightY < 640) || 
+        (pinkyRightX > 700 && pinkyRightY > 468 && pinkyRightY < 640) || 
+        (pinkyRightX > 240 && pinkyRightX < 320 && pinkyRightY > 468 && pinkyRightY < 640) || 
+        (pinkyRightX > 612 && pinkyRightX < 696 && pinkyRightY > 468 && pinkyRightY < 640) || 
+        (pinkyRightX > 328 && pinkyRightX < 608 && pinkyRightY > 556 && pinkyRightY < 640) || 
+        (pinkyRightX > 70 && pinkyRightX < 232 && pinkyRightY > 644 && pinkyRightY < 728) || 
+        (pinkyRightX > 240 && pinkyRightX < 420 && pinkyRightY > 644 && pinkyRightY < 728) || 
+        (pinkyRightX > 512 && pinkyRightX < 692 && pinkyRightY > 644 && pinkyRightY < 728) || 
+        (pinkyRightX > 700 && pinkyRightX < 856 && pinkyRightY > 644 && pinkyRightY < 728) || 
+        (pinkyRightX > 424 && pinkyRightX < 508 && pinkyRightY > 556 && pinkyRightY < 728) || 
+        (pinkyRightX > 148 && pinkyRightX < 232 && pinkyRightY > 644 && pinkyRightY < 816) || 
+        (pinkyRightX > 700 && pinkyRightX < 788 && pinkyRightY > 644 && pinkyRightY < 816) || 
+        (pinkyRightX < 132 && pinkyRightY > 732 && pinkyRightY < 816) || 
+        (pinkyRightX > 796 && pinkyRightY > 732 && pinkyRightY < 816) || 
+        (pinkyRightX > 328 && pinkyRightX < 608 && pinkyRightY > 732 && pinkyRightY < 816) || 
+        (pinkyRightX > 240 && pinkyRightX < 320 && pinkyRightY > 732 && pinkyRightY < 900) || 
+        (pinkyRightX > 612 && pinkyRightX < 696 && pinkyRightY > 732 && pinkyRightY < 900) || 
+        (pinkyRightX > 424 && pinkyRightX < 508 && pinkyRightY > 732 && pinkyRightY < 900) || 
+        (pinkyRightX > 70 && pinkyRightX < 420 && pinkyRightY > 820 && pinkyRightY < 900) || 
+        (pinkyRightX > 512 && pinkyRightX < 856 && pinkyRightY > 820 && pinkyRightY < 900) || 
+        (pinkyRightX > 864 && pinkyRightX < 904 && pinkyRightY > 65 && pinkyRightY < 292) || 
+        (pinkyRightX > 864 && pinkyRightX < 904 && pinkyRightY > 640 && pinkyRightY < 864)) {
             for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
-                for (let j = i + 12; j < possibleMovesPosition[i + 12].length; j++) {
-                    if ((pinkyLeftX <= possibleMovesPosition[j][i][0] && pinkyRightX >= possibleMovesPosition[j][i][0]) && (pinkyTopY <= possibleMovesPosition[j][i][1] && pinkyBottomY >= possibleMovesPosition[j][i][1]) && (currentpinkyGhostPosition != possibleMovesPosition[j][i])) {
-                        debugger;
-                        currentpinkyGhostPosition = possibleMovesPosition[j][i];
-                        console.log(possibleMoves[i + 12]);
-                        let nextDirection = possibleMoves[j][Math.floor(Math.random() * possibleMoves[j].length)];
-                        if (nextDirection === 'right') {
-                            pinkyHeldLeft = false;
-                            pinkyHeldRight = true;
+                for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
+                    if ((pinkyLeftX <= possibleMovesPosition[i + 12][j][0] && pinkyRightX >= possibleMovesPosition[i + 12][j][0]) && (pinkyTopY <= possibleMovesPosition[i + 12][j][1] && pinkyBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentPinkyGhostPosition != possibleMovesPosition[i + 12][j])) {
+                        currentPinkyGhostPosition = possibleMovesPosition[i + 12][j];
+                        let nextDirection = possibleMoves[i + 12][Math.floor(Math.random() * possibleMoves[i + 12].length)];
+                        pinkyX = possibleMovesPosition[i + 12][j][0];
+                        pinkyY = possibleMovesPosition[i + 12][j][1];
+                        pinkyLeftX = pinkyX - WALL_W/2;
+                        pinkyLeftY = pinkyY - WALL_H/2 + CHARACTER_H/2;
+                        pinkyRightX = pinkyX - WALL_W/2 + CHARACTER_W;
+                        pinkyRightY = pinkyY - WALL_H/2 + CHARACTER_H/2;
+                        pinkyTopX = pinkyX - WALL_W/2 + CHARACTER_W/2;
+                        pinkyTopY = pinkyY - WALL_H/2;
+                        pinkyBottomX = pinkyX - WALL_W/2 + CHARACTER_W/2;
+                        pinkyBottomY = pinkyY - WALL_H/2 + CHARACTER_H;
+                        if (nextDirection === 'left') {
+                            pinkyHeldRight = false;
+                            pinkyHeldLeft = true;
+                            break;
                         } else if (nextDirection === 'up') {
-                            pinkyHeldLeft = false;
+                            pinkyHeldRight = false;
                             pinkyHeldUp = true;
+                            break;
                         } else if (nextDirection === 'down') {
-                            pinkyHeldLeft = false;
+                            pinkyHeldRight = false;
                             pinkyHeldDown = true;
+                            break;
                         }
                     }
                 }
             }
-        }
-    } else if (pinkyHeldRight) {
-        if ((pinkyRightX > 90 && pinkyRightX < 202 && pinkyRightY > 89 && pinkyRightY < 173) || (pinkyRightX > 254 && pinkyRightX < 394 && pinkyRightY < 173 && pinkyRightY > 89) || (pinkyRightX > 440 && pinkyRightX < 484 && pinkyRightY < 173) || (pinkyRightX > 530 && pinkyRightX < 673 && pinkyRightY < 173 && pinkyRightY > 89) || (pinkyRightX > 718 && pinkyRightX < 834 && pinkyRightY < 173 && pinkyRightY > 89) ||
-        (pinkyRightX > 90 && pinkyRightX < 394 && pinkyRightY > 839 && pinkyRightY < 874) || (pinkyRightX > 530 && pinkyRightX < 834 && pinkyRightY > 839 && pinkyRightY < 874) || (pinkyRightX > 255 && pinkyRightX < 294 && pinkyRightY > 749 && pinkyRightY < 874) || (pinkyRightX > 630 && pinkyRightX < 669 && pinkyRightY > 749 && pinkyRightY < 874) || 
-        (pinkyRightX > 440 && pinkyRightX < 484 && pinkyRightY > 749 && pinkyRightY < 874) || (pinkyRightX > 343 && pinkyRightX < 581 && pinkyRightY > 749 && pinkyRightY < 800) || (pinkyRightX < 109 && pinkyRightY > 749 && pinkyRightY < 800) || (pinkyRightX > 815 && pinkyRightY > 749 && pinkyRightY < 800) || 
-        (pinkyRightX > 715 && pinkyRightX < 764 && pinkyRightY > 662 && pinkyRightY < 800) || (pinkyRightX > 160 && pinkyRightX < 209 && pinkyRightY > 662 && pinkyRightY < 800) || (pinkyRightX > 90 && pinkyRightX < 209 && pinkyRightY > 662 && pinkyRightY < 703) || (pinkyRightX > 715 && pinkyRightX < 764 && pinkyRightY > 662 && pinkyRightY < 703) || (pinkyRightX > 715 && pinkyRightX < 835 && pinkyRightY > 662 && pinkyRightY < 703) || 
-        (pinkyRightX > 530 && pinkyRightX < 673 && pinkyRightY > 662 && pinkyRightY < 703) || (pinkyRightX > 254 && pinkyRightX < 394 && pinkyRightY > 662 && pinkyRightY < 703) || (pinkyRightX > 715 && pinkyRightY > 484 && pinkyRightY < 613) || (pinkyRightX < 209 && pinkyRightY > 484 && pinkyRightY < 613) || 
-        (pinkyRightX > 440 && pinkyRightX < 484 && pinkyRightY > 572 && pinkyRightY < 703) || (pinkyRightX > 343 && pinkyRightX < 581 && pinkyRightY > 574 && pinkyRightY < 613) || (pinkyRightX > 630 && pinkyRightX < 669 && pinkyRightY > 484 && pinkyRightY < 613) || (pinkyRightX > 630 && pinkyRightX < 669 && pinkyRightY > 484 && pinkyRightY < 613) || (pinkyRightX > 255 && pinkyRightX < 294 && pinkyRightY > 484 && pinkyRightY < 613) || 
-        (pinkyRightX > 343 && pinkyRightX < 581 && pinkyRightY > 508 && pinkyRightY < 528) || (pinkyRightX > 343 && pinkyRightX < 360 && pinkyRightY > 402 && pinkyRightY < 528) || (pinkyRightX > 343 && pinkyRightX < 581 && pinkyRightY > 399 && pinkyRightY < 414) || (pinkyRightX > 564 && pinkyRightX < 581 && pinkyRightY > 402 && pinkyRightY < 528) ||
-        (pinkyRightX > 715 && pinkyRightY > 309 && pinkyRightY < 438) || (pinkyRightX < 209 && pinkyRightY > 309 && pinkyRightY < 438) || (pinkyRightX > 255 && pinkyRightX < 294 && pinkyRightY > 484 && pinkyRightY < 613) || (pinkyRightX > 630 && pinkyRightX < 669 && pinkyRightY > 484 && pinkyRightY < 613) || 
-        (pinkyRightX > 255 && pinkyRightX < 294 && pinkyRightY > 221 && pinkyRightY < 438) || (pinkyRightX > 630 && pinkyRightX < 669 && pinkyRightY > 221 && pinkyRightY < 438) || (pinkyRightX > 255 && pinkyRightX < 394 && pinkyRightY > 309 && pinkyRightY < 348) || (pinkyRightX > 530 && pinkyRightX < 669 && pinkyRightY > 309 && pinkyRightY < 348) || 
-        (pinkyRightX > 440 && pinkyRightX < 484 && pinkyRightY > 221 && pinkyRightY < 348) || (pinkyRightX > 343 && pinkyRightX < 581 && pinkyRightY > 221 && pinkyRightY < 263) || (pinkyRightX > 90 && pinkyRightX < 202 && pinkyRightY > 221 && pinkyRightY < 263) || (pinkyRightX > 718 && pinkyRightX < 834 && pinkyRightY > 221 && pinkyRightY < 263) || 
-        (pinkyRightX > 880)) {
+        } else if (pinkyLeftX < -27) {
+            pinkyX = 954;
+            pinkyY = 462;
+            pinkyLeftX = 952;
+            pinkyLeftY = 466;
+            pinkyRightX = 964;
+            pinkyRightY = 466;
+            pinkyTopX = 958;
+            pinkyTopY = 460;
+            pinkyBottomX = 958;
+            pinkyBottomY = 472;
+        } else {
+            if (pinkyRightX > 964) {
+                pinkyX = -26;
+                pinkyY = 462;
+                pinkyLeftX = -28;
+                pinkyLeftY = 466;
+                pinkyRightX = -16;
+                pinkyRightY = 466;
+                pinkyTopX = -22;
+                pinkyTopY = 460;
+                pinkyBottomX = -22;
+                pinkyBottomY = 472;
+            } 
             if (pinkyRightFirstLoaded) {
                 pinkyRightFirstLoaded = false;
                 pinkyDownFirstLoaded = false;
@@ -1743,40 +1977,109 @@ function pacmanMove() {
                 pinkyBottomX += pinkySpeed;
                 pinkyRightFirstLoaded = true;
             }
+        }
+    } else if (pinkyHeldUp) {
+        console.log(`pinky left x is ${pinkyLeftX}`);
+        console.log(`pinky right x is ${pinkyRightY}`);
+        console.log(`pinky top y is ${pinkyTopY}`);
+        console.log(`pinky bottom y is ${pinkyBottomY}`);
+        if ((pinkyTopY < 64) || (pinkyTopX > 70 && pinkyTopX < 232 && pinkyTopY > 70 && pinkyTopY < 196) || 
+        (pinkyTopX > 240 && pinkyTopX < 420 && pinkyTopY < 196 && pinkyTopY > 70) || 
+        (pinkyTopX > 424 && pinkyTopX < 508 && pinkyTopY < 196) || 
+        (pinkyTopX > 512 && pinkyTopX < 692 && pinkyTopY < 196 && pinkyTopY > 70) || 
+        (pinkyTopX > 700 && pinkyTopX < 856 && pinkyTopY < 196 && pinkyTopY > 70) || 
+        (pinkyTopX > 70 && pinkyTopX < 232 && pinkyTopY > 204 && pinkyTopY < 284) || 
+        (pinkyTopX > 240 && pinkyTopX < 320 && pinkyTopY > 204 && pinkyTopY < 464) || 
+        (pinkyTopX > 328 && pinkyTopX < 608 && pinkyTopY > 204 && pinkyTopY < 284) || 
+        (pinkyTopX > 612 && pinkyTopX < 696 && pinkyTopY > 204 && pinkyTopY < 464) || 
+        (pinkyTopX > 700 && pinkyTopX < 856 && pinkyTopY > 204 && pinkyTopY < 284) || 
+        (pinkyTopX > 424 && pinkyTopX < 508 && pinkyTopY > 204 && pinkyTopY < 376) || 
+        (pinkyTopX > 240 && pinkyTopX < 420 && pinkyTopY > 292 && pinkyTopY < 376) || 
+        (pinkyTopX > 512 && pinkyTopX < 696 && pinkyTopY > 292 && pinkyTopY < 376) || 
+        (pinkyTopX > 700 && pinkyTopY > 292 && pinkyTopY < 464) || 
+        (pinkyTopX < 232 && pinkyTopY > 292 && pinkyTopY < 464) || 
+        (pinkyTopX > 328 && pinkyTopX < 392 && pinkyTopY > 380 && pinkyTopY < 552) || 
+        (pinkyTopX > 540 && pinkyTopX < 608 && pinkyTopY > 380 && pinkyTopY < 552) || 
+        (pinkyTopX > 328 && pinkyTopX < 460 && pinkyTopY > 380 && pinkyTopY < 448) || 
+        (pinkyTopX > 472 && pinkyTopX < 608 && pinkyTopY > 380 && pinkyTopY < 448) || 
+        (pinkyTopX > 328 && pinkyTopX < 608 && pinkyTopY > 484 && pinkyTopY < 552) || 
+        (pinkyTopX < 232 && pinkyTopY > 468 && pinkyTopY < 640) || 
+        (pinkyTopX > 700 && pinkyTopY > 468 && pinkyTopY < 640) || 
+        (pinkyTopX > 240 && pinkyTopX < 320 && pinkyTopY > 468 && pinkyTopY < 640) || 
+        (pinkyTopX > 612 && pinkyTopX < 696 && pinkyTopY > 468 && pinkyTopY < 640) || 
+        (pinkyTopX > 328 && pinkyTopX < 608 && pinkyTopY > 556 && pinkyTopY < 640) || 
+        (pinkyTopX > 70 && pinkyTopX < 232 && pinkyTopY > 644 && pinkyTopY < 728) || 
+        (pinkyTopX > 240 && pinkyTopX < 420 && pinkyTopY > 644 && pinkyTopY < 728) || 
+        (pinkyTopX > 512 && pinkyTopX < 692 && pinkyTopY > 644 && pinkyTopY < 728) || 
+        (pinkyTopX > 700 && pinkyTopX < 856 && pinkyTopY > 644 && pinkyTopY < 728) || 
+        (pinkyTopX > 424 && pinkyTopX < 508 && pinkyTopY > 556 && pinkyTopY < 728) || 
+        (pinkyTopX > 148 && pinkyTopX < 232 && pinkyTopY > 644 && pinkyTopY < 816) || 
+        (pinkyTopX > 700 && pinkyTopX < 788 && pinkyTopY > 644 && pinkyTopY < 816) || 
+        (pinkyTopX < 132 && pinkyTopY > 732 && pinkyTopY < 816) || 
+        (pinkyTopX > 796 && pinkyTopY > 732 && pinkyTopY < 816) || 
+        (pinkyTopX > 328 && pinkyTopX < 608 && pinkyTopY > 732 && pinkyTopY < 816) || 
+        (pinkyTopX > 240 && pinkyTopX < 320 && pinkyTopY > 732 && pinkyTopY < 900) || 
+        (pinkyTopX > 612 && pinkyTopX < 696 && pinkyTopY > 732 && pinkyTopY < 900) || 
+        (pinkyTopX > 424 && pinkyTopX < 508 && pinkyTopY > 732 && pinkyTopY < 900) || 
+        (pinkyTopX > 70 && pinkyTopX < 420 && pinkyTopY > 820 && pinkyTopY < 900) || 
+        (pinkyTopX > 512 && pinkyTopX < 856 && pinkyTopY > 820 && pinkyTopY < 900) || 
+        (pinkyTopX > 0 && pinkyTopX < 68 && pinkyTopY > 68 && pinkyTopY < 292) || 
+        (pinkyTopX > 0 && pinkyTopX < 68 && pinkyTopY > 640 && pinkyTopY < 864)) {
             for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
-                for (let j = i + 12; j < possibleMovesPosition[i + 12].length; j++) {
-                    debugger;
-                    if ((pinkyLeftX <= possibleMovesPosition[j][i][0] && pinkyRightX >= possibleMovesPosition[j][i][0]) && (pinkyTopY <= possibleMovesPosition[j][i][1] && pinkyBottomY >= possibleMovesPosition[j][i][1]) && (currentpinkyGhostPosition != possibleMovesPosition[j][i])) {
-                        debugger;
-                        currentpinkyGhostPosition = possibleMovesPosition[j][i];
-                        console.log(possibleMoves[i + 12]);
-                        let nextDirection = possibleMoves[j][Math.floor(Math.random() * possibleMoves[j].length)];
-                        if (nextDirection === 'left') {
-                            pinkyHeldRight = false;
+                for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
+                    if ((pinkyLeftX <= possibleMovesPosition[i + 12][j][0] && pinkyRightX >= possibleMovesPosition[i + 12][j][0]) && (pinkyTopY <= possibleMovesPosition[i + 12][j][1] && pinkyBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentPinkyGhostPosition != possibleMovesPosition[i + 12][j])) {
+                        currentPinkyGhostPosition = possibleMovesPosition[i + 12][j];
+                        let nextDirection = possibleMoves[i + 12][Math.floor(Math.random() * possibleMoves[i + 12].length)];
+                        pinkyX = possibleMovesPosition[i + 12][j][0];
+                        pinkyY = possibleMovesPosition[i + 12][j][1];
+                        pinkyLeftX = pinkyX - WALL_W/2;
+                        pinkyLeftY = pinkyY - WALL_H/2 + CHARACTER_H/2;
+                        pinkyRightX = pinkyX - WALL_W/2 + CHARACTER_W;
+                        pinkyRightY = pinkyY - WALL_H/2 + CHARACTER_H/2;
+                        pinkyTopX = pinkyX - WALL_W/2 + CHARACTER_W/2;
+                        pinkyTopY = pinkyY - WALL_H/2;
+                        pinkyBottomX = pinkyX - WALL_W/2 + CHARACTER_W/2;
+                        pinkyBottomY = pinkyY - WALL_H/2 + CHARACTER_H;
+                        if (nextDirection === 'right') {
+                            pinkyHeldUp = false;
+                            pinkyHeldRight = true;
+                            break;
+                        } else if (nextDirection === 'left') {
+                            pinkyHeldUp = false;
                             pinkyHeldLeft = true;
-                        } else if (nextDirection === 'up') {
-                            pinkyHeldRight = false;
-                            pinkyHeldUp = true;
+                            break;
                         } else if (nextDirection === 'down') {
-                            pinkyHeldRight = false;
+                            pinkyHeldUp = false;
                             pinkyHeldDown = true;
+                            break;
                         }
                     }
                 }
             }
-        }
-    } else if (pinkyHeldUp) {
-        if ((pinkyTopX > 90 && pinkyTopX < 202 && pinkyTopY > 89 && pinkyTopY < 173) || (pinkyTopX > 254 && pinkyTopX < 394 && pinkyTopY < 173 && pinkyTopY > 89) || (pinkyTopX > 440 && pinkyTopX < 484 && pinkyTopY < 173) || (pinkyTopX > 530 && pinkyTopX < 673 && pinkyTopY < 173 && pinkyTopY > 89) || (pinkyTopX > 718 && pinkyTopX < 834 && pinkyTopY < 173 && pinkyTopY > 89) || 
-        (pinkyTopX > 90 && pinkyTopX < 394 && pinkyTopY > 839 && pinkyTopY < 874) || (pinkyTopX > 530 && pinkyTopX < 834 && pinkyTopY > 839 && pinkyTopY < 874) || (pinkyTopX > 255 && pinkyTopX < 294 && pinkyTopY > 749 && pinkyTopY < 874) || (pinkyTopX > 630 && pinkyTopX < 669 && pinkyTopY > 749 && pinkyTopY < 874) || 
-        (pinkyTopX > 440 && pinkyTopX < 484 && pinkyTopY > 749 && pinkyTopY < 874) || (pinkyTopX > 343 && pinkyTopX < 581 && pinkyTopY > 749 && pinkyTopY < 800) || (pinkyTopX < 109 && pinkyTopY > 749 && pinkyTopY < 800) || (pinkyTopX > 815 && pinkyTopY > 749 && pinkyTopY < 800) || 
-        (pinkyTopX > 715 && pinkyTopX < 764 && pinkyTopY > 662 && pinkyTopY < 800) || (pinkyTopX > 160 && pinkyTopX < 209 && pinkyTopY > 662 && pinkyTopY < 800) || (pinkyTopX > 90 && pinkyTopX < 209 && pinkyTopY > 662 && pinkyTopY < 703) || (pinkyTopX > 715 && pinkyTopX < 764 && pinkyTopY > 662 && pinkyTopY < 703) || (pinkyTopX > 715 && pinkyTopX < 835 && pinkyTopY > 662 && pinkyTopY < 703) || 
-        (pinkyTopX > 530 && pinkyTopX < 673 && pinkyTopY > 662 && pinkyTopY < 703) || (pinkyTopX > 254 && pinkyTopX < 394 && pinkyTopY > 662 && pinkyTopY < 703) || (pinkyTopX > 715 && pinkyTopY > 484 && pinkyTopY < 613) || (pinkyTopX < 209 && pinkyTopY > 484 && pinkyTopY < 613) || 
-        (pinkyTopX > 440 && pinkyTopX < 484 && pinkyTopY > 572 && pinkyTopY < 703) || (pinkyTopX > 343 && pinkyTopX < 581 && pinkyTopY > 574 && pinkyTopY < 613) || (pinkyTopX > 630 && pinkyTopX < 669 && pinkyTopY > 484 && pinkyTopY < 613) || (pinkyTopX > 630 && pinkyTopX < 669 && pinkyTopY > 484 && pinkyTopY < 613) || (pinkyTopX > 255 && pinkyTopX < 294 && pinkyTopY > 484 && pinkyTopY < 613) || 
-        (pinkyTopX > 343 && pinkyTopX < 581 && pinkyTopY > 508 && pinkyTopY < 528) || (pinkyTopX > 343 && pinkyTopX < 360 && pinkyTopY > 402 && pinkyTopY < 528) || (pinkyTopX > 343 && pinkyTopX < 581 && pinkyTopY > 399 && pinkyTopY < 414) || (pinkyTopX > 564 && pinkyTopX < 581 && pinkyTopY > 402 && pinkyTopY < 528) ||
-        (pinkyTopX > 715 && pinkyTopY > 309 && pinkyTopY < 438) || (pinkyTopX < 209 && pinkyTopY > 309 && pinkyTopY < 438) || (pinkyTopX > 255 && pinkyTopX < 294 && pinkyTopY > 484 && pinkyTopY < 613) || (pinkyTopX > 630 && pinkyTopX < 669 && pinkyTopY > 484 && pinkyTopY < 613) || 
-        (pinkyTopX > 255 && pinkyTopX < 294 && pinkyTopY > 221 && pinkyTopY < 438) || (pinkyTopX > 630 && pinkyTopX < 669 && pinkyTopY > 221 && pinkyTopY < 438) || (pinkyTopX > 255 && pinkyTopX < 394 && pinkyTopY > 309 && pinkyTopY < 348) || (pinkyTopX > 530 && pinkyTopX < 669 && pinkyTopY > 309 && pinkyTopY < 348) || 
-        (pinkyTopX > 440 && pinkyTopX < 484 && pinkyTopY > 221 && pinkyTopY < 348) || (pinkyTopX > 343 && pinkyTopX < 581 && pinkyTopY > 221 && pinkyTopY < 263) || (pinkyTopX > 90 && pinkyTopX < 202 && pinkyTopY > 221 && pinkyTopY < 263) || (pinkyTopX > 718 && pinkyTopX < 834 && pinkyTopY > 221 && pinkyTopY < 263) || 
-        (pinkyTopY < 43)) {
+        } else if (pinkyLeftX < -27) {
+            pinkyX = 954;
+            pinkyY = 462;
+            pinkyLeftX = 952;
+            pinkyLeftY = 466;
+            pinkyRightX = 964;
+            pinkyRightY = 466;
+            pinkyTopX = 958;
+            pinkyTopY = 460;
+            pinkyBottomX = 958;
+            pinkyBottomY = 472;
+        } else {
+            if (pinkyRightX > 964) {
+                pinkyX = -26;
+                pinkyY = 462;
+                pinkyLeftX = -28;
+                pinkyLeftY = 466;
+                pinkyRightX = -16;
+                pinkyRightY = 466;
+                pinkyTopX = -22;
+                pinkyTopY = 460;
+                pinkyBottomX = -22;
+                pinkyBottomY = 472;
+            } 
             if (pinkyUpFirstLoaded) {
                 pinkyUpFirstLoaded = false;
                 pinkyDownFirstLoaded = false;
@@ -1791,6 +2094,37 @@ function pacmanMove() {
                 pinkyTopY -= pinkySpeed;
                 pinkyBottomY -= pinkySpeed;
                 pinkyUpSecondLoaded = true;
+                for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
+                    for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
+                        if ((pinkyLeftX <= possibleMovesPosition[i + 12][j][0] && pinkyRightX >= possibleMovesPosition[i + 12][j][0]) && (pinkyTopY <= possibleMovesPosition[i + 12][j][1] && pinkyBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentPinkyGhostPosition != possibleMovesPosition[i + 12][j])) {
+                            currentPinkyGhostPosition = possibleMovesPosition[i + 12][j];
+                            let nextDirection = possibleMoves[i + 12][Math.floor(Math.random() * possibleMoves[i + 12].length)];
+                            pinkyX = possibleMovesPosition[i + 12][j][0];
+                            pinkyY = possibleMovesPosition[i + 12][j][1];
+                            pinkyLeftX = pinkyX - WALL_W/2;
+                            pinkyLeftY = pinkyY - WALL_H/2 + CHARACTER_H/2;
+                            pinkyRightX = pinkyX - WALL_W/2 + CHARACTER_W;
+                            pinkyRightY = pinkyY - WALL_H/2 + CHARACTER_H/2;
+                            pinkyTopX = pinkyX - WALL_W/2 + CHARACTER_W/2;
+                            pinkyTopY = pinkyY - WALL_H/2;
+                            pinkyBottomX = pinkyX - WALL_W/2 + CHARACTER_W/2;
+                            pinkyBottomY = pinkyY - WALL_H/2 + CHARACTER_H;
+                            if (nextDirection === 'right') {
+                                pinkyHeldUp = false;
+                                pinkyHeldRight = true;
+                                break;
+                            } else if (nextDirection === 'left') {
+                                pinkyHeldUp = false;
+                                pinkyHeldLeft = true;
+                                break;
+                            } else if (nextDirection === 'down') {
+                                pinkyHeldUp = false;
+                                pinkyHeldDown = true;
+                                break;
+                            }
+                        }
+                    }
+                }
             } else {
                 pinkyUpSecondLoaded = false;
                 pinkyY -= pinkySpeed;
@@ -1799,41 +2133,139 @@ function pacmanMove() {
                 pinkyTopY -= pinkySpeed;
                 pinkyBottomY -= pinkySpeed;
                 pinkyUpFirstLoaded = true;
-            }
-            for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
-                for (let j = i + 12; j < possibleMovesPosition[i + 12].length; j++) {
-                    debugger;
-                    if ((pinkyLeftX <= possibleMovesPosition[j][i][0] && pinkyRightX >= possibleMovesPosition[j][i][0]) && (pinkyTopY <= possibleMovesPosition[j][i][1] && pinkyBottomY >= possibleMovesPosition[j][i][1]) && (currentpinkyGhostPosition != possibleMovesPosition[j][i])) {
-                        debugger;
-                        currentpinkyGhostPosition = possibleMovesPosition[j][i];
-                        console.log(possibleMoves[i + 12]);
-                        let nextDirection = possibleMoves[j][Math.floor(Math.random() * possibleMoves[j].length)];
-                        if (nextDirection === 'right') {
-                            pinkyHeldUp = false;
-                            pinkyHeldRight = true;
-                        } else if (nextDirection === 'left') {
-                            pinkyHeldUp = false;
-                            pinkyHeldLeft = true;
-                        } else if (nextDirection === 'down') {
-                            pinkyHeldUp = false;
-                            pinkyHeldDown = true;
+                for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
+                    for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
+                        if ((pinkyLeftX <= possibleMovesPosition[i + 12][j][0] && pinkyRightX >= possibleMovesPosition[i + 12][j][0]) && (pinkyTopY <= possibleMovesPosition[i + 12][j][1] && pinkyBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentPinkyGhostPosition != possibleMovesPosition[i + 12][j])) {
+                            currentPinkyGhostPosition = possibleMovesPosition[i + 12][j];
+                            let nextDirection = possibleMoves[i + 12][Math.floor(Math.random() * possibleMoves[i + 12].length)];
+                            pinkyX = possibleMovesPosition[i + 12][j][0];
+                            pinkyY = possibleMovesPosition[i + 12][j][1];
+                            pinkyLeftX = pinkyX - WALL_W/2;
+                            pinkyLeftY = pinkyY - WALL_H/2 + CHARACTER_H/2;
+                            pinkyRightX = pinkyX - WALL_W/2 + CHARACTER_W;
+                            pinkyRightY = pinkyY - WALL_H/2 + CHARACTER_H/2;
+                            pinkyTopX = pinkyX - WALL_W/2 + CHARACTER_W/2;
+                            pinkyTopY = pinkyY - WALL_H/2;
+                            pinkyBottomX = pinkyX - WALL_W/2 + CHARACTER_W/2;
+                            pinkyBottomY = pinkyY - WALL_H/2 + CHARACTER_H;
+                            if (nextDirection === 'right') {
+                                pinkyHeldUp = false;
+                                pinkyHeldRight = true;
+                                break;
+                            } else if (nextDirection === 'left') {
+                                pinkyHeldUp = false;
+                                pinkyHeldLeft = true;
+                                break;
+                            } else if (nextDirection === 'down') {
+                                pinkyHeldUp = false;
+                                pinkyHeldDown = true;
+                                break;
+                            }
                         }
                     }
                 }
             }
         }
     } else if (pinkyHeldDown) {
-        if ((pinkyBottomX > 90 && pinkyBottomX < 202 && pinkyBottomY > 89 && pinkyBottomY < 173) || (pinkyBottomX > 254 && pinkyBottomX < 394 && pinkyBottomY < 173 && pinkyBottomY > 89) || (pinkyBottomX > 440 && pinkyBottomX < 484 && pinkyBottomY < 173) || (pinkyBottomX > 530 && pinkyBottomX < 673 && pinkyBottomY < 173 && pinkyBottomY > 89) || (pinkyBottomX > 718 && pinkyBottomX < 834 && pinkyBottomY < 173 && pinkyBottomY > 89) || 
-        (pinkyBottomX > 90 && pinkyBottomX < 394 && pinkyBottomY > 839 && pinkyBottomY < 874) || (pinkyBottomX > 530 && pinkyBottomX < 834 && pinkyBottomY > 839 && pinkyBottomY < 874) || (pinkyBottomX > 255 && pinkyBottomX < 294 && pinkyBottomY > 749 && pinkyBottomY < 874) || (pinkyBottomX > 630 && pinkyBottomX < 669 && pinkyBottomY > 749 && pinkyBottomY < 874) || 
-        (pinkyBottomX > 440 && pinkyBottomX < 484 && pinkyBottomY > 749 && pinkyBottomY < 874) || (pinkyBottomX > 343 && pinkyBottomX < 581 && pinkyBottomY > 749 && pinkyBottomY < 800) || (pinkyBottomX < 109 && pinkyBottomY > 749 && pinkyBottomY < 800) || (pinkyBottomX > 815 && pinkyBottomY > 749 && pinkyBottomY < 800) || 
-        (pinkyBottomX > 715 && pinkyBottomX < 764 && pinkyBottomY > 662 && pinkyBottomY < 800) || (pinkyBottomX > 160 && pinkyBottomX < 209 && pinkyBottomY > 662 && pinkyBottomY < 800) || (pinkyBottomX > 90 && pinkyBottomX < 209 && pinkyBottomY > 662 && pinkyBottomY < 703) || (pinkyBottomX > 715 && pinkyBottomX < 764 && pinkyBottomY > 662 && pinkyBottomY < 703) || (pinkyBottomX > 715 && pinkyBottomX < 835 && pinkyBottomY > 662 && pinkyBottomY < 703) || 
-        (pinkyBottomX > 530 && pinkyBottomX < 673 && pinkyBottomY > 662 && pinkyBottomY < 703) || (pinkyBottomX > 254 && pinkyBottomX < 394 && pinkyBottomY > 662 && pinkyBottomY < 703) || (pinkyBottomX > 715 && pinkyBottomY > 484 && pinkyBottomY < 613) || (pinkyBottomX < 209 && pinkyBottomY > 484 && pinkyBottomY < 613) || 
-        (pinkyBottomX > 440 && pinkyBottomX < 484 && pinkyBottomY > 572 && pinkyBottomY < 703) || (pinkyBottomX > 343 && pinkyBottomX < 581 && pinkyBottomY > 574 && pinkyBottomY < 613) || (pinkyBottomX > 630 && pinkyBottomX < 669 && pinkyBottomY > 484 && pinkyBottomY < 613) || (pinkyBottomX > 255 && pinkyBottomX < 294 && pinkyBottomY > 484 && pinkyBottomY < 613) || 
-        (pinkyBottomX > 343 && pinkyBottomX < 581 && pinkyBottomY > 508 && pinkyBottomY < 528) || (pinkyBottomX > 343 && pinkyBottomX < 360 && pinkyBottomY > 402 && pinkyBottomY < 528) || (pinkyBottomX > 343 && pinkyBottomX < 581 && pinkyBottomY > 399 && pinkyBottomY < 414) || (pinkyBottomX > 564 && pinkyBottomX < 581 && pinkyBottomY > 402 && pinkyBottomY < 528) ||
-        (pinkyBottomX > 715 && pinkyBottomY > 309 && pinkyBottomY < 438) || (pinkyBottomX < 209 && pinkyBottomY > 309 && pinkyBottomY < 438) || (pinkyBottomX > 255 && pinkyBottomX < 294 && pinkyBottomY > 484 && pinkyBottomY < 613) || (pinkyBottomX > 630 && pinkyBottomX < 669 && pinkyBottomY > 484 && pinkyBottomY < 613) || 
-        (pinkyBottomX > 255 && pinkyBottomX < 294 && pinkyBottomY > 221 && pinkyBottomY < 438) || (pinkyBottomX > 630 && pinkyBottomX < 669 && pinkyBottomY > 221 && pinkyBottomY < 438) || (pinkyBottomX > 255 && pinkyBottomX < 394 && pinkyBottomY > 309 && pinkyBottomY < 348) || (pinkyBottomX > 530 && pinkyBottomX < 669 && pinkyBottomY > 309 && pinkyBottomY < 348) || 
-        (pinkyBottomX > 440 && pinkyBottomX < 484 && pinkyBottomY > 221 && pinkyBottomY < 348) || (pinkyBottomX > 343 && pinkyBottomX < 581 && pinkyBottomY > 221 && pinkyBottomY < 263) || (pinkyBottomX > 90 && pinkyBottomX < 202 && pinkyBottomY > 221 && pinkyBottomY < 263) || (pinkyBottomX > 718 && pinkyBottomX < 834 && pinkyBottomY > 221 && pinkyBottomY < 263) || 
-        (pinkyBottomY > 924)) {
+        console.log(`pinky left x is ${pinkyLeftX}`);
+        console.log(`pinky right x is ${pinkyRightY}`);
+        console.log(`pinky top y is ${pinkyTopY}`);
+        console.log(`pinky bottom y is ${pinkyBottomY}`);
+        if ((pinkyBottomX > 70 && pinkyBottomX < 232 && pinkyBottomY > 70 && pinkyBottomY < 196) || 
+        (pinkyBottomX > 240 && pinkyBottomX < 420 && pinkyBottomY < 196 && pinkyBottomY > 70) || 
+        (pinkyBottomX > 424 && pinkyBottomX < 508 && pinkyBottomY < 196) || 
+        (pinkyBottomX > 512 && pinkyBottomX < 692 && pinkyBottomY < 196 && pinkyBottomY > 70) || 
+        (pinkyBottomX > 700 && pinkyBottomX < 856 && pinkyBottomY < 196 && pinkyBottomY > 70) || 
+        (pinkyBottomX > 70 && pinkyBottomX < 232 && pinkyBottomY > 204 && pinkyBottomY < 284) || 
+        (pinkyBottomX > 240 && pinkyBottomX < 320 && pinkyBottomY > 204 && pinkyBottomY < 464) || 
+        (pinkyBottomX > 328 && pinkyBottomX < 608 && pinkyBottomY > 204 && pinkyBottomY < 284) || 
+        (pinkyBottomX > 612 && pinkyBottomX < 696 && pinkyBottomY > 204 && pinkyBottomY < 464) || 
+        (pinkyBottomX > 700 && pinkyBottomX < 856 && pinkyBottomY > 204 && pinkyBottomY < 284) || 
+        (pinkyBottomX > 424 && pinkyBottomX < 508 && pinkyBottomY > 204 && pinkyBottomY < 376) || 
+        (pinkyBottomX > 240 && pinkyBottomX < 420 && pinkyBottomY > 292 && pinkyBottomY < 376) || 
+        (pinkyBottomX > 512 && pinkyBottomX < 696 && pinkyBottomY > 292 && pinkyBottomY < 376) || 
+        (pinkyBottomX > 700 && pinkyBottomY > 292 && pinkyBottomY < 464) || 
+        (pinkyBottomX < 232 && pinkyBottomY > 292 && pinkyBottomY < 464) || 
+        (pinkyBottomX > 328 && pinkyBottomX < 392 && pinkyBottomY > 380 && pinkyBottomY < 552) || 
+        (pinkyBottomX > 540 && pinkyBottomX < 608 && pinkyBottomY > 380 && pinkyBottomY < 552) || 
+        (pinkyBottomX > 328 && pinkyBottomX < 460 && pinkyBottomY > 380 && pinkyBottomY < 448) || 
+        (pinkyBottomX > 472 && pinkyBottomX < 608 && pinkyBottomY > 380 && pinkyBottomY < 448) || 
+        (pinkyBottomX > 328 && pinkyBottomX < 608 && pinkyBottomY > 484 && pinkyBottomY < 552) || 
+        (pinkyBottomX < 232 && pinkyBottomY > 468 && pinkyBottomY < 640) || 
+        (pinkyBottomX > 700 && pinkyBottomY > 468 && pinkyBottomY < 640) || 
+        (pinkyBottomX > 612 && pinkyBottomX < 696 && pinkyBottomY > 468 && pinkyBottomY < 640) || 
+        (pinkyBottomX > 328 && pinkyBottomX < 608 && pinkyBottomY > 556 && pinkyBottomY < 640) || 
+        (pinkyBottomX > 70 && pinkyBottomX < 232 && pinkyBottomY > 644 && pinkyBottomY < 728) || 
+        (pinkyBottomX > 240 && pinkyBottomX < 420 && pinkyBottomY > 644 && pinkyBottomY < 728) || 
+        (pinkyBottomX > 512 && pinkyBottomX < 692 && pinkyBottomY > 644 && pinkyBottomY < 728) || 
+        (pinkyBottomX > 700 && pinkyBottomX < 856 && pinkyBottomY > 644 && pinkyBottomY < 728) || 
+        (pinkyBottomX > 424 && pinkyBottomX < 508 && pinkyBottomY > 556 && pinkyBottomY < 728) || 
+        (pinkyBottomX > 148 && pinkyBottomX < 232 && pinkyBottomY > 644 && pinkyBottomY < 816) || 
+        (pinkyBottomX > 700 && pinkyBottomX < 788 && pinkyBottomY > 644 && pinkyBottomY < 816) || 
+        (pinkyBottomX < 132 && pinkyBottomY > 732 && pinkyBottomY < 816) || 
+        (pinkyBottomX > 796 && pinkyBottomY > 732 && pinkyBottomY < 816) || 
+        (pinkyBottomX > 328 && pinkyBottomX < 608 && pinkyBottomY > 732 && pinkyBottomY < 816) || 
+        (pinkyBottomX > 240 && pinkyBottomX < 320 && pinkyBottomY > 732 && pinkyBottomY < 900) || 
+        (pinkyBottomX > 612 && pinkyBottomX < 696 && pinkyBottomY > 732 && pinkyBottomY < 900) || 
+        (pinkyBottomX > 424 && pinkyBottomX < 508 && pinkyBottomY > 732 && pinkyBottomY < 900) || 
+        (pinkyBottomX > 70 && pinkyBottomX < 420 && pinkyBottomY > 820 && pinkyBottomY < 900) || 
+        (pinkyBottomX > 512 && pinkyBottomX < 856 && pinkyBottomY > 820 && pinkyBottomY < 900) || 
+        (pinkyBottomY > 908)) {
+            for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
+                for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
+                    if ((pinkyLeftX <= possibleMovesPosition[i + 12][j][0] && pinkyRightX >= possibleMovesPosition[i + 12][j][0]) && (pinkyTopY <= possibleMovesPosition[i + 12][j][1] && pinkyBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentPinkyGhostPosition != possibleMovesPosition[i + 12][j])) {
+                        currentPinkyGhostPosition = possibleMovesPosition[i + 12][j];
+                        let nextDirection = possibleMoves[i + 12][Math.floor(Math.random() * possibleMoves[i + 12].length)];
+                        pinkyX = possibleMovesPosition[i + 12][j][0];
+                        pinkyY = possibleMovesPosition[i + 12][j][1];
+                        pinkyLeftX = pinkyX - WALL_W/2;
+                        pinkyLeftY = pinkyY - WALL_H/2 + CHARACTER_H/2;
+                        pinkyRightX = pinkyX - WALL_W/2 + CHARACTER_W;
+                        pinkyRightY = pinkyY - WALL_H/2 + CHARACTER_H/2;
+                        pinkyTopX = pinkyX - WALL_W/2 + CHARACTER_W/2;
+                        pinkyTopY = pinkyY - WALL_H/2;
+                        pinkyBottomX = pinkyX - WALL_W/2 + CHARACTER_W/2;
+                        pinkyBottomY = pinkyY - WALL_H/2 + CHARACTER_H;
+                        if (nextDirection === 'right') {
+                            pinkyHeldDown = false;
+                            pinkyHeldRight = true;
+                            break;
+                        } else if (nextDirection === 'up') {
+                            pinkyHeldDown = false;
+                            pinkyHeldUp = true;
+                            break;
+                        } else if (nextDirection === 'left') {
+                            pinkyHeldDown = false;
+                            pinkyHeldLeft = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        } else if (pinkyLeftX < -27) {
+            pinkyX = 954;
+            pinkyY = 462;
+            pinkyLeftX = 952;
+            pinkyLeftY = 466;
+            pinkyRightX = 964;
+            pinkyRightY = 466;
+            pinkyTopX = 958;
+            pinkyTopY = 460;
+            pinkyBottomX = 958;
+            pinkyBottomY = 472;
+        } else {
+            if (pinkyRightX > 964) {
+                pinkyX = -26;
+                pinkyY = 462;
+                pinkyLeftX = -28;
+                pinkyLeftY = 466;
+                pinkyRightX = -16;
+                pinkyRightY = 466;
+                pinkyTopX = -22;
+                pinkyTopY = 460;
+                pinkyBottomX = -22;
+                pinkyBottomY = 472;
+            } 
             if (pinkyDownFirstLoaded) {
                 pinkyDownFirstLoaded = false;
                 pinkyRightFirstLoaded = false;
@@ -1857,35 +2289,1512 @@ function pacmanMove() {
                 pinkyBottomY += pinkySpeed;
                 pinkyDownFirstLoaded = true;
             }
+        }
+    }
+    if (inkyHeldLeft) {
+        console.log(`inky left x is ${inkyLeftX}`);
+        console.log(`inky right x is ${inkyRightY}`);
+        console.log(`inky top y is ${inkyTopY}`);
+        console.log(`inky bottom y is ${inkyBottomY}`);
+        if ((inkyLeftX > 0 && inkyLeftX < 64 && inkyLeftY > 68 && inkyLeftY < 292) || 
+        (inkyLeftX > 0 && inkyLeftX < 64 && inkyLeftY > 640 && inkyLeftY < 864) || 
+        (inkyLeftX > 70 && inkyLeftX < 232 && inkyLeftY > 70 && inkyLeftY < 196) || 
+        (inkyLeftX > 240 && inkyLeftX < 420 && inkyLeftY < 196 && inkyLeftY > 70) || 
+        (inkyLeftX > 424 && inkyLeftX < 508 && inkyLeftY < 196) || 
+        (inkyLeftX > 512 && inkyLeftX < 692 && inkyLeftY < 196 && inkyLeftY > 70) || 
+        (inkyLeftX > 700 && inkyLeftX < 856 && inkyLeftY < 196 && inkyLeftY > 70) || 
+        (inkyLeftX > 70 && inkyLeftX < 232 && inkyLeftY > 204 && inkyLeftY < 284) || 
+        (inkyLeftX > 240 && inkyLeftX < 320 && inkyLeftY > 204 && inkyLeftY < 464) || 
+        (inkyLeftX > 328 && inkyLeftX < 608 && inkyLeftY > 204 && inkyLeftY < 284) || 
+        (inkyLeftX > 612 && inkyLeftX < 696 && inkyLeftY > 204 && inkyLeftY < 464) || 
+        (inkyLeftX > 700 && inkyLeftX < 856 && inkyLeftY > 204 && inkyLeftY < 284) || 
+        (inkyLeftX > 424 && inkyLeftX < 508 && inkyLeftY > 204 && inkyLeftY < 376) || 
+        (inkyLeftX > 240 && inkyLeftX < 420 && inkyLeftY > 292 && inkyLeftY < 376) || 
+        (inkyLeftX > 512 && inkyLeftX < 696 && inkyLeftY > 292 && inkyLeftY < 376) || 
+        (inkyLeftX > 700 && inkyLeftY > 292 && inkyLeftY < 464) || 
+        (inkyLeftX < 232 && inkyLeftY > 292 && inkyLeftY < 464) || 
+        (inkyLeftX > 328 && inkyLeftX < 392 && inkyLeftY > 380 && inkyLeftY < 552) || 
+        (inkyLeftX > 540 && inkyLeftX < 608 && inkyLeftY > 380 && inkyLeftY < 552) || 
+        (inkyLeftX > 328 && inkyLeftX < 460 && inkyLeftY > 380 && inkyLeftY < 448) || 
+        (inkyLeftX > 472 && inkyLeftX < 608 && inkyLeftY > 380 && inkyLeftY < 448) || 
+        (inkyLeftX > 328 && inkyLeftX < 608 && inkyLeftY > 484 && inkyLeftY < 552) || 
+        (inkyLeftX < 232 && inkyLeftY > 468 && inkyLeftY < 640) || 
+        (inkyLeftX > 700 && inkyLeftY > 468 && inkyLeftY < 640) || 
+        (inkyLeftX > 240 && inkyLeftX < 320 && inkyLeftY > 468 && inkyLeftY < 640) || 
+        (inkyLeftX > 612 && inkyLeftX < 696 && inkyLeftY > 468 && inkyLeftY < 640) || 
+        (inkyLeftX > 328 && inkyLeftX < 608 && inkyLeftY > 556 && inkyLeftY < 640) || 
+        (inkyLeftX > 70 && inkyLeftX < 232 && inkyLeftY > 644 && inkyLeftY < 728) || 
+        (inkyLeftX > 240 && inkyLeftX < 420 && inkyLeftY > 644 && inkyLeftY < 728) || 
+        (inkyLeftX > 512 && inkyLeftX < 692 && inkyLeftY > 644 && inkyLeftY < 728) || 
+        (inkyLeftX > 700 && inkyLeftX < 856 && inkyLeftY > 644 && inkyLeftY < 728) || 
+        (inkyLeftX > 424 && inkyLeftX < 508 && inkyLeftY > 556 && inkyLeftY < 728) || 
+        (inkyLeftX > 148 && inkyLeftX < 232 && inkyLeftY > 644 && inkyLeftY < 816) || 
+        (inkyLeftX > 700 && inkyLeftX < 788 && inkyLeftY > 644 && inkyLeftY < 816) || 
+        (inkyLeftX < 132 && inkyLeftY > 732 && inkyLeftY < 816) || 
+        (inkyLeftX > 796 && inkyLeftY > 732 && inkyLeftY < 816) || 
+        (inkyLeftX > 328 && inkyLeftX < 608 && inkyLeftY > 732 && inkyLeftY < 816) || 
+        (inkyLeftX > 240 && inkyLeftX < 320 && inkyLeftY > 732 && inkyLeftY < 900) || 
+        (inkyLeftX > 612 && inkyLeftX < 696 && inkyLeftY > 732 && inkyLeftY < 900) || 
+        (inkyLeftX > 424 && inkyLeftX < 508 && inkyLeftY > 732 && inkyLeftY < 900) || 
+        (inkyLeftX > 70 && inkyLeftX < 420 && inkyLeftY > 820 && inkyLeftY < 900) || 
+        (inkyLeftX > 512 && inkyLeftX < 856 && inkyLeftY > 820 && inkyLeftY < 900)
+        ) {
             for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
-                for (let j = i + 12; j < possibleMovesPosition[i + 12].length; j++) {
-                    debugger;
-                    if ((pinkyLeftX <= possibleMovesPosition[j][i][0] && pinkyRightX >= possibleMovesPosition[j][i][0]) && (pinkyTopY <= possibleMovesPosition[j][i][1] && pinkyBottomY >= possibleMovesPosition[j][i][1]) && (currentpinkyGhostPosition != possibleMovesPosition[j][i])) {
-                        debugger;
-                        currentpinkyGhostPosition = possibleMovesPosition[j][i];
-                        console.log(possibleMoves[i + 12]);
-                        let nextDirection = possibleMoves[j][Math.floor(Math.random() * possibleMoves[j].length)];
+                for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
+                    if ((inkyLeftX <= possibleMovesPosition[i + 12][j][0] && inkyRightX >= possibleMovesPosition[i + 12][j][0]) && (inkyTopY <= possibleMovesPosition[i + 12][j][1] && inkyBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentInkyGhostPosition != possibleMovesPosition[i + 12][j])) {
+                        currentInkyGhostPosition = possibleMovesPosition[i + 12][j];
+                        let nextDirection = possibleMoves[i + 12][Math.floor(Math.random() * possibleMoves[i + 12].length)];
+                        inkyX = possibleMovesPosition[i + 12][j][0];
+                        inkyY = possibleMovesPosition[i + 12][j][1];
+                        inkyLeftX = inkyX - WALL_W/2;
+                        inkyLeftY = inkyY - WALL_H/2 + CHARACTER_H/2;
+                        inkyRightX = inkyX - WALL_W/2 + CHARACTER_W;
+                        inkyRightY = inkyY - WALL_H/2 + CHARACTER_H/2;
+                        inkyTopX = inkyX - WALL_W/2 + CHARACTER_W/2;
+                        inkyTopY = inkyY - WALL_H/2;
+                        inkyBottomX = inkyX - WALL_W/2 + CHARACTER_W/2;
+                        inkyBottomY = inkyY - WALL_H/2 + CHARACTER_H;
                         if (nextDirection === 'right') {
-                            pinkyHeldDown = false;
-                            pinkyHeldRight = true;
+                            inkyHeldLeft = false;
+                            inkyHeldRight = true;
+                            break;
                         } else if (nextDirection === 'up') {
-                            pinkyHeldDown = false;
-                            pinkyHeldUp = true;
+                            inkyHeldLeft = false;
+                            inkyHeldUp = true;
+                            break;
+                        } else if (nextDirection === 'down') {
+                            inkyHeldLeft = false;
+                            inkyHeldDown = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        } else if (inkyLeftX < -27) {
+            inkyX = 954;
+            inkyY = 462;
+            inkyLeftX = 952;
+            inkyLeftY = 466;
+            inkyRightX = 964;
+            inkyRightY = 466;
+            inkyTopX = 958;
+            inkyTopY = 460;
+            inkyBottomX = 958;
+            inkyBottomY = 472;
+        } else {
+            if (inkyRightX > 964) {
+                inkyX = -26;
+                inkyY = 462;
+                inkyLeftX = -28;
+                inkyLeftY = 466;
+                inkyRightX = -16;
+                inkyRightY = 466;
+                inkyTopX = -22;
+                inkyTopY = 460;
+                inkyBottomX = -22;
+                inkyBottomY = 472;
+            } 
+            if (inkyLeftFirstLoaded) {
+                inkyLeftFirstLoaded = false;
+                inkyDownFirstLoaded = false;
+                inkyDownSecondLoaded = false;
+                inkyRightFirstLoaded = false;
+                inkyRightSecondLoaded = false;
+                inkyUpFirstLoaded = false;
+                inkyUpSecondLoaded = false;
+                inkyX -= inkySpeed;
+                inkyLeftX -= inkySpeed;
+                inkyRightX -= inkySpeed;
+                inkyTopX -= inkySpeed;
+                inkyBottomX -= inkySpeed;
+                inkyLeftSecondLoaded = true;
+                for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
+                    for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
+                        if ((inkyLeftX <= possibleMovesPosition[i + 12][j][0] && inkyRightX >= possibleMovesPosition[i + 12][j][0]) && (inkyTopY <= possibleMovesPosition[i + 12][j][1] && inkyBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentInkyGhostPosition != possibleMovesPosition[i + 12][j])) {
+                            currentInkyGhostPosition = possibleMovesPosition[i + 12][j];
+                            let nextDirection = possibleMoves[i + 12][Math.floor(Math.random() * possibleMoves[i + 12].length)];
+                            inkyX = possibleMovesPosition[i + 12][j][0];
+                            inkyY = possibleMovesPosition[i + 12][j][1];
+                            inkyLeftX = inkyX - WALL_W/2;
+                            inkyLeftY = inkyY - WALL_H/2 + CHARACTER_H/2;
+                            inkyRightX = inkyX - WALL_W/2 + CHARACTER_W;
+                            inkyRightY = inkyY - WALL_H/2 + CHARACTER_H/2;
+                            inkyTopX = inkyX - WALL_W/2 + CHARACTER_W/2;
+                            inkyTopY = inkyY - WALL_H/2;
+                            inkyBottomX = inkyX - WALL_W/2 + CHARACTER_W/2;
+                            inkyBottomY = inkyY - WALL_H/2 + CHARACTER_H;
+                            if (nextDirection === 'right') {
+                                inkyHeldLeft = false;
+                                inkyHeldRight = true;
+                                break;
+                            } else if (nextDirection === 'up') {
+                                inkyHeldLeft = false;
+                                inkyHeldUp = true;
+                                break;
+                            } else if (nextDirection === 'down') {
+                                inkyHeldLeft = false;
+                                inkyHeldDown = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            } else {
+                inkyLeftSecondLoaded = false;
+                inkyX -= inkySpeed;
+                inkyLeftX -= inkySpeed;
+                inkyRightX -= inkySpeed;
+                inkyTopX -= inkySpeed;
+                inkyBottomX -= inkySpeed;
+                inkyLeftFirstLoaded = true;
+                for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
+                    for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
+                        if ((inkyLeftX <= possibleMovesPosition[i + 12][j][0] && inkyRightX >= possibleMovesPosition[i + 12][j][0]) && (inkyTopY <= possibleMovesPosition[i + 12][j][1] && inkyBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentInkyGhostPosition != possibleMovesPosition[i + 12][j])) {
+                            currentInkyGhostPosition = possibleMovesPosition[i + 12][j];
+                            let nextDirection = possibleMoves[i + 12][Math.floor(Math.random() * possibleMoves[i + 12].length)];
+                            inkyX = possibleMovesPosition[i + 12][j][0];
+                            inkyY = possibleMovesPosition[i + 12][j][1];
+                            inkyLeftX = inkyX - WALL_W/2;
+                            inkyLeftY = inkyY - WALL_H/2 + CHARACTER_H/2;
+                            inkyRightX = inkyX - WALL_W/2 + CHARACTER_W;
+                            inkyRightY = inkyY - WALL_H/2 + CHARACTER_H/2;
+                            inkyTopX = inkyX - WALL_W/2 + CHARACTER_W/2;
+                            inkyTopY = inkyY - WALL_H/2;
+                            inkyBottomX = inkyX - WALL_W/2 + CHARACTER_W/2;
+                            inkyBottomY = inkyY - WALL_H/2 + CHARACTER_H;
+                            if (nextDirection === 'right') {
+                                inkyHeldLeft = false;
+                                inkyHeldRight = true;
+                                break;
+                            } else if (nextDirection === 'up') {
+                                inkyHeldLeft = false;
+                                inkyHeldUp = true;
+                                break;
+                            } else if (nextDirection === 'down') {
+                                inkyHeldLeft = false;
+                                inkyHeldDown = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    } else if (inkyHeldRight) {
+        console.log(`inky left x is ${inkyLeftX}`);
+        console.log(`inky right x is ${inkyRightY}`);
+        console.log(`inky top y is ${inkyTopY}`);
+        console.log(`inky bottom y is ${inkyBottomY}`);
+        if ((inkyRightX > 70 && inkyRightX < 232 && inkyRightY > 70 && inkyRightY < 196) || 
+        (inkyRightX > 240 && inkyRightX < 420 && inkyRightY < 196 && inkyRightY > 70) || 
+        (inkyRightX > 424 && inkyRightX < 508 && inkyRightY < 196) || 
+        (inkyRightX > 512 && inkyRightX < 692 && inkyRightY < 196 && inkyRightY > 70) || 
+        (inkyRightX > 700 && inkyRightX < 856 && inkyRightY < 196 && inkyRightY > 70) ||
+        (inkyRightX > 70 && inkyRightX < 232 && inkyRightY > 204 && inkyRightY < 284) || 
+        (inkyRightX > 240 && inkyRightX < 320 && inkyRightY > 204 && inkyRightY < 464) || 
+        (inkyRightX > 328 && inkyRightX < 608 && inkyRightY > 204 && inkyRightY < 284) || 
+        (inkyRightX > 612 && inkyRightX < 696 && inkyRightY > 204 && inkyRightY < 464) || 
+        (inkyRightX > 700 && inkyRightX < 856 && inkyRightY > 204 && inkyRightY < 284) || 
+        (inkyRightX > 424 && inkyRightX < 508 && inkyRightY > 204 && inkyRightY < 376) || 
+        (inkyRightX > 240 && inkyRightX < 420 && inkyRightY > 292 && inkyRightY < 376) || 
+        (inkyRightX > 512 && inkyRightX < 696 && inkyRightY > 292 && inkyRightY < 376) || 
+        (inkyRightX > 700 && inkyRightY > 292 && inkyRightY < 464) || 
+        (inkyRightX < 232 && inkyRightY > 292 && inkyRightY < 464) || 
+        (inkyRightX > 328 && inkyRightX < 392 && inkyRightY > 380 && inkyRightY < 552) || 
+        (inkyRightX > 540 && inkyRightX < 608 && inkyRightY > 380 && inkyRightY < 552) || 
+        (inkyRightX > 328 && inkyRightX < 460 && inkyRightY > 380 && inkyRightY < 448) || 
+        (inkyRightX > 472 && inkyRightX < 608 && inkyRightY > 380 && inkyRightY < 448) || 
+        (inkyRightX > 328 && inkyRightX < 608 && inkyRightY > 484 && inkyRightY < 552) || 
+        (inkyRightX < 232 && inkyRightY > 468 && inkyRightY < 640) || 
+        (inkyRightX > 700 && inkyRightY > 468 && inkyRightY < 640) || 
+        (inkyRightX > 240 && inkyRightX < 320 && inkyRightY > 468 && inkyRightY < 640) || 
+        (inkyRightX > 612 && inkyRightX < 696 && inkyRightY > 468 && inkyRightY < 640) || 
+        (inkyRightX > 328 && inkyRightX < 608 && inkyRightY > 556 && inkyRightY < 640) || 
+        (inkyRightX > 70 && inkyRightX < 232 && inkyRightY > 644 && inkyRightY < 728) || 
+        (inkyRightX > 240 && inkyRightX < 420 && inkyRightY > 644 && inkyRightY < 728) || 
+        (inkyRightX > 512 && inkyRightX < 692 && inkyRightY > 644 && inkyRightY < 728) || 
+        (inkyRightX > 700 && inkyRightX < 856 && inkyRightY > 644 && inkyRightY < 728) || 
+        (inkyRightX > 424 && inkyRightX < 508 && inkyRightY > 556 && inkyRightY < 728) || 
+        (inkyRightX > 148 && inkyRightX < 232 && inkyRightY > 644 && inkyRightY < 816) || 
+        (inkyRightX > 700 && inkyRightX < 788 && inkyRightY > 644 && inkyRightY < 816) || 
+        (inkyRightX < 132 && inkyRightY > 732 && inkyRightY < 816) || 
+        (inkyRightX > 796 && inkyRightY > 732 && inkyRightY < 816) || 
+        (inkyRightX > 328 && inkyRightX < 608 && inkyRightY > 732 && inkyRightY < 816) || 
+        (inkyRightX > 240 && inkyRightX < 320 && inkyRightY > 732 && inkyRightY < 900) || 
+        (inkyRightX > 612 && inkyRightX < 696 && inkyRightY > 732 && inkyRightY < 900) || 
+        (inkyRightX > 424 && inkyRightX < 508 && inkyRightY > 732 && inkyRightY < 900) || 
+        (inkyRightX > 70 && inkyRightX < 420 && inkyRightY > 820 && inkyRightY < 900) || 
+        (inkyRightX > 512 && inkyRightX < 856 && inkyRightY > 820 && inkyRightY < 900) || 
+        (inkyRightX > 864 && inkyRightX < 904 && inkyRightY > 65 && inkyRightY < 292) || 
+        (inkyRightX > 864 && inkyRightX < 904 && inkyRightY > 640 && inkyRightY < 864)) {
+            for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
+                for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
+                    if ((inkyLeftX <= possibleMovesPosition[i + 12][j][0] && inkyRightX >= possibleMovesPosition[i + 12][j][0]) && (inkyTopY <= possibleMovesPosition[i + 12][j][1] && inkyBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentInkyGhostPosition != possibleMovesPosition[i + 12][j])) {
+                        currentInkyGhostPosition = possibleMovesPosition[i + 12][j];
+                        let nextDirection = possibleMoves[i + 12][Math.floor(Math.random() * possibleMoves[i + 12].length)];
+                        inkyX = possibleMovesPosition[i + 12][j][0];
+                        inkyY = possibleMovesPosition[i + 12][j][1];
+                        inkyLeftX = inkyX - WALL_W/2;
+                        inkyLeftY = inkyY - WALL_H/2 + CHARACTER_H/2;
+                        inkyRightX = inkyX - WALL_W/2 + CHARACTER_W;
+                        inkyRightY = inkyY - WALL_H/2 + CHARACTER_H/2;
+                        inkyTopX = inkyX - WALL_W/2 + CHARACTER_W/2;
+                        inkyTopY = inkyY - WALL_H/2;
+                        inkyBottomX = inkyX - WALL_W/2 + CHARACTER_W/2;
+                        inkyBottomY = inkyY - WALL_H/2 + CHARACTER_H;
+                        if (nextDirection === 'left') {
+                            inkyHeldRight = false;
+                            inkyHeldLeft = true;
+                            break;
+                        } else if (nextDirection === 'up') {
+                            inkyHeldRight = false;
+                            inkyHeldUp = true;
+                            break;
+                        } else if (nextDirection === 'down') {
+                            inkyHeldRight = false;
+                            inkyHeldDown = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        } else if (inkyLeftX < -27) {
+            inkyX = 954;
+            inkyY = 462;
+            inkyLeftX = 952;
+            inkyLeftY = 466;
+            inkyRightX = 964;
+            inkyRightY = 466;
+            inkyTopX = 958;
+            inkyTopY = 460;
+            inkyBottomX = 958;
+            inkyBottomY = 472;
+        } else {
+            if (inkyRightX > 964) {
+                inkyX = -26;
+                inkyY = 462;
+                inkyLeftX = -28;
+                inkyLeftY = 466;
+                inkyRightX = -16;
+                inkyRightY = 466;
+                inkyTopX = -22;
+                inkyTopY = 460;
+                inkyBottomX = -22;
+                inkyBottomY = 472;
+            } 
+            if (inkyRightFirstLoaded) {
+                inkyRightFirstLoaded = false;
+                inkyDownFirstLoaded = false;
+                inkyDownSecondLoaded = false;
+                inkyLeftFirstLoaded = false;
+                inkyLeftSecondLoaded = false;
+                inkyUpFirstLoaded = false;
+                inkyUpSecondLoaded = false;
+                inkyX += inkySpeed;
+                inkyLeftX += inkySpeed;
+                inkyRightX += inkySpeed;
+                inkyTopX += inkySpeed;
+                inkyBottomX += inkySpeed;
+                inkyRightSecondLoaded = true;
+                for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
+                    for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
+                        if ((inkyLeftX <= possibleMovesPosition[i + 12][j][0] && inkyRightX >= possibleMovesPosition[i + 12][j][0]) && (inkyTopY <= possibleMovesPosition[i + 12][j][1] && inkyBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentInkyGhostPosition != possibleMovesPosition[i + 12][j])) {
+                            currentInkyGhostPosition = possibleMovesPosition[i + 12][j];
+                            let nextDirection = possibleMoves[i + 12][Math.floor(Math.random() * possibleMoves[i + 12].length)];
+                            inkyX = possibleMovesPosition[i + 12][j][0];
+                            inkyY = possibleMovesPosition[i + 12][j][1];
+                            inkyLeftX = inkyX - WALL_W/2;
+                            inkyLeftY = inkyY - WALL_H/2 + CHARACTER_H/2;
+                            inkyRightX = inkyX - WALL_W/2 + CHARACTER_W;
+                            inkyRightY = inkyY - WALL_H/2 + CHARACTER_H/2;
+                            inkyTopX = inkyX - WALL_W/2 + CHARACTER_W/2;
+                            inkyTopY = inkyY - WALL_H/2;
+                            inkyBottomX = inkyX - WALL_W/2 + CHARACTER_W/2;
+                            inkyBottomY = inkyY - WALL_H/2 + CHARACTER_H;
+                            if (nextDirection === 'left') {
+                                inkyHeldRight = false;
+                                inkyHeldLeft = true;
+                                break;
+                            } else if (nextDirection === 'up') {
+                                inkyHeldRight = false;
+                                inkyHeldUp = true;
+                                break;
+                            } else if (nextDirection === 'down') {
+                                inkyHeldRight = false;
+                                inkyHeldDown = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            } else {
+                inkyRightSecondLoaded = false;
+                inkyX += inkySpeed;
+                inkyLeftX += inkySpeed;
+                inkyRightX += inkySpeed;
+                inkyTopX += inkySpeed;
+                inkyBottomX += inkySpeed;
+                inkyRightFirstLoaded = true;
+                for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
+                    for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
+                        if ((inkyLeftX <= possibleMovesPosition[i + 12][j][0] && inkyRightX >= possibleMovesPosition[i + 12][j][0]) && (inkyTopY <= possibleMovesPosition[i + 12][j][1] && inkyBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentInkyGhostPosition != possibleMovesPosition[i + 12][j])) {
+                            currentInkyGhostPosition = possibleMovesPosition[i + 12][j];
+                            let nextDirection = possibleMoves[i + 12][Math.floor(Math.random() * possibleMoves[i + 12].length)];
+                            inkyX = possibleMovesPosition[i + 12][j][0];
+                            inkyY = possibleMovesPosition[i + 12][j][1];
+                            inkyLeftX = inkyX - WALL_W/2;
+                            inkyLeftY = inkyY - WALL_H/2 + CHARACTER_H/2;
+                            inkyRightX = inkyX - WALL_W/2 + CHARACTER_W;
+                            inkyRightY = inkyY - WALL_H/2 + CHARACTER_H/2;
+                            inkyTopX = inkyX - WALL_W/2 + CHARACTER_W/2;
+                            inkyTopY = inkyY - WALL_H/2;
+                            inkyBottomX = inkyX - WALL_W/2 + CHARACTER_W/2;
+                            inkyBottomY = inkyY - WALL_H/2 + CHARACTER_H;
+                            if (nextDirection === 'left') {
+                                inkyHeldRight = false;
+                                inkyHeldLeft = true;
+                                break;
+                            } else if (nextDirection === 'up') {
+                                inkyHeldRight = false;
+                                inkyHeldUp = true;
+                                break;
+                            } else if (nextDirection === 'down') {
+                                inkyHeldRight = false;
+                                inkyHeldDown = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    } else if (inkyHeldUp) {
+        console.log(`inky left x is ${inkyLeftX}`);
+        console.log(`inky right x is ${inkyRightY}`);
+        console.log(`inky top y is ${inkyTopY}`);
+        console.log(`inky bottom y is ${inkyBottomY}`);
+        if ((inkyTopY < 64) || (inkyTopX > 70 && inkyTopX < 232 && inkyTopY > 70 && inkyTopY < 196) || 
+        (inkyTopX > 240 && inkyTopX < 420 && inkyTopY < 196 && inkyTopY > 70) || 
+        (inkyTopX > 424 && inkyTopX < 508 && inkyTopY < 196) || 
+        (inkyTopX > 512 && inkyTopX < 692 && inkyTopY < 196 && inkyTopY > 70) || 
+        (inkyTopX > 700 && inkyTopX < 856 && inkyTopY < 196 && inkyTopY > 70) || 
+        (inkyTopX > 70 && inkyTopX < 232 && inkyTopY > 204 && inkyTopY < 284) || 
+        (inkyTopX > 240 && inkyTopX < 320 && inkyTopY > 204 && inkyTopY < 464) || 
+        (inkyTopX > 328 && inkyTopX < 608 && inkyTopY > 204 && inkyTopY < 284) || 
+        (inkyTopX > 612 && inkyTopX < 696 && inkyTopY > 204 && inkyTopY < 464) || 
+        (inkyTopX > 700 && inkyTopX < 856 && inkyTopY > 204 && inkyTopY < 284) || 
+        (inkyTopX > 424 && inkyTopX < 508 && inkyTopY > 204 && inkyTopY < 376) || 
+        (inkyTopX > 240 && inkyTopX < 420 && inkyTopY > 292 && inkyTopY < 376) || 
+        (inkyTopX > 512 && inkyTopX < 696 && inkyTopY > 292 && inkyTopY < 376) || 
+        (inkyTopX > 700 && inkyTopY > 292 && inkyTopY < 464) || 
+        (inkyTopX < 232 && inkyTopY > 292 && inkyTopY < 464) || 
+        (inkyTopX > 328 && inkyTopX < 392 && inkyTopY > 380 && inkyTopY < 552) || 
+        (inkyTopX > 540 && inkyTopX < 608 && inkyTopY > 380 && inkyTopY < 552) || 
+        (inkyTopX > 328 && inkyTopX < 460 && inkyTopY > 380 && inkyTopY < 448) || 
+        (inkyTopX > 472 && inkyTopX < 608 && inkyTopY > 380 && inkyTopY < 448) || 
+        (inkyTopX > 328 && inkyTopX < 608 && inkyTopY > 484 && inkyTopY < 552) || 
+        (inkyTopX < 232 && inkyTopY > 468 && inkyTopY < 640) || 
+        (inkyTopX > 700 && inkyTopY > 468 && inkyTopY < 640) || 
+        (inkyTopX > 240 && inkyTopX < 320 && inkyTopY > 468 && inkyTopY < 640) || 
+        (inkyTopX > 612 && inkyTopX < 696 && inkyTopY > 468 && inkyTopY < 640) || 
+        (inkyTopX > 328 && inkyTopX < 608 && inkyTopY > 556 && inkyTopY < 640) || 
+        (inkyTopX > 70 && inkyTopX < 232 && inkyTopY > 644 && inkyTopY < 728) || 
+        (inkyTopX > 240 && inkyTopX < 420 && inkyTopY > 644 && inkyTopY < 728) || 
+        (inkyTopX > 512 && inkyTopX < 692 && inkyTopY > 644 && inkyTopY < 728) || 
+        (inkyTopX > 700 && inkyTopX < 856 && inkyTopY > 644 && inkyTopY < 728) || 
+        (inkyTopX > 424 && inkyTopX < 508 && inkyTopY > 556 && inkyTopY < 728) || 
+        (inkyTopX > 148 && inkyTopX < 232 && inkyTopY > 644 && inkyTopY < 816) || 
+        (inkyTopX > 700 && inkyTopX < 788 && inkyTopY > 644 && inkyTopY < 816) || 
+        (inkyTopX < 132 && inkyTopY > 732 && inkyTopY < 816) || 
+        (inkyTopX > 796 && inkyTopY > 732 && inkyTopY < 816) || 
+        (inkyTopX > 328 && inkyTopX < 608 && inkyTopY > 732 && inkyTopY < 816) || 
+        (inkyTopX > 240 && inkyTopX < 320 && inkyTopY > 732 && inkyTopY < 900) || 
+        (inkyTopX > 612 && inkyTopX < 696 && inkyTopY > 732 && inkyTopY < 900) || 
+        (inkyTopX > 424 && inkyTopX < 508 && inkyTopY > 732 && inkyTopY < 900) || 
+        (inkyTopX > 70 && inkyTopX < 420 && inkyTopY > 820 && inkyTopY < 900) || 
+        (inkyTopX > 512 && inkyTopX < 856 && inkyTopY > 820 && inkyTopY < 900) || 
+        (inkyTopX > 0 && inkyTopX < 68 && inkyTopY > 68 && inkyTopY < 292) || 
+        (inkyTopX > 0 && inkyTopX < 68 && inkyTopY > 640 && inkyTopY < 864)) {
+            for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
+                for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
+                    if ((inkyLeftX <= possibleMovesPosition[i + 12][j][0] && inkyRightX >= possibleMovesPosition[i + 12][j][0]) && (inkyTopY <= possibleMovesPosition[i + 12][j][1] && inkyBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentInkyGhostPosition != possibleMovesPosition[i + 12][j])) {
+                        currentInkyGhostPosition = possibleMovesPosition[i + 12][j];
+                        let nextDirection = possibleMoves[i + 12][Math.floor(Math.random() * possibleMoves[i + 12].length)];
+                        inkyX = possibleMovesPosition[i + 12][j][0];
+                        inkyY = possibleMovesPosition[i + 12][j][1];
+                        inkyLeftX = inkyX - WALL_W/2;
+                        inkyLeftY = inkyY - WALL_H/2 + CHARACTER_H/2;
+                        inkyRightX = inkyX - WALL_W/2 + CHARACTER_W;
+                        inkyRightY = inkyY - WALL_H/2 + CHARACTER_H/2;
+                        inkyTopX = inkyX - WALL_W/2 + CHARACTER_W/2;
+                        inkyTopY = inkyY - WALL_H/2;
+                        inkyBottomX = inkyX - WALL_W/2 + CHARACTER_W/2;
+                        inkyBottomY = inkyY - WALL_H/2 + CHARACTER_H;
+                        if (nextDirection === 'right') {
+                            inkyHeldUp = false;
+                            inkyHeldRight = true;
+                            break;
                         } else if (nextDirection === 'left') {
-                            pinkyHeldDown = false;
-                            pinkyHeldLeft = true;
+                            inkyHeldUp = false;
+                            inkyHeldLeft = true;
+                            break;
+                        } else if (nextDirection === 'down') {
+                            inkyHeldUp = false;
+                            inkyHeldDown = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        } else if (inkyLeftX < -27) {
+            inkyX = 954;
+            inkyY = 462;
+            inkyLeftX = 952;
+            inkyLeftY = 466;
+            inkyRightX = 964;
+            inkyRightY = 466;
+            inkyTopX = 958;
+            inkyTopY = 460;
+            inkyBottomX = 958;
+            inkyBottomY = 472;
+        } else {
+            if (inkyRightX > 964) {
+                inkyX = -26;
+                inkyY = 462;
+                inkyLeftX = -28;
+                inkyLeftY = 466;
+                inkyRightX = -16;
+                inkyRightY = 466;
+                inkyTopX = -22;
+                inkyTopY = 460;
+                inkyBottomX = -22;
+                inkyBottomY = 472;
+            } 
+            if (inkyUpFirstLoaded) {
+                inkyUpFirstLoaded = false;
+                inkyDownFirstLoaded = false;
+                inkyDownSecondLoaded = false;
+                inkyLeftFirstLoaded = false;
+                inkyLeftSecondLoaded = false;
+                inkyRightFirstLoaded = false;
+                inkyRightSecondLoaded = false;
+                inkyY -= inkySpeed;
+                inkyLeftY -= inkySpeed;
+                inkyRightY -= inkySpeed;
+                inkyTopY -= inkySpeed;
+                inkyBottomY -= inkySpeed;
+                inkyUpSecondLoaded = true;
+                for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
+                    for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
+                        if ((inkyLeftX <= possibleMovesPosition[i + 12][j][0] && inkyRightX >= possibleMovesPosition[i + 12][j][0]) && (inkyTopY <= possibleMovesPosition[i + 12][j][1] && inkyBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentInkyGhostPosition != possibleMovesPosition[i + 12][j])) {
+                            currentInkyGhostPosition = possibleMovesPosition[i + 12][j];
+                            let nextDirection = possibleMoves[i + 12][Math.floor(Math.random() * possibleMoves[i + 12].length)];
+                            inkyX = possibleMovesPosition[i + 12][j][0];
+                            inkyY = possibleMovesPosition[i + 12][j][1];
+                            inkyLeftX = inkyX - WALL_W/2;
+                            inkyLeftY = inkyY - WALL_H/2 + CHARACTER_H/2;
+                            inkyRightX = inkyX - WALL_W/2 + CHARACTER_W;
+                            inkyRightY = inkyY - WALL_H/2 + CHARACTER_H/2;
+                            inkyTopX = inkyX - WALL_W/2 + CHARACTER_W/2;
+                            inkyTopY = inkyY - WALL_H/2;
+                            inkyBottomX = inkyX - WALL_W/2 + CHARACTER_W/2;
+                            inkyBottomY = inkyY - WALL_H/2 + CHARACTER_H;
+                            if (nextDirection === 'right') {
+                                inkyHeldUp = false;
+                                inkyHeldRight = true;
+                                break;
+                            } else if (nextDirection === 'left') {
+                                inkyHeldUp = false;
+                                inkyHeldLeft = true;
+                                break;
+                            } else if (nextDirection === 'down') {
+                                inkyHeldUp = false;
+                                inkyHeldDown = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            } else {
+                inkyUpSecondLoaded = false;
+                inkyY -= inkySpeed;
+                inkyLeftY -= inkySpeed;
+                inkyRightY -= inkySpeed;
+                inkyTopY -= inkySpeed;
+                inkyBottomY -= inkySpeed;
+                inkyUpFirstLoaded = true;
+                for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
+                    for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
+                        if ((inkyLeftX <= possibleMovesPosition[i + 12][j][0] && inkyRightX >= possibleMovesPosition[i + 12][j][0]) && (inkyTopY <= possibleMovesPosition[i + 12][j][1] && inkyBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentInkyGhostPosition != possibleMovesPosition[i + 12][j])) {
+                            currentInkyGhostPosition = possibleMovesPosition[i + 12][j];
+                            let nextDirection = possibleMoves[i + 12][Math.floor(Math.random() * possibleMoves[i + 12].length)];
+                            inkyX = possibleMovesPosition[i + 12][j][0];
+                            inkyY = possibleMovesPosition[i + 12][j][1];
+                            inkyLeftX = inkyX - WALL_W/2;
+                            inkyLeftY = inkyY - WALL_H/2 + CHARACTER_H/2;
+                            inkyRightX = inkyX - WALL_W/2 + CHARACTER_W;
+                            inkyRightY = inkyY - WALL_H/2 + CHARACTER_H/2;
+                            inkyTopX = inkyX - WALL_W/2 + CHARACTER_W/2;
+                            inkyTopY = inkyY - WALL_H/2;
+                            inkyBottomX = inkyX - WALL_W/2 + CHARACTER_W/2;
+                            inkyBottomY = inkyY - WALL_H/2 + CHARACTER_H;
+                            if (nextDirection === 'right') {
+                                inkyHeldUp = false;
+                                inkyHeldRight = true;
+                                break;
+                            } else if (nextDirection === 'left') {
+                                inkyHeldUp = false;
+                                inkyHeldLeft = true;
+                                break;
+                            } else if (nextDirection === 'down') {
+                                inkyHeldUp = false;
+                                inkyHeldDown = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    } else if (inkyHeldDown) {
+        console.log(`inky left x is ${inkyLeftX}`);
+        console.log(`inky right x is ${inkyRightY}`);
+        console.log(`inky top y is ${inkyTopY}`);
+        console.log(`inky bottom y is ${inkyBottomY}`);
+        if ((inkyBottomX > 70 && inkyBottomX < 232 && inkyBottomY > 70 && inkyBottomY < 196) || 
+        (inkyBottomX > 240 && inkyBottomX < 420 && inkyBottomY < 196 && inkyBottomY > 70) || 
+        (inkyBottomX > 424 && inkyBottomX < 508 && inkyBottomY < 196) || 
+        (inkyBottomX > 512 && inkyBottomX < 692 && inkyBottomY < 196 && inkyBottomY > 70) || 
+        (inkyBottomX > 700 && inkyBottomX < 856 && inkyBottomY < 196 && inkyBottomY > 70) || 
+        (inkyBottomX > 70 && inkyBottomX < 232 && inkyBottomY > 204 && inkyBottomY < 284) || 
+        (inkyBottomX > 240 && inkyBottomX < 320 && inkyBottomY > 204 && inkyBottomY < 464) || 
+        (inkyBottomX > 328 && inkyBottomX < 608 && inkyBottomY > 204 && inkyBottomY < 284) || 
+        (inkyBottomX > 612 && inkyBottomX < 696 && inkyBottomY > 204 && inkyBottomY < 464) || 
+        (inkyBottomX > 700 && inkyBottomX < 856 && inkyBottomY > 204 && inkyBottomY < 284) || 
+        (inkyBottomX > 424 && inkyBottomX < 508 && inkyBottomY > 204 && inkyBottomY < 376) || 
+        (inkyBottomX > 240 && inkyBottomX < 420 && inkyBottomY > 292 && inkyBottomY < 376) || 
+        (inkyBottomX > 512 && inkyBottomX < 696 && inkyBottomY > 292 && inkyBottomY < 376) || 
+        (inkyBottomX > 700 && inkyBottomY > 292 && inkyBottomY < 464) || 
+        (inkyBottomX < 232 && inkyBottomY > 292 && inkyBottomY < 464) || 
+        (inkyBottomX > 328 && inkyBottomX < 392 && inkyBottomY > 380 && inkyBottomY < 552) || 
+        (inkyBottomX > 540 && inkyBottomX < 608 && inkyBottomY > 380 && inkyBottomY < 552) || 
+        (inkyBottomX > 328 && inkyBottomX < 460 && inkyBottomY > 380 && inkyBottomY < 448) || 
+        (inkyBottomX > 472 && inkyBottomX < 608 && inkyBottomY > 380 && inkyBottomY < 448) || 
+        (inkyBottomX > 328 && inkyBottomX < 608 && inkyBottomY > 484 && inkyBottomY < 552) || 
+        (inkyBottomX < 232 && inkyBottomY > 468 && inkyBottomY < 640) || 
+        (inkyBottomX > 700 && inkyBottomY > 468 && inkyBottomY < 640) || 
+        (inkyBottomX > 612 && inkyBottomX < 696 && inkyBottomY > 468 && inkyBottomY < 640) || 
+        (inkyBottomX > 328 && inkyBottomX < 608 && inkyBottomY > 556 && inkyBottomY < 640) || 
+        (inkyBottomX > 70 && inkyBottomX < 232 && inkyBottomY > 644 && inkyBottomY < 728) || 
+        (inkyBottomX > 240 && inkyBottomX < 420 && inkyBottomY > 644 && inkyBottomY < 728) || 
+        (inkyBottomX > 512 && inkyBottomX < 692 && inkyBottomY > 644 && inkyBottomY < 728) || 
+        (inkyBottomX > 700 && inkyBottomX < 856 && inkyBottomY > 644 && inkyBottomY < 728) || 
+        (inkyBottomX > 424 && inkyBottomX < 508 && inkyBottomY > 556 && inkyBottomY < 728) || 
+        (inkyBottomX > 148 && inkyBottomX < 232 && inkyBottomY > 644 && inkyBottomY < 816) || 
+        (inkyBottomX > 700 && inkyBottomX < 788 && inkyBottomY > 644 && inkyBottomY < 816) || 
+        (inkyBottomX < 132 && inkyBottomY > 732 && inkyBottomY < 816) || 
+        (inkyBottomX > 796 && inkyBottomY > 732 && inkyBottomY < 816) || 
+        (inkyBottomX > 328 && inkyBottomX < 608 && inkyBottomY > 732 && inkyBottomY < 816) || 
+        (inkyBottomX > 240 && inkyBottomX < 320 && inkyBottomY > 732 && inkyBottomY < 900) || 
+        (inkyBottomX > 612 && inkyBottomX < 696 && inkyBottomY > 732 && inkyBottomY < 900) || 
+        (inkyBottomX > 424 && inkyBottomX < 508 && inkyBottomY > 732 && inkyBottomY < 900) || 
+        (inkyBottomX > 70 && inkyBottomX < 420 && inkyBottomY > 820 && inkyBottomY < 900) || 
+        (inkyBottomX > 512 && inkyBottomX < 856 && inkyBottomY > 820 && inkyBottomY < 900) || 
+        (inkyBottomY > 908)) {
+            for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
+                for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
+                    if ((inkyLeftX <= possibleMovesPosition[i + 12][j][0] && inkyRightX >= possibleMovesPosition[i + 12][j][0]) && (inkyTopY <= possibleMovesPosition[i + 12][j][1] && inkyBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentInkyGhostPosition != possibleMovesPosition[i + 12][j])) {
+                        currentInkyGhostPosition = possibleMovesPosition[i + 12][j];
+                        let nextDirection = possibleMoves[i + 12][Math.floor(Math.random() * possibleMoves[i + 12].length)];
+                        inkyX = possibleMovesPosition[i + 12][j][0];
+                        inkyY = possibleMovesPosition[i + 12][j][1];
+                        inkyLeftX = inkyX - WALL_W/2;
+                        inkyLeftY = inkyY - WALL_H/2 + CHARACTER_H/2;
+                        inkyRightX = inkyX - WALL_W/2 + CHARACTER_W;
+                        inkyRightY = inkyY - WALL_H/2 + CHARACTER_H/2;
+                        inkyTopX = inkyX - WALL_W/2 + CHARACTER_W/2;
+                        inkyTopY = inkyY - WALL_H/2;
+                        inkyBottomX = inkyX - WALL_W/2 + CHARACTER_W/2;
+                        inkyBottomY = inkyY - WALL_H/2 + CHARACTER_H;
+                        if (nextDirection === 'right') {
+                            inkyHeldDown = false;
+                            inkyHeldRight = true;
+                            break;
+                        } else if (nextDirection === 'up') {
+                            inkyHeldDown = false;
+                            inkyHeldUp = true;
+                            break;
+                        } else if (nextDirection === 'left') {
+                            inkyHeldDown = false;
+                            inkyHeldLeft = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        } else if (inkyLeftX < -27) {
+            inkyX = 954;
+            inkyY = 462;
+            inkyLeftX = 952;
+            inkyLeftY = 466;
+            inkyRightX = 964;
+            inkyRightY = 466;
+            inkyTopX = 958;
+            inkyTopY = 460;
+            inkyBottomX = 958;
+            inkyBottomY = 472;
+        } else {
+            if (inkyRightX > 964) {
+                inkyX = -26;
+                inkyY = 462;
+                inkyLeftX = -28;
+                inkyLeftY = 466;
+                inkyRightX = -16;
+                inkyRightY = 466;
+                inkyTopX = -22;
+                inkyTopY = 460;
+                inkyBottomX = -22;
+                inkyBottomY = 472;
+            } 
+            if (inkyDownFirstLoaded) {
+                inkyDownFirstLoaded = false;
+                inkyRightFirstLoaded = false;
+                inkyRightSecondLoaded = false;
+                inkyLeftFirstLoaded = false;
+                inkyLeftSecondLoaded = false;
+                inkyUpFirstLoaded = false;
+                inkyUpSecondLoaded = false;
+                inkyY += inkySpeed;
+                inkyLeftY += inkySpeed;
+                inkyRightY += inkySpeed;
+                inkyTopY += inkySpeed;
+                inkyBottomY += inkySpeed;
+                inkyDownSecondLoaded = true;
+                for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
+                    for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
+                        if ((inkyLeftX <= possibleMovesPosition[i + 12][j][0] && inkyRightX >= possibleMovesPosition[i + 12][j][0]) && (inkyTopY <= possibleMovesPosition[i + 12][j][1] && inkyBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentInkyGhostPosition != possibleMovesPosition[i + 12][j])) {
+                            currentInkyGhostPosition = possibleMovesPosition[i + 12][j];
+                            let nextDirection = possibleMoves[i + 12][Math.floor(Math.random() * possibleMoves[i + 12].length)];
+                            inkyX = possibleMovesPosition[i + 12][j][0];
+                            inkyY = possibleMovesPosition[i + 12][j][1];
+                            inkyLeftX = inkyX - WALL_W/2;
+                            inkyLeftY = inkyY - WALL_H/2 + CHARACTER_H/2;
+                            inkyRightX = inkyX - WALL_W/2 + CHARACTER_W;
+                            inkyRightY = inkyY - WALL_H/2 + CHARACTER_H/2;
+                            inkyTopX = inkyX - WALL_W/2 + CHARACTER_W/2;
+                            inkyTopY = inkyY - WALL_H/2;
+                            inkyBottomX = inkyX - WALL_W/2 + CHARACTER_W/2;
+                            inkyBottomY = inkyY - WALL_H/2 + CHARACTER_H;
+                            if (nextDirection === 'right') {
+                                inkyHeldDown = false;
+                                inkyHeldRight = true;
+                                break;
+                            } else if (nextDirection === 'up') {
+                                inkyHeldDown = false;
+                                inkyHeldUp = true;
+                                break;
+                            } else if (nextDirection === 'left') {
+                                inkyHeldDown = false;
+                                inkyHeldLeft = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            } else {
+                inkyDownSecondLoaded = false;
+                inkyY += inkySpeed;
+                inkyLeftY += inkySpeed;
+                inkyRightY += inkySpeed;
+                inkyTopY += inkySpeed;
+                inkyBottomY += inkySpeed;
+                inkyDownFirstLoaded = true;
+                for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
+                    for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
+                        if ((inkyLeftX <= possibleMovesPosition[i + 12][j][0] && inkyRightX >= possibleMovesPosition[i + 12][j][0]) && (inkyTopY <= possibleMovesPosition[i + 12][j][1] && inkyBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentInkyGhostPosition != possibleMovesPosition[i + 12][j])) {
+                            currentInkyGhostPosition = possibleMovesPosition[i + 12][j];
+                            let nextDirection = possibleMoves[i + 12][Math.floor(Math.random() * possibleMoves[i + 12].length)];
+                            inkyX = possibleMovesPosition[i + 12][j][0];
+                            inkyY = possibleMovesPosition[i + 12][j][1];
+                            inkyLeftX = inkyX - WALL_W/2;
+                            inkyLeftY = inkyY - WALL_H/2 + CHARACTER_H/2;
+                            inkyRightX = inkyX - WALL_W/2 + CHARACTER_W;
+                            inkyRightY = inkyY - WALL_H/2 + CHARACTER_H/2;
+                            inkyTopX = inkyX - WALL_W/2 + CHARACTER_W/2;
+                            inkyTopY = inkyY - WALL_H/2;
+                            inkyBottomX = inkyX - WALL_W/2 + CHARACTER_W/2;
+                            inkyBottomY = inkyY - WALL_H/2 + CHARACTER_H;
+                            if (nextDirection === 'right') {
+                                inkyHeldDown = false;
+                                inkyHeldRight = true;
+                                break;
+                            } else if (nextDirection === 'up') {
+                                inkyHeldDown = false;
+                                inkyHeldUp = true;
+                                break;
+                            } else if (nextDirection === 'left') {
+                                inkyHeldDown = false;
+                                inkyHeldLeft = true;
+                                break;
+                            }
                         }
                     }
                 }
             }
         }
     }
-    // pinkyX += pinkySpeed;
-    // pinkyY += pinkySpeed;
-    // inkyX += inkySpeed;
-    // inkyY += inkySpeed;
-    // clydeX += clydeSpeed;
-    // clydeY += clydeSpeed;
+    if (clydeHeldLeft) {
+        console.log(`clyde left x is ${clydeLeftX}`);
+        console.log(`clyde right x is ${clydeRightY}`);
+        console.log(`clyde top y is ${clydeTopY}`);
+        console.log(`clyde bottom y is ${clydeBottomY}`);
+        if ((clydeLeftX > 0 && clydeLeftX < 64 && clydeLeftY > 68 && clydeLeftY < 292) || 
+        (clydeLeftX > 0 && clydeLeftX < 64 && clydeLeftY > 640 && clydeLeftY < 864) || 
+        (clydeLeftX > 70 && clydeLeftX < 232 && clydeLeftY > 70 && clydeLeftY < 196) || 
+        (clydeLeftX > 240 && clydeLeftX < 420 && clydeLeftY < 196 && clydeLeftY > 70) || 
+        (clydeLeftX > 424 && clydeLeftX < 508 && clydeLeftY < 196) || 
+        (clydeLeftX > 512 && clydeLeftX < 692 && clydeLeftY < 196 && clydeLeftY > 70) || 
+        (clydeLeftX > 700 && clydeLeftX < 856 && clydeLeftY < 196 && clydeLeftY > 70) || 
+        (clydeLeftX > 70 && clydeLeftX < 232 && clydeLeftY > 204 && clydeLeftY < 284) || 
+        (clydeLeftX > 240 && clydeLeftX < 320 && clydeLeftY > 204 && clydeLeftY < 464) || 
+        (clydeLeftX > 328 && clydeLeftX < 608 && clydeLeftY > 204 && clydeLeftY < 284) || 
+        (clydeLeftX > 612 && clydeLeftX < 696 && clydeLeftY > 204 && clydeLeftY < 464) || 
+        (clydeLeftX > 700 && clydeLeftX < 856 && clydeLeftY > 204 && clydeLeftY < 284) || 
+        (clydeLeftX > 424 && clydeLeftX < 508 && clydeLeftY > 204 && clydeLeftY < 376) || 
+        (clydeLeftX > 240 && clydeLeftX < 420 && clydeLeftY > 292 && clydeLeftY < 376) || 
+        (clydeLeftX > 512 && clydeLeftX < 696 && clydeLeftY > 292 && clydeLeftY < 376) || 
+        (clydeLeftX > 700 && clydeLeftY > 292 && clydeLeftY < 464) || 
+        (clydeLeftX < 232 && clydeLeftY > 292 && clydeLeftY < 464) || 
+        (clydeLeftX > 328 && clydeLeftX < 392 && clydeLeftY > 380 && clydeLeftY < 552) || 
+        (clydeLeftX > 540 && clydeLeftX < 608 && clydeLeftY > 380 && clydeLeftY < 552) || 
+        (clydeLeftX > 328 && clydeLeftX < 460 && clydeLeftY > 380 && clydeLeftY < 448) || 
+        (clydeLeftX > 472 && clydeLeftX < 608 && clydeLeftY > 380 && clydeLeftY < 448) || 
+        (clydeLeftX > 328 && clydeLeftX < 608 && clydeLeftY > 484 && clydeLeftY < 552) || 
+        (clydeLeftX < 232 && clydeLeftY > 468 && clydeLeftY < 640) || 
+        (clydeLeftX > 700 && clydeLeftY > 468 && clydeLeftY < 640) || 
+        (clydeLeftX > 240 && clydeLeftX < 320 && clydeLeftY > 468 && clydeLeftY < 640) || 
+        (clydeLeftX > 612 && clydeLeftX < 696 && clydeLeftY > 468 && clydeLeftY < 640) || 
+        (clydeLeftX > 328 && clydeLeftX < 608 && clydeLeftY > 556 && clydeLeftY < 640) || 
+        (clydeLeftX > 70 && clydeLeftX < 232 && clydeLeftY > 644 && clydeLeftY < 728) || 
+        (clydeLeftX > 240 && clydeLeftX < 420 && clydeLeftY > 644 && clydeLeftY < 728) || 
+        (clydeLeftX > 512 && clydeLeftX < 692 && clydeLeftY > 644 && clydeLeftY < 728) || 
+        (clydeLeftX > 700 && clydeLeftX < 856 && clydeLeftY > 644 && clydeLeftY < 728) || 
+        (clydeLeftX > 424 && clydeLeftX < 508 && clydeLeftY > 556 && clydeLeftY < 728) || 
+        (clydeLeftX > 148 && clydeLeftX < 232 && clydeLeftY > 644 && clydeLeftY < 816) || 
+        (clydeLeftX > 700 && clydeLeftX < 788 && clydeLeftY > 644 && clydeLeftY < 816) || 
+        (clydeLeftX < 132 && clydeLeftY > 732 && clydeLeftY < 816) || 
+        (clydeLeftX > 796 && clydeLeftY > 732 && clydeLeftY < 816) || 
+        (clydeLeftX > 328 && clydeLeftX < 608 && clydeLeftY > 732 && clydeLeftY < 816) || 
+        (clydeLeftX > 240 && clydeLeftX < 320 && clydeLeftY > 732 && clydeLeftY < 900) || 
+        (clydeLeftX > 612 && clydeLeftX < 696 && clydeLeftY > 732 && clydeLeftY < 900) || 
+        (clydeLeftX > 424 && clydeLeftX < 508 && clydeLeftY > 732 && clydeLeftY < 900) || 
+        (clydeLeftX > 70 && clydeLeftX < 420 && clydeLeftY > 820 && clydeLeftY < 900) || 
+        (clydeLeftX > 512 && clydeLeftX < 856 && clydeLeftY > 820 && clydeLeftY < 900)
+        ) {
+            for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
+                for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
+                    if ((clydeLeftX <= possibleMovesPosition[i + 12][j][0] && clydeRightX >= possibleMovesPosition[i + 12][j][0]) && (clydeTopY <= possibleMovesPosition[i + 12][j][1] && clydeBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentClydeGhostPosition != possibleMovesPosition[i + 12][j])) {
+                        currentClydeGhostPosition = possibleMovesPosition[i + 12][j];
+                        let nextDirection = possibleMoves[i + 12][Math.floor(Math.random() * possibleMoves[i + 12].length)];
+                        clydeX = possibleMovesPosition[i + 12][j][0];
+                        clydeY = possibleMovesPosition[i + 12][j][1];
+                        clydeLeftX = clydeX - WALL_W/2;
+                        clydeLeftY = clydeY - WALL_H/2 + CHARACTER_H/2;
+                        clydeRightX = clydeX - WALL_W/2 + CHARACTER_W;
+                        clydeRightY = clydeY - WALL_H/2 + CHARACTER_H/2;
+                        clydeTopX = clydeX - WALL_W/2 + CHARACTER_W/2;
+                        clydeTopY = clydeY - WALL_H/2;
+                        clydeBottomX = clydeX - WALL_W/2 + CHARACTER_W/2;
+                        clydeBottomY = clydeY - WALL_H/2 + CHARACTER_H;
+                        if (nextDirection === 'right') {
+                            clydeHeldLeft = false;
+                            clydeHeldRight = true;
+                            break;
+                        } else if (nextDirection === 'up') {
+                            clydeHeldLeft = false;
+                            clydeHeldUp = true;
+                            break;
+                        } else if (nextDirection === 'down') {
+                            clydeHeldLeft = false;
+                            clydeHeldDown = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        } else if (clydeLeftX < -27) {
+            clydeX = 954;
+            clydeY = 462;
+            clydeLeftX = 952;
+            clydeLeftY = 466;
+            clydeRightX = 964;
+            clydeRightY = 466;
+            clydeTopX = 958;
+            clydeTopY = 460;
+            clydeBottomX = 958;
+            clydeBottomY = 472;
+        } else {
+            if (clydeRightX > 964) {
+                clydeX = -26;
+                clydeY = 462;
+                clydeLeftX = -28;
+                clydeLeftY = 466;
+                clydeRightX = -16;
+                clydeRightY = 466;
+                clydeTopX = -22;
+                clydeTopY = 460;
+                clydeBottomX = -22;
+                clydeBottomY = 472;
+            } 
+            if (clydeLeftFirstLoaded) {
+                clydeLeftFirstLoaded = false;
+                clydeDownFirstLoaded = false;
+                clydeDownSecondLoaded = false;
+                clydeRightFirstLoaded = false;
+                clydeRightSecondLoaded = false;
+                clydeUpFirstLoaded = false;
+                clydeUpSecondLoaded = false;
+                clydeX -= clydeSpeed;
+                clydeLeftX -= clydeSpeed;
+                clydeRightX -= clydeSpeed;
+                clydeTopX -= clydeSpeed;
+                clydeBottomX -= clydeSpeed;
+                clydeLeftSecondLoaded = true;
+                for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
+                    for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
+                        if ((clydeLeftX <= possibleMovesPosition[i + 12][j][0] && clydeRightX >= possibleMovesPosition[i + 12][j][0]) && (clydeTopY <= possibleMovesPosition[i + 12][j][1] && clydeBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentClydeGhostPosition != possibleMovesPosition[i + 12][j])) {
+                            currentClydeGhostPosition = possibleMovesPosition[i + 12][j];
+                            let nextDirection = possibleMoves[i + 12][Math.floor(Math.random() * possibleMoves[i + 12].length)];
+                            clydeX = possibleMovesPosition[i + 12][j][0];
+                            clydeY = possibleMovesPosition[i + 12][j][1];
+                            clydeLeftX = clydeX - WALL_W/2;
+                            clydeLeftY = clydeY - WALL_H/2 + CHARACTER_H/2;
+                            clydeRightX = clydeX - WALL_W/2 + CHARACTER_W;
+                            clydeRightY = clydeY - WALL_H/2 + CHARACTER_H/2;
+                            clydeTopX = clydeX - WALL_W/2 + CHARACTER_W/2;
+                            clydeTopY = clydeY - WALL_H/2;
+                            clydeBottomX = clydeX - WALL_W/2 + CHARACTER_W/2;
+                            clydeBottomY = clydeY - WALL_H/2 + CHARACTER_H;
+                            if (nextDirection === 'right') {
+                                clydeHeldLeft = false;
+                                clydeHeldRight = true;
+                                break;
+                            } else if (nextDirection === 'up') {
+                                clydeHeldLeft = false;
+                                clydeHeldUp = true;
+                                break;
+                            } else if (nextDirection === 'down') {
+                                clydeHeldLeft = false;
+                                clydeHeldDown = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            } else {
+                clydeLeftSecondLoaded = false;
+                clydeX -= clydeSpeed;
+                clydeLeftX -= clydeSpeed;
+                clydeRightX -= clydeSpeed;
+                clydeTopX -= clydeSpeed;
+                clydeBottomX -= clydeSpeed;
+                clydeLeftFirstLoaded = true;
+                for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
+                    for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
+                        if ((clydeLeftX <= possibleMovesPosition[i + 12][j][0] && clydeRightX >= possibleMovesPosition[i + 12][j][0]) && (clydeTopY <= possibleMovesPosition[i + 12][j][1] && clydeBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentClydeGhostPosition != possibleMovesPosition[i + 12][j])) {
+                            currentClydeGhostPosition = possibleMovesPosition[i + 12][j];
+                            let nextDirection = possibleMoves[i + 12][Math.floor(Math.random() * possibleMoves[i + 12].length)];
+                            clydeX = possibleMovesPosition[i + 12][j][0];
+                            clydeY = possibleMovesPosition[i + 12][j][1];
+                            clydeLeftX = clydeX - WALL_W/2;
+                            clydeLeftY = clydeY - WALL_H/2 + CHARACTER_H/2;
+                            clydeRightX = clydeX - WALL_W/2 + CHARACTER_W;
+                            clydeRightY = clydeY - WALL_H/2 + CHARACTER_H/2;
+                            clydeTopX = clydeX - WALL_W/2 + CHARACTER_W/2;
+                            clydeTopY = clydeY - WALL_H/2;
+                            clydeBottomX = clydeX - WALL_W/2 + CHARACTER_W/2;
+                            clydeBottomY = clydeY - WALL_H/2 + CHARACTER_H;
+                            if (nextDirection === 'right') {
+                                clydeHeldLeft = false;
+                                clydeHeldRight = true;
+                                break;
+                            } else if (nextDirection === 'up') {
+                                clydeHeldLeft = false;
+                                clydeHeldUp = true;
+                                break;
+                            } else if (nextDirection === 'down') {
+                                clydeHeldLeft = false;
+                                clydeHeldDown = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    } else if (clydeHeldRight) {
+        console.log(`clyde left x is ${clydeLeftX}`);
+        console.log(`clyde right x is ${clydeRightY}`);
+        console.log(`clyde top y is ${clydeTopY}`);
+        console.log(`clyde bottom y is ${clydeBottomY}`);
+        if ((clydeRightX > 70 && clydeRightX < 232 && clydeRightY > 70 && clydeRightY < 196) || 
+        (clydeRightX > 240 && clydeRightX < 420 && clydeRightY < 196 && clydeRightY > 70) || 
+        (clydeRightX > 424 && clydeRightX < 508 && clydeRightY < 196) || 
+        (clydeRightX > 512 && clydeRightX < 692 && clydeRightY < 196 && clydeRightY > 70) || 
+        (clydeRightX > 700 && clydeRightX < 856 && clydeRightY < 196 && clydeRightY > 70) ||
+        (clydeRightX > 70 && clydeRightX < 232 && clydeRightY > 204 && clydeRightY < 284) || 
+        (clydeRightX > 240 && clydeRightX < 320 && clydeRightY > 204 && clydeRightY < 464) || 
+        (clydeRightX > 328 && clydeRightX < 608 && clydeRightY > 204 && clydeRightY < 284) || 
+        (clydeRightX > 612 && clydeRightX < 696 && clydeRightY > 204 && clydeRightY < 464) || 
+        (clydeRightX > 700 && clydeRightX < 856 && clydeRightY > 204 && clydeRightY < 284) || 
+        (clydeRightX > 424 && clydeRightX < 508 && clydeRightY > 204 && clydeRightY < 376) || 
+        (clydeRightX > 240 && clydeRightX < 420 && clydeRightY > 292 && clydeRightY < 376) || 
+        (clydeRightX > 512 && clydeRightX < 696 && clydeRightY > 292 && clydeRightY < 376) || 
+        (clydeRightX > 700 && clydeRightY > 292 && clydeRightY < 464) || 
+        (clydeRightX < 232 && clydeRightY > 292 && clydeRightY < 464) || 
+        (clydeRightX > 328 && clydeRightX < 392 && clydeRightY > 380 && clydeRightY < 552) || 
+        (clydeRightX > 540 && clydeRightX < 608 && clydeRightY > 380 && clydeRightY < 552) || 
+        (clydeRightX > 328 && clydeRightX < 460 && clydeRightY > 380 && clydeRightY < 448) || 
+        (clydeRightX > 472 && clydeRightX < 608 && clydeRightY > 380 && clydeRightY < 448) || 
+        (clydeRightX > 328 && clydeRightX < 608 && clydeRightY > 484 && clydeRightY < 552) || 
+        (clydeRightX < 232 && clydeRightY > 468 && clydeRightY < 640) || 
+        (clydeRightX > 700 && clydeRightY > 468 && clydeRightY < 640) || 
+        (clydeRightX > 240 && clydeRightX < 320 && clydeRightY > 468 && clydeRightY < 640) || 
+        (clydeRightX > 612 && clydeRightX < 696 && clydeRightY > 468 && clydeRightY < 640) || 
+        (clydeRightX > 328 && clydeRightX < 608 && clydeRightY > 556 && clydeRightY < 640) || 
+        (clydeRightX > 70 && clydeRightX < 232 && clydeRightY > 644 && clydeRightY < 728) || 
+        (clydeRightX > 240 && clydeRightX < 420 && clydeRightY > 644 && clydeRightY < 728) || 
+        (clydeRightX > 512 && clydeRightX < 692 && clydeRightY > 644 && clydeRightY < 728) || 
+        (clydeRightX > 700 && clydeRightX < 856 && clydeRightY > 644 && clydeRightY < 728) || 
+        (clydeRightX > 424 && clydeRightX < 508 && clydeRightY > 556 && clydeRightY < 728) || 
+        (clydeRightX > 148 && clydeRightX < 232 && clydeRightY > 644 && clydeRightY < 816) || 
+        (clydeRightX > 700 && clydeRightX < 788 && clydeRightY > 644 && clydeRightY < 816) || 
+        (clydeRightX < 132 && clydeRightY > 732 && clydeRightY < 816) || 
+        (clydeRightX > 796 && clydeRightY > 732 && clydeRightY < 816) || 
+        (clydeRightX > 328 && clydeRightX < 608 && clydeRightY > 732 && clydeRightY < 816) || 
+        (clydeRightX > 240 && clydeRightX < 320 && clydeRightY > 732 && clydeRightY < 900) || 
+        (clydeRightX > 612 && clydeRightX < 696 && clydeRightY > 732 && clydeRightY < 900) || 
+        (clydeRightX > 424 && clydeRightX < 508 && clydeRightY > 732 && clydeRightY < 900) || 
+        (clydeRightX > 70 && clydeRightX < 420 && clydeRightY > 820 && clydeRightY < 900) || 
+        (clydeRightX > 512 && clydeRightX < 856 && clydeRightY > 820 && clydeRightY < 900) || 
+        (clydeRightX > 864 && clydeRightX < 904 && clydeRightY > 65 && clydeRightY < 292) || 
+        (clydeRightX > 864 && clydeRightY > 640 && clydeRightY < 864)) {
+            for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
+                for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
+                    if ((clydeLeftX <= possibleMovesPosition[i + 12][j][0] && clydeRightX >= possibleMovesPosition[i + 12][j][0]) && (clydeTopY <= possibleMovesPosition[i + 12][j][1] && clydeBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentClydeGhostPosition != possibleMovesPosition[i + 12][j])) {
+                        currentClydeGhostPosition = possibleMovesPosition[i + 12][j];
+                        let nextDirection = possibleMoves[i + 12][Math.floor(Math.random() * possibleMoves[i + 12].length)];
+                        clydeX = possibleMovesPosition[i + 12][j][0];
+                        clydeY = possibleMovesPosition[i + 12][j][1];
+                        clydeLeftX = clydeX - WALL_W/2;
+                        clydeLeftY = clydeY - WALL_H/2 + CHARACTER_H/2;
+                        clydeRightX = clydeX - WALL_W/2 + CHARACTER_W;
+                        clydeRightY = clydeY - WALL_H/2 + CHARACTER_H/2;
+                        clydeTopX = clydeX - WALL_W/2 + CHARACTER_W/2;
+                        clydeTopY = clydeY - WALL_H/2;
+                        clydeBottomX = clydeX - WALL_W/2 + CHARACTER_W/2;
+                        clydeBottomY = clydeY - WALL_H/2 + CHARACTER_H;
+                        if (nextDirection === 'left') {
+                            clydeHeldRight = false;
+                            clydeHeldLeft = true;
+                            break;
+                        } else if (nextDirection === 'up') {
+                            clydeHeldRight = false;
+                            clydeHeldUp = true;
+                            break;
+                        } else if (nextDirection === 'down') {
+                            clydeHeldRight = false;
+                            clydeHeldDown = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        } else if (clydeLeftX < -27) {
+            clydeX = 954;
+            clydeY = 462;
+            clydeLeftX = 952;
+            clydeLeftY = 466;
+            clydeRightX = 964;
+            clydeRightY = 466;
+            clydeTopX = 958;
+            clydeTopY = 460;
+            clydeBottomX = 958;
+            clydeBottomY = 472;
+        } else {
+            if (clydeRightX > 964) {
+                clydeX = -26;
+                clydeY = 462;
+                clydeLeftX = -28;
+                clydeLeftY = 466;
+                clydeRightX = -16;
+                clydeRightY = 466;
+                clydeTopX = -22;
+                clydeTopY = 460;
+                clydeBottomX = -22;
+                clydeBottomY = 472;
+            } 
+            if (clydeRightFirstLoaded) {
+                clydeRightFirstLoaded = false;
+                clydeDownFirstLoaded = false;
+                clydeDownSecondLoaded = false;
+                clydeLeftFirstLoaded = false;
+                clydeLeftSecondLoaded = false;
+                clydeUpFirstLoaded = false;
+                clydeUpSecondLoaded = false;
+                clydeX += clydeSpeed;
+                clydeLeftX += clydeSpeed;
+                clydeRightX += clydeSpeed;
+                clydeTopX += clydeSpeed;
+                clydeBottomX += clydeSpeed;
+                clydeRightSecondLoaded = true;
+                for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
+                    for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
+                        if ((clydeLeftX <= possibleMovesPosition[i + 12][j][0] && clydeRightX >= possibleMovesPosition[i + 12][j][0]) && (clydeTopY <= possibleMovesPosition[i + 12][j][1] && clydeBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentClydeGhostPosition != possibleMovesPosition[i + 12][j])) {
+                            currentClydeGhostPosition = possibleMovesPosition[i + 12][j];
+                            let nextDirection = possibleMoves[i + 12][Math.floor(Math.random() * possibleMoves[i + 12].length)];
+                            clydeX = possibleMovesPosition[i + 12][j][0];
+                            clydeY = possibleMovesPosition[i + 12][j][1];
+                            clydeLeftX = clydeX - WALL_W/2;
+                            clydeLeftY = clydeY - WALL_H/2 + CHARACTER_H/2;
+                            clydeRightX = clydeX - WALL_W/2 + CHARACTER_W;
+                            clydeRightY = clydeY - WALL_H/2 + CHARACTER_H/2;
+                            clydeTopX = clydeX - WALL_W/2 + CHARACTER_W/2;
+                            clydeTopY = clydeY - WALL_H/2;
+                            clydeBottomX = clydeX - WALL_W/2 + CHARACTER_W/2;
+                            clydeBottomY = clydeY - WALL_H/2 + CHARACTER_H;
+                            if (nextDirection === 'left') {
+                                clydeHeldRight = false;
+                                clydeHeldLeft = true;
+                                break;
+                            } else if (nextDirection === 'up') {
+                                clydeHeldRight = false;
+                                clydeHeldUp = true;
+                                break;
+                            } else if (nextDirection === 'down') {
+                                clydeHeldRight = false;
+                                clydeHeldDown = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            } else {
+                clydeRightSecondLoaded = false;
+                clydeX += clydeSpeed;
+                clydeLeftX += clydeSpeed;
+                clydeRightX += clydeSpeed;
+                clydeTopX += clydeSpeed;
+                clydeBottomX += clydeSpeed;
+                clydeRightFirstLoaded = true;
+                for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
+                    for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
+                        if ((clydeLeftX <= possibleMovesPosition[i + 12][j][0] && clydeRightX >= possibleMovesPosition[i + 12][j][0]) && (clydeTopY <= possibleMovesPosition[i + 12][j][1] && clydeBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentClydeGhostPosition != possibleMovesPosition[i + 12][j])) {
+                            currentClydeGhostPosition = possibleMovesPosition[i + 12][j];
+                            let nextDirection = possibleMoves[i + 12][Math.floor(Math.random() * possibleMoves[i + 12].length)];
+                            clydeX = possibleMovesPosition[i + 12][j][0];
+                            clydeY = possibleMovesPosition[i + 12][j][1];
+                            clydeLeftX = clydeX - WALL_W/2;
+                            clydeLeftY = clydeY - WALL_H/2 + CHARACTER_H/2;
+                            clydeRightX = clydeX - WALL_W/2 + CHARACTER_W;
+                            clydeRightY = clydeY - WALL_H/2 + CHARACTER_H/2;
+                            clydeTopX = clydeX - WALL_W/2 + CHARACTER_W/2;
+                            clydeTopY = clydeY - WALL_H/2;
+                            clydeBottomX = clydeX - WALL_W/2 + CHARACTER_W/2;
+                            clydeBottomY = clydeY - WALL_H/2 + CHARACTER_H;
+                            if (nextDirection === 'left') {
+                                clydeHeldRight = false;
+                                clydeHeldLeft = true;
+                                break;
+                            } else if (nextDirection === 'up') {
+                                clydeHeldRight = false;
+                                clydeHeldUp = true;
+                                break;
+                            } else if (nextDirection === 'down') {
+                                clydeHeldRight = false;
+                                clydeHeldDown = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    } else if (clydeHeldUp) {
+        console.log(`clyde left x is ${clydeLeftX}`);
+        console.log(`clyde right x is ${clydeRightY}`);
+        console.log(`clyde top y is ${clydeTopY}`);
+        console.log(`clyde bottom y is ${clydeBottomY}`);
+        if ((clydeTopY < 64) || (clydeTopX > 70 && clydeTopX < 232 && clydeTopY > 70 && clydeTopY < 196) || 
+        (clydeTopX > 240 && clydeTopX < 420 && clydeTopY < 196 && clydeTopY > 70) || 
+        (clydeTopX > 424 && clydeTopX < 508 && clydeTopY < 196) || 
+        (clydeTopX > 512 && clydeTopX < 692 && clydeTopY < 196 && clydeTopY > 70) || 
+        (clydeTopX > 700 && clydeTopX < 856 && clydeTopY < 196 && clydeTopY > 70) || 
+        (clydeTopX > 70 && clydeTopX < 232 && clydeTopY > 204 && clydeTopY < 284) || 
+        (clydeTopX > 240 && clydeTopX < 320 && clydeTopY > 204 && clydeTopY < 464) || 
+        (clydeTopX > 328 && clydeTopX < 608 && clydeTopY > 204 && clydeTopY < 284) || 
+        (clydeTopX > 612 && clydeTopX < 696 && clydeTopY > 204 && clydeTopY < 464) || 
+        (clydeTopX > 700 && clydeTopX < 856 && clydeTopY > 204 && clydeTopY < 284) || 
+        (clydeTopX > 424 && clydeTopX < 508 && clydeTopY > 204 && clydeTopY < 376) || 
+        (clydeTopX > 240 && clydeTopX < 420 && clydeTopY > 292 && clydeTopY < 376) || 
+        (clydeTopX > 512 && clydeTopX < 696 && clydeTopY > 292 && clydeTopY < 376) || 
+        (clydeTopX > 700 && clydeTopY > 292 && clydeTopY < 464) || 
+        (clydeTopX < 232 && clydeTopY > 292 && clydeTopY < 464) || 
+        (clydeTopX > 328 && clydeTopX < 392 && clydeTopY > 380 && clydeTopY < 552) || 
+        (clydeTopX > 540 && clydeTopX < 608 && clydeTopY > 380 && clydeTopY < 552) || 
+        (clydeTopX > 328 && clydeTopX < 460 && clydeTopY > 380 && clydeTopY < 448) || 
+        (clydeTopX > 472 && clydeTopX < 608 && clydeTopY > 380 && clydeTopY < 448) || 
+        (clydeTopX > 328 && clydeTopX < 608 && clydeTopY > 484 && clydeTopY < 552) || 
+        (clydeTopX < 232 && clydeTopY > 468 && clydeTopY < 640) || 
+        (clydeTopX > 700 && clydeTopY > 468 && clydeTopY < 640) || 
+        (clydeTopX > 240 && clydeTopX < 320 && clydeTopY > 468 && clydeTopY < 640) || 
+        (clydeTopX > 612 && clydeTopX < 696 && clydeTopY > 468 && clydeTopY < 640) || 
+        (clydeTopX > 328 && clydeTopX < 608 && clydeTopY > 556 && clydeTopY < 640) || 
+        (clydeTopX > 70 && clydeTopX < 232 && clydeTopY > 644 && clydeTopY < 728) || 
+        (clydeTopX > 240 && clydeTopX < 420 && clydeTopY > 644 && clydeTopY < 728) || 
+        (clydeTopX > 512 && clydeTopX < 692 && clydeTopY > 644 && clydeTopY < 728) || 
+        (clydeTopX > 700 && clydeTopX < 856 && clydeTopY > 644 && clydeTopY < 728) || 
+        (clydeTopX > 424 && clydeTopX < 508 && clydeTopY > 556 && clydeTopY < 728) || 
+        (clydeTopX > 148 && clydeTopX < 232 && clydeTopY > 644 && clydeTopY < 816) || 
+        (clydeTopX > 700 && clydeTopX < 788 && clydeTopY > 644 && clydeTopY < 816) || 
+        (clydeTopX < 132 && clydeTopY > 732 && clydeTopY < 816) || 
+        (clydeTopX > 796 && clydeTopY > 732 && clydeTopY < 816) || 
+        (clydeTopX > 328 && clydeTopX < 608 && clydeTopY > 732 && clydeTopY < 816) || 
+        (clydeTopX > 240 && clydeTopX < 320 && clydeTopY > 732 && clydeTopY < 900) || 
+        (clydeTopX > 612 && clydeTopX < 696 && clydeTopY > 732 && clydeTopY < 900) || 
+        (clydeTopX > 424 && clydeTopX < 508 && clydeTopY > 732 && clydeTopY < 900) || 
+        (clydeTopX > 70 && clydeTopX < 420 && clydeTopY > 820 && clydeTopY < 900) || 
+        (clydeTopX > 512 && clydeTopX < 856 && clydeTopY > 820 && clydeTopY < 900) || 
+        (clydeTopX > 0 && clydeTopX < 68 && clydeTopY > 68 && clydeTopY < 292) || 
+        (clydeTopX > 0 && clydeTopX < 68 && clydeTopY > 640 && clydeTopY < 864)) {
+            for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
+                for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
+                    if ((clydeLeftX <= possibleMovesPosition[i + 12][j][0] && clydeRightX >= possibleMovesPosition[i + 12][j][0]) && (clydeTopY <= possibleMovesPosition[i + 12][j][1] && clydeBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentClydeGhostPosition != possibleMovesPosition[i + 12][j])) {
+                        currentClydeGhostPosition = possibleMovesPosition[i + 12][j];
+                        let nextDirection = possibleMoves[i + 12][Math.floor(Math.random() * possibleMoves[i + 12].length)];
+                        clydeX = possibleMovesPosition[i + 12][j][0];
+                        clydeY = possibleMovesPosition[i + 12][j][1];
+                        clydeLeftX = clydeX - WALL_W/2;
+                        clydeLeftY = clydeY - WALL_H/2 + CHARACTER_H/2;
+                        clydeRightX = clydeX - WALL_W/2 + CHARACTER_W;
+                        clydeRightY = clydeY - WALL_H/2 + CHARACTER_H/2;
+                        clydeTopX = clydeX - WALL_W/2 + CHARACTER_W/2;
+                        clydeTopY = clydeY - WALL_H/2;
+                        clydeBottomX = clydeX - WALL_W/2 + CHARACTER_W/2;
+                        clydeBottomY = clydeY - WALL_H/2 + CHARACTER_H;
+                        if (nextDirection === 'right') {
+                            clydeHeldUp = false;
+                            clydeHeldRight = true;
+                            break;
+                        } else if (nextDirection === 'left') {
+                            clydeHeldUp = false;
+                            clydeHeldLeft = true;
+                            break;
+                        } else if (nextDirection === 'down') {
+                            clydeHeldUp = false;
+                            clydeHeldDown = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        } else if (clydeLeftX < -27) {
+            clydeX = 954;
+            clydeY = 462;
+            clydeLeftX = 952;
+            clydeLeftY = 466;
+            clydeRightX = 964;
+            clydeRightY = 466;
+            clydeTopX = 958;
+            clydeTopY = 460;
+            clydeBottomX = 958;
+            clydeBottomY = 472;
+        } else {
+            if (clydeRightX > 964) {
+                clydeX = -26;
+                clydeY = 462;
+                clydeLeftX = -28;
+                clydeLeftY = 466;
+                clydeRightX = -16;
+                clydeRightY = 466;
+                clydeTopX = -22;
+                clydeTopY = 460;
+                clydeBottomX = -22;
+                clydeBottomY = 472;
+            } 
+            if (clydeUpFirstLoaded) {
+                clydeUpFirstLoaded = false;
+                clydeDownFirstLoaded = false;
+                clydeDownSecondLoaded = false;
+                clydeLeftFirstLoaded = false;
+                clydeLeftSecondLoaded = false;
+                clydeRightFirstLoaded = false;
+                clydeRightSecondLoaded = false;
+                clydeY -= clydeSpeed;
+                clydeLeftY -= clydeSpeed;
+                clydeRightY -= clydeSpeed;
+                clydeTopY -= clydeSpeed;
+                clydeBottomY -= clydeSpeed;
+                clydeUpSecondLoaded = true;
+                for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
+                    for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
+                        if ((clydeLeftX <= possibleMovesPosition[i + 12][j][0] && clydeRightX >= possibleMovesPosition[i + 12][j][0]) && (clydeTopY <= possibleMovesPosition[i + 12][j][1] && clydeBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentClydeGhostPosition != possibleMovesPosition[i + 12][j])) {
+                            currentClydeGhostPosition = possibleMovesPosition[i + 12][j];
+                            let nextDirection = possibleMoves[i + 12][Math.floor(Math.random() * possibleMoves[i + 12].length)];
+                            clydeX = possibleMovesPosition[i + 12][j][0];
+                            clydeY = possibleMovesPosition[i + 12][j][1];
+                            clydeLeftX = clydeX - WALL_W/2;
+                            clydeLeftY = clydeY - WALL_H/2 + CHARACTER_H/2;
+                            clydeRightX = clydeX - WALL_W/2 + CHARACTER_W;
+                            clydeRightY = clydeY - WALL_H/2 + CHARACTER_H/2;
+                            clydeTopX = clydeX - WALL_W/2 + CHARACTER_W/2;
+                            clydeTopY = clydeY - WALL_H/2;
+                            clydeBottomX = clydeX - WALL_W/2 + CHARACTER_W/2;
+                            clydeBottomY = clydeY - WALL_H/2 + CHARACTER_H;
+                            if (nextDirection === 'right') {
+                                clydeHeldUp = false;
+                                clydeHeldRight = true;
+                                break;
+                            } else if (nextDirection === 'left') {
+                                clydeHeldUp = false;
+                                clydeHeldLeft = true;
+                                break;
+                            } else if (nextDirection === 'down') {
+                                clydeHeldUp = false;
+                                clydeHeldDown = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            } else {
+                clydeUpSecondLoaded = false;
+                clydeY -= clydeSpeed;
+                clydeLeftY -= clydeSpeed;
+                clydeRightY -= clydeSpeed;
+                clydeTopY -= clydeSpeed;
+                clydeBottomY -= clydeSpeed;
+                clydeUpFirstLoaded = true;
+                for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
+                    for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
+                        if ((clydeLeftX <= possibleMovesPosition[i + 12][j][0] && clydeRightX >= possibleMovesPosition[i + 12][j][0]) && (clydeTopY <= possibleMovesPosition[i + 12][j][1] && clydeBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentClydeGhostPosition != possibleMovesPosition[i + 12][j])) {
+                            currentClydeGhostPosition = possibleMovesPosition[i + 12][j];
+                            let nextDirection = possibleMoves[i + 12][Math.floor(Math.random() * possibleMoves[i + 12].length)];
+                            clydeX = possibleMovesPosition[i + 12][j][0];
+                            clydeY = possibleMovesPosition[i + 12][j][1];
+                            clydeLeftX = clydeX - WALL_W/2;
+                            clydeLeftY = clydeY - WALL_H/2 + CHARACTER_H/2;
+                            clydeRightX = clydeX - WALL_W/2 + CHARACTER_W;
+                            clydeRightY = clydeY - WALL_H/2 + CHARACTER_H/2;
+                            clydeTopX = clydeX - WALL_W/2 + CHARACTER_W/2;
+                            clydeTopY = clydeY - WALL_H/2;
+                            clydeBottomX = clydeX - WALL_W/2 + CHARACTER_W/2;
+                            clydeBottomY = clydeY - WALL_H/2 + CHARACTER_H;
+                            if (nextDirection === 'right') {
+                                clydeHeldUp = false;
+                                clydeHeldRight = true;
+                                break;
+                            } else if (nextDirection === 'left') {
+                                clydeHeldUp = false;
+                                clydeHeldLeft = true;
+                                break;
+                            } else if (nextDirection === 'down') {
+                                clydeHeldUp = false;
+                                clydeHeldDown = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    } else if (clydeHeldDown) {
+        console.log(`clyde left x is ${clydeLeftX}`);
+        console.log(`clyde right x is ${clydeRightY}`);
+        console.log(`clyde top y is ${clydeTopY}`);
+        console.log(`clyde bottom y is ${clydeBottomY}`);
+        if ((clydeBottomX > 70 && clydeBottomX < 232 && clydeBottomY > 70 && clydeBottomY < 196) || 
+        (clydeBottomX > 240 && clydeBottomX < 420 && clydeBottomY < 196 && clydeBottomY > 70) || 
+        (clydeBottomX > 424 && clydeBottomX < 508 && clydeBottomY < 196) || 
+        (clydeBottomX > 512 && clydeBottomX < 692 && clydeBottomY < 196 && clydeBottomY > 70) || 
+        (clydeBottomX > 700 && clydeBottomX < 856 && clydeBottomY < 196 && clydeBottomY > 70) || 
+        (clydeBottomX > 70 && clydeBottomX < 232 && clydeBottomY > 204 && clydeBottomY < 284) || 
+        (clydeBottomX > 240 && clydeBottomX < 320 && clydeBottomY > 204 && clydeBottomY < 464) || 
+        (clydeBottomX > 328 && clydeBottomX < 608 && clydeBottomY > 204 && clydeBottomY < 284) || 
+        (clydeBottomX > 612 && clydeBottomX < 696 && clydeBottomY > 204 && clydeBottomY < 464) || 
+        (clydeBottomX > 700 && clydeBottomX < 856 && clydeBottomY > 204 && clydeBottomY < 284) || 
+        (clydeBottomX > 424 && clydeBottomX < 508 && clydeBottomY > 204 && clydeBottomY < 376) || 
+        (clydeBottomX > 240 && clydeBottomX < 420 && clydeBottomY > 292 && clydeBottomY < 376) || 
+        (clydeBottomX > 512 && clydeBottomX < 696 && clydeBottomY > 292 && clydeBottomY < 376) || 
+        (clydeBottomX > 700 && clydeBottomY > 292 && clydeBottomY < 464) || 
+        (clydeBottomX < 232 && clydeBottomY > 292 && clydeBottomY < 464) || 
+        (clydeBottomX > 328 && clydeBottomX < 392 && clydeBottomY > 380 && clydeBottomY < 552) || 
+        (clydeBottomX > 540 && clydeBottomX < 608 && clydeBottomY > 380 && clydeBottomY < 552) || 
+        (clydeBottomX > 328 && clydeBottomX < 460 && clydeBottomY > 380 && clydeBottomY < 448) || 
+        (clydeBottomX > 472 && clydeBottomX < 608 && clydeBottomY > 380 && clydeBottomY < 448) || 
+        (clydeBottomX > 328 && clydeBottomX < 608 && clydeBottomY > 484 && clydeBottomY < 552) || 
+        (clydeBottomX < 232 && clydeBottomY > 468 && clydeBottomY < 640) || 
+        (clydeBottomX > 700 && clydeBottomY > 468 && clydeBottomY < 640) || 
+        (clydeBottomX > 612 && clydeBottomX < 696 && clydeBottomY > 468 && clydeBottomY < 640) || 
+        (clydeBottomX > 328 && clydeBottomX < 608 && clydeBottomY > 556 && clydeBottomY < 640) || 
+        (clydeBottomX > 70 && clydeBottomX < 232 && clydeBottomY > 644 && clydeBottomY < 728) || 
+        (clydeBottomX > 240 && clydeBottomX < 420 && clydeBottomY > 644 && clydeBottomY < 728) || 
+        (clydeBottomX > 512 && clydeBottomX < 692 && clydeBottomY > 644 && clydeBottomY < 728) || 
+        (clydeBottomX > 700 && clydeBottomX < 856 && clydeBottomY > 644 && clydeBottomY < 728) || 
+        (clydeBottomX > 424 && clydeBottomX < 508 && clydeBottomY > 556 && clydeBottomY < 728) || 
+        (clydeBottomX > 148 && clydeBottomX < 232 && clydeBottomY > 644 && clydeBottomY < 816) || 
+        (clydeBottomX > 700 && clydeBottomX < 788 && clydeBottomY > 644 && clydeBottomY < 816) || 
+        (clydeBottomX < 132 && clydeBottomY > 732 && clydeBottomY < 816) || 
+        (clydeBottomX > 796 && clydeBottomY > 732 && clydeBottomY < 816) || 
+        (clydeBottomX > 328 && clydeBottomX < 608 && clydeBottomY > 732 && clydeBottomY < 816) || 
+        (clydeBottomX > 240 && clydeBottomX < 320 && clydeBottomY > 732 && clydeBottomY < 900) || 
+        (clydeBottomX > 612 && clydeBottomX < 696 && clydeBottomY > 732 && clydeBottomY < 900) || 
+        (clydeBottomX > 424 && clydeBottomX < 508 && clydeBottomY > 732 && clydeBottomY < 900) || 
+        (clydeBottomX > 70 && clydeBottomX < 420 && clydeBottomY > 820 && clydeBottomY < 900) || 
+        (clydeBottomX > 512 && clydeBottomX < 856 && clydeBottomY > 820 && clydeBottomY < 900) || 
+        (clydeBottomY > 908)) {
+            for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
+                for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
+                    if ((clydeLeftX <= possibleMovesPosition[i + 12][j][0] && clydeRightX >= possibleMovesPosition[i + 12][j][0]) && (clydeTopY <= possibleMovesPosition[i + 12][j][1] && clydeBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentClydeGhostPosition != possibleMovesPosition[i + 12][j])) {
+                        currentClydeGhostPosition = possibleMovesPosition[i + 12][j];
+                        let nextDirection = possibleMoves[i + 12][Math.floor(Math.random() * possibleMoves[i + 12].length)];
+                        clydeX = possibleMovesPosition[i + 12][j][0];
+                        clydeY = possibleMovesPosition[i + 12][j][1];
+                        clydeLeftX = clydeX - WALL_W/2;
+                        clydeLeftY = clydeY - WALL_H/2 + CHARACTER_H/2;
+                        clydeRightX = clydeX - WALL_W/2 + CHARACTER_W;
+                        clydeRightY = clydeY - WALL_H/2 + CHARACTER_H/2;
+                        clydeTopX = clydeX - WALL_W/2 + CHARACTER_W/2;
+                        clydeTopY = clydeY - WALL_H/2;
+                        clydeBottomX = clydeX - WALL_W/2 + CHARACTER_W/2;
+                        clydeBottomY = clydeY - WALL_H/2 + CHARACTER_H;
+                        if (nextDirection === 'right') {
+                            clydeHeldDown = false;
+                            clydeHeldRight = true;
+                            break;
+                        } else if (nextDirection === 'up') {
+                            clydeHeldDown = false;
+                            clydeHeldUp = true;
+                            break;
+                        } else if (nextDirection === 'left') {
+                            clydeHeldDown = false;
+                            clydeHeldLeft = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        } else if (clydeLeftX < -27) {
+            clydeX = 954;
+            clydeY = 462;
+            clydeLeftX = 952;
+            clydeLeftY = 466;
+            clydeRightX = 964;
+            clydeRightY = 466;
+            clydeTopX = 958;
+            clydeTopY = 460;
+            clydeBottomX = 958;
+            clydeBottomY = 472;
+        } else {
+            if (clydeRightX > 964) {
+                clydeX = -26;
+                clydeY = 462;
+                clydeLeftX = -28;
+                clydeLeftY = 466;
+                clydeRightX = -16;
+                clydeRightY = 466;
+                clydeTopX = -22;
+                clydeTopY = 460;
+                clydeBottomX = -22;
+                clydeBottomY = 472;
+            } 
+            if (clydeDownFirstLoaded) {
+                clydeDownFirstLoaded = false;
+                clydeRightFirstLoaded = false;
+                clydeRightSecondLoaded = false;
+                clydeLeftFirstLoaded = false;
+                clydeLeftSecondLoaded = false;
+                clydeUpFirstLoaded = false;
+                clydeUpSecondLoaded = false;
+                clydeY += clydeSpeed;
+                clydeLeftY += clydeSpeed;
+                clydeRightY += clydeSpeed;
+                clydeTopY += clydeSpeed;
+                clydeBottomY += clydeSpeed;
+                clydeDownSecondLoaded = true;
+                for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
+                    for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
+                        if ((clydeLeftX <= possibleMovesPosition[i + 12][j][0] && clydeRightX >= possibleMovesPosition[i + 12][j][0]) && (clydeTopY <= possibleMovesPosition[i + 12][j][1] && clydeBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentClydeGhostPosition != possibleMovesPosition[i + 12][j])) {
+                            currentClydeGhostPosition = possibleMovesPosition[i + 12][j];
+                            let nextDirection = possibleMoves[i + 12][Math.floor(Math.random() * possibleMoves[i + 12].length)];
+                            clydeX = possibleMovesPosition[i + 12][j][0];
+                            clydeY = possibleMovesPosition[i + 12][j][1];
+                            clydeLeftX = clydeX - WALL_W/2;
+                            clydeLeftY = clydeY - WALL_H/2 + CHARACTER_H/2;
+                            clydeRightX = clydeX - WALL_W/2 + CHARACTER_W;
+                            clydeRightY = clydeY - WALL_H/2 + CHARACTER_H/2;
+                            clydeTopX = clydeX - WALL_W/2 + CHARACTER_W/2;
+                            clydeTopY = clydeY - WALL_H/2;
+                            clydeBottomX = clydeX - WALL_W/2 + CHARACTER_W/2;
+                            clydeBottomY = clydeY - WALL_H/2 + CHARACTER_H;
+                            if (nextDirection === 'right') {
+                                clydeHeldDown = false;
+                                clydeHeldRight = true;
+                                break;
+                            } else if (nextDirection === 'up') {
+                                clydeHeldDown = false;
+                                clydeHeldUp = true;
+                                break;
+                            } else if (nextDirection === 'left') {
+                                clydeHeldDown = false;
+                                clydeHeldLeft = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            } else {
+                clydeDownSecondLoaded = false;
+                clydeY += clydeSpeed;
+                clydeLeftY += clydeSpeed;
+                clydeRightY += clydeSpeed;
+                clydeTopY += clydeSpeed;
+                clydeBottomY += clydeSpeed;
+                clydeDownFirstLoaded = true;
+                for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
+                    for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
+                        if ((clydeLeftX <= possibleMovesPosition[i + 12][j][0] && clydeRightX >= possibleMovesPosition[i + 12][j][0]) && (clydeTopY <= possibleMovesPosition[i + 12][j][1] && clydeBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentClydeGhostPosition != possibleMovesPosition[i + 12][j])) {
+                            currentClydeGhostPosition = possibleMovesPosition[i + 12][j];
+                            let nextDirection = possibleMoves[i + 12][Math.floor(Math.random() * possibleMoves[i + 12].length)];
+                            clydeX = possibleMovesPosition[i + 12][j][0];
+                            clydeY = possibleMovesPosition[i + 12][j][1];
+                            clydeLeftX = clydeX - WALL_W/2;
+                            clydeLeftY = clydeY - WALL_H/2 + CHARACTER_H/2;
+                            clydeRightX = clydeX - WALL_W/2 + CHARACTER_W;
+                            clydeRightY = clydeY - WALL_H/2 + CHARACTER_H/2;
+                            clydeTopX = clydeX - WALL_W/2 + CHARACTER_W/2;
+                            clydeTopY = clydeY - WALL_H/2;
+                            clydeBottomX = clydeX - WALL_W/2 + CHARACTER_W/2;
+                            clydeBottomY = clydeY - WALL_H/2 + CHARACTER_H;
+                            if (nextDirection === 'right') {
+                                clydeHeldDown = false;
+                                clydeHeldRight = true;
+                                break;
+                            } else if (nextDirection === 'up') {
+                                clydeHeldDown = false;
+                                clydeHeldUp = true;
+                                break;
+                            } else if (nextDirection === 'left') {
+                                clydeHeldDown = false;
+                                clydeHeldLeft = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 function moveAll() {
@@ -1899,48 +3808,48 @@ function moveAll() {
     
 }
 
-function ballTrackHandling() {
-    var ballPacmanWallCol = Math.floor(pacmanX / WALL_W);
-    var ballPacmanWallRow = Math.floor(pacmanY / WALL_H);
-    var ballBlinkyWallCol = Math.floor(blinkyX / WALL_W);
-    var ballBlinkyWallRow = Math.floor(blinkyY / WALL_H);
-    var ballPinkyWallCol = Math.floor(pinkyX / WALL_W);
-    var ballPinkyWallRow = Math.floor(pinkyY / WALL_H);
-    var ballInkyWallCol = Math.floor(inkyX / WALL_W);
-    var ballInkyWallRow = Math.floor(inkyY / WALL_H);
-    var ballClydeWallCol = Math.floor(clydeX / WALL_W);
-    var ballClydeWallRow = Math.floor(clydeY / WALL_H);
-    var trackIndexUnderBall = rowColToArrayIndex(ballPacmanWallCol, ballPacmanWallRow);
-    var trackIndexUnderBall = rowColToArrayIndex(ballBlinkyWallCol, ballBlinkyWallRow);
-    var trackIndexUnderBall = rowColToArrayIndex(ballPinkyWallCol, ballPinkyWallRow);
-    var trackIndexUnderBall = rowColToArrayIndex(ballInkyWallCol, ballInkyWallRow);
-    var trackIndexUnderBall = rowColToArrayIndex(ballClydeWallCol, ballClydeWallRow);
-    if (ballPacmanWallCol >= 0 && ballPacmanWallCol < WALL_COLS && ballPacmanWallRow >= 0 && ballPacmanWallRow < WALL_ROWS) {
-        if (isWallAtColRow(ballPacmanWallCol, ballPacmanWallRow)) {
-            pacmanSpeed *= -1;
-        }
-    }
-    if (ballBlinkyWallCol >= 0 && ballBlinkyWallCol < WALL_COLS && ballBlinkyWallRow >= 0 && ballBlinkyWallRow < WALL_ROWS) {
-        if (isWallAtColRow(ballBlinkyWallCol, ballBlinkyWallRow)) {
-            blinkySpeed *= -1;
-        }
-    }
-    if (ballInkyWallCol >= 0 && ballInkyWallCol < WALL_COLS && ballInkyWallRow >= 0 && ballInkyWallRow < WALL_ROWS) {
-        if (isWallAtColRow(ballInkyWallCol, ballInkyWallRow)) {
-            inkySpeed *= -1;
-        }
-    }
-    if (ballPinkyWallCol >= 0 && ballPinkyWallCol < WALL_COLS && ballPinkyWallRow >= 0 && ballPinkyWallRow < WALL_ROWS) {
-        if (isWallAtColRow(ballPinkyWallCol, ballPinkyWallRow)) {
-            pinkySpeed *= -1;
-        }
-    }
-    if (ballClydeWallCol >= 0 && ballClydeWallCol < WALL_COLS && ballClydeWallRow >= 0 && ballClydeWallRow < WALL_ROWS) {
-        if (isWallAtColRow(ballClydeWallCol, ballClydeWallRow)) {
-            clydeSpeed *= -1;
-        }
-    }
-}
+// function ballTrackHandling() {
+//     var ballPacmanWallCol = Math.floor(pacmanX / WALL_W);
+//     var ballPacmanWallRow = Math.floor(pacmanY / WALL_H);
+//     var ballpinkyWallCol = Math.floor(blinkyX / WALL_W);
+//     var ballBlinkyWallRow = Math.floor(blinkyY / WALL_H);
+//     var ballPinkyWallCol = Math.floor(pinkyX / WALL_W);
+//     var ballPinkyWallRow = Math.floor(pinkyY / WALL_H);
+//     var ballInkyWallCol = Math.floor(inkyX / WALL_W);
+//     var ballInkyWallRow = Math.floor(inkyY / WALL_H);
+//     var ballClydeWallCol = Math.floor(clydeX / WALL_W);
+//     var ballClydeWallRow = Math.floor(clydeY / WALL_H);
+//     var trackIndexUnderBall = rowColToArrayIndex(ballPacmanWallCol, ballPacmanWallRow);
+//     var trackIndexUnderBall = rowColToArrayIndex(ballBlinkyWallCol, ballBlinkyWallRow);
+//     var trackIndexUnderBall = rowColToArrayIndex(ballPinkyWallCol, ballPinkyWallRow);
+//     var trackIndexUnderBall = rowColToArrayIndex(ballInkyWallCol, ballInkyWallRow);
+//     var trackIndexUnderBall = rowColToArrayIndex(ballClydeWallCol, ballClydeWallRow);
+//     if (ballPacmanWallCol >= 0 && ballPacmanWallCol < WALL_COLS && ballPacmanWallRow >= 0 && ballPacmanWallRow < WALL_ROWS) {
+//         if (isWallAtColRow(ballPacmanWallCol, ballPacmanWallRow)) {
+//             pacmanSpeed *= -1;
+//         }
+//     }
+//     if (ballBlinkyWallCol >= 0 && ballBlinkyWallCol < WALL_COLS && ballBlinkyWallRow >= 0 && ballBlinkyWallRow < WALL_ROWS) {
+//         if (isWallAtColRow(ballBlinkyWallCol, ballBlinkyWallRow)) {
+//             blinkySpeed *= -1;
+//         }
+//     }
+//     if (ballInkyWallCol >= 0 && ballInkyWallCol < WALL_COLS && ballInkyWallRow >= 0 && ballInkyWallRow < WALL_ROWS) {
+//         if (isWallAtColRow(ballInkyWallCol, ballInkyWallRow)) {
+//             inkySpeed *= -1;
+//         }
+//     }
+//     if (ballPinkyWallCol >= 0 && ballPinkyWallCol < WALL_COLS && ballPinkyWallRow >= 0 && ballPinkyWallRow < WALL_ROWS) {
+//         if (isWallAtColRow(ballPinkyWallCol, ballPinkyWallRow)) {
+//             pinkySpeed *= -1;
+//         }
+//     }
+//     if (ballClydeWallCol >= 0 && ballClydeWallCol < WALL_COLS && ballClydeWallRow >= 0 && ballClydeWallRow < WALL_ROWS) {
+//         if (isWallAtColRow(ballClydeWallCol, ballClydeWallRow)) {
+//             clydeSpeed *= -1;
+//         }
+//     }
+// }
 
 function isWallAtColRow(col, row) {
     if (col >= 0 && col < WALL_COLS && row >= 0 && row < WALL_ROWS) {
@@ -1955,6 +3864,8 @@ function rowColToArrayIndex(col, row) {
     return col + WALL_COLS * row;
 }
 
+let moving = false;
+let nextMoving = false;
 function keyPressed(event) {
     if (event.keyCode === KEY_LEFT) {
         keyHeldLeft = true;
@@ -1965,7 +3876,11 @@ function keyPressed(event) {
     } else if (event.keyCode === KEY_DOWN) {
         keyHeldDown = true;
     }
-    munchStage = true;
+    if (keyHeldLeft || keyHeldRight || keyHeldUp || keyHeldDown) nextMoving = true;
+    if(!moving && nextMoving) {
+        munch.play();
+    }
+    moving = nextMoving;
     event.preventDefault();
 }
 
@@ -1979,18 +3894,30 @@ function keyReleased(event) {
     } else if (event.keyCode === KEY_DOWN) {
         keyHeldDown = false;
     }
-    munchStage = false;
+    if (!(keyHeldLeft || keyHeldRight || keyHeldUp || keyHeldDown)) nextMoving = false;
+    if(moving && !nextMoving) {
+        munch.pause();
+    }
+    moving = nextMoving;
     event.preventDefault();
+}
+
+function animate() {
+    var framesPerSecond = 30;
+    updateAll();
+    updateSometimes();
+    if (ghostBlue) {
+        normalMode();
+    }
+    setTimeout( () => requestAnimationFrame(animate), 1000/framesPerSecond)
 }
 
 window.onload = function() {
     canvas = document.getElementById('gameCanvas');
     canvasContext = canvas.getContext('2d');
     intro.play();
-    var framesPerSecond = 30;
-    setInterval(updateAll, 1000/framesPerSecond);
-    setInterval(updateSometimes, 1000/4);
-
+    
+    animate();
     document.addEventListener('keydown', keyPressed);
     document.addEventListener('keyup', keyReleased);
 
@@ -2206,16 +4133,26 @@ function updateAll() {
         drawWalls();
         drawReady();
         drawPlayerOne();
+    } else if (ghostBlue) {
+        drawBackground();
+        drawWalls();
+        pointsEaten();
+        drawBlinky();
+        drawPinky();
+        drawInky();
+        drawClyde();
+        drawPacman();
+        moveAll();
     } else {
         drawBackground();
         drawWalls();
+        pointsEaten();
         drawPacman();
         drawBlinky();
         drawPinky();
         drawInky();
         drawClyde();
         moveAll();
-        pointsEaten();
     }
 }
 
