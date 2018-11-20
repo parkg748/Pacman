@@ -3422,7 +3422,7 @@ function pacmanMove() {
         }
     } else if (clydeHeldUp) {
         console.log(`clyde left x is ${clydeLeftX}`);
-        console.log(`clyde right x is ${clydeRightY}`);
+        console.log(`clyde right x is ${clydeRightX}`);
         console.log(`clyde top y is ${clydeTopY}`);
         console.log(`clyde bottom y is ${clydeBottomY}`);
         if ((clydeTopY < 64) || (clydeTopX > 70 && clydeTopX < 232 && clydeTopY > 70 && clydeTopY < 196) || 
