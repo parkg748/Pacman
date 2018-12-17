@@ -1225,8 +1225,8 @@ function pacmanMove() {
         console.log(`blinky right x is ${blinkyRightY}`);
         console.log(`blinky top y is ${blinkyTopY}`);
         console.log(`blinky bottom y is ${blinkyBottomY}`);
-        if ((blinkyLeftX > 0 && blinkyLeftX < 68 && blinkyLeftY > 68 && blinkyLeftY < 292) || 
-        (blinkyLeftX > 0 && blinkyLeftX < 68 && blinkyLeftY > 640 && blinkyLeftY < 864) || 
+        if ((blinkyLeftX > 0 && blinkyLeftX < 64 && blinkyLeftY > 68 && blinkyLeftY < 292) || 
+        (blinkyLeftX > 0 && blinkyLeftX < 64 && blinkyLeftY > 640 && blinkyLeftY < 864) || 
         (blinkyLeftX > 70 && blinkyLeftX < 232 && blinkyLeftY > 70 && blinkyLeftY < 196) || 
         (blinkyLeftX > 240 && blinkyLeftX < 420 && blinkyLeftY < 196 && blinkyLeftY > 70) || 
         (blinkyLeftX > 424 && blinkyLeftX < 508 && blinkyLeftY < 196) || 
@@ -1270,7 +1270,6 @@ function pacmanMove() {
         ) {
             for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
                 for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
-                    console.log('here');
                     if ((blinkyLeftX <= possibleMovesPosition[i + 12][j][0] && blinkyRightX >= possibleMovesPosition[i + 12][j][0]) && (blinkyTopY <= possibleMovesPosition[i + 12][j][1] && blinkyBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentBlinkyGhostPosition != possibleMovesPosition[i + 12][j])) {
                         currentBlinkyGhostPosition = possibleMovesPosition[i + 12][j];
                         let nextDirection = possibleMoves[i + 12][Math.floor(Math.random() * possibleMoves[i + 12].length)];
@@ -3278,7 +3277,7 @@ function pacmanMove() {
         (clydeRightX > 70 && clydeRightX < 420 && clydeRightY > 820 && clydeRightY < 900) || 
         (clydeRightX > 512 && clydeRightX < 856 && clydeRightY > 820 && clydeRightY < 900) || 
         (clydeRightX > 864 && clydeRightX < 904 && clydeRightY > 65 && clydeRightY < 292) || 
-        (clydeRightX > 864 && clydeRightY > 640 && clydeRightY < 864)) {
+        (clydeRightX > 864 && clydeRightX < 904 && clydeRightY > 640 && clydeRightY < 864)) {
             for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
                 for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
                     if ((clydeLeftX <= possibleMovesPosition[i + 12][j][0] && clydeRightX >= possibleMovesPosition[i + 12][j][0]) && (clydeTopY <= possibleMovesPosition[i + 12][j][1] && clydeBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentClydeGhostPosition != possibleMovesPosition[i + 12][j])) {
@@ -3348,37 +3347,6 @@ function pacmanMove() {
                 clydeTopX += clydeSpeed;
                 clydeBottomX += clydeSpeed;
                 clydeRightSecondLoaded = true;
-                for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
-                    for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
-                        if ((clydeLeftX <= possibleMovesPosition[i + 12][j][0] && clydeRightX >= possibleMovesPosition[i + 12][j][0]) && (clydeTopY <= possibleMovesPosition[i + 12][j][1] && clydeBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentClydeGhostPosition != possibleMovesPosition[i + 12][j])) {
-                            currentClydeGhostPosition = possibleMovesPosition[i + 12][j];
-                            let nextDirection = possibleMoves[i + 12][Math.floor(Math.random() * possibleMoves[i + 12].length)];
-                            clydeX = possibleMovesPosition[i + 12][j][0];
-                            clydeY = possibleMovesPosition[i + 12][j][1];
-                            clydeLeftX = clydeX - WALL_W/2;
-                            clydeLeftY = clydeY - WALL_H/2 + CHARACTER_H/2;
-                            clydeRightX = clydeX - WALL_W/2 + CHARACTER_W;
-                            clydeRightY = clydeY - WALL_H/2 + CHARACTER_H/2;
-                            clydeTopX = clydeX - WALL_W/2 + CHARACTER_W/2;
-                            clydeTopY = clydeY - WALL_H/2;
-                            clydeBottomX = clydeX - WALL_W/2 + CHARACTER_W/2;
-                            clydeBottomY = clydeY - WALL_H/2 + CHARACTER_H;
-                            if (nextDirection === 'left') {
-                                clydeHeldRight = false;
-                                clydeHeldLeft = true;
-                                break;
-                            } else if (nextDirection === 'up') {
-                                clydeHeldRight = false;
-                                clydeHeldUp = true;
-                                break;
-                            } else if (nextDirection === 'down') {
-                                clydeHeldRight = false;
-                                clydeHeldDown = true;
-                                break;
-                            }
-                        }
-                    }
-                }
             } else {
                 clydeRightSecondLoaded = false;
                 clydeX += clydeSpeed;
@@ -3387,37 +3355,6 @@ function pacmanMove() {
                 clydeTopX += clydeSpeed;
                 clydeBottomX += clydeSpeed;
                 clydeRightFirstLoaded = true;
-                for (let i = 0; i < Object.values(possibleMovesPosition).length; i++) {
-                    for (let j = 0; j < possibleMovesPosition[i + 12].length; j++) {
-                        if ((clydeLeftX <= possibleMovesPosition[i + 12][j][0] && clydeRightX >= possibleMovesPosition[i + 12][j][0]) && (clydeTopY <= possibleMovesPosition[i + 12][j][1] && clydeBottomY >= possibleMovesPosition[i + 12][j][1]) && (currentClydeGhostPosition != possibleMovesPosition[i + 12][j])) {
-                            currentClydeGhostPosition = possibleMovesPosition[i + 12][j];
-                            let nextDirection = possibleMoves[i + 12][Math.floor(Math.random() * possibleMoves[i + 12].length)];
-                            clydeX = possibleMovesPosition[i + 12][j][0];
-                            clydeY = possibleMovesPosition[i + 12][j][1];
-                            clydeLeftX = clydeX - WALL_W/2;
-                            clydeLeftY = clydeY - WALL_H/2 + CHARACTER_H/2;
-                            clydeRightX = clydeX - WALL_W/2 + CHARACTER_W;
-                            clydeRightY = clydeY - WALL_H/2 + CHARACTER_H/2;
-                            clydeTopX = clydeX - WALL_W/2 + CHARACTER_W/2;
-                            clydeTopY = clydeY - WALL_H/2;
-                            clydeBottomX = clydeX - WALL_W/2 + CHARACTER_W/2;
-                            clydeBottomY = clydeY - WALL_H/2 + CHARACTER_H;
-                            if (nextDirection === 'left') {
-                                clydeHeldRight = false;
-                                clydeHeldLeft = true;
-                                break;
-                            } else if (nextDirection === 'up') {
-                                clydeHeldRight = false;
-                                clydeHeldUp = true;
-                                break;
-                            } else if (nextDirection === 'down') {
-                                clydeHeldRight = false;
-                                clydeHeldDown = true;
-                                break;
-                            }
-                        }
-                    }
-                }
             }
         }
     } else if (clydeHeldUp) {
